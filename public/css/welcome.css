@@ -1,0 +1,162 @@
+.color-blue-main {
+    color: #4499BB;
+}
+
+.color-deepblue-main {
+    color: #0C2340;
+}
+
+.color-green-accent {
+    color: #8CC63F;
+}
+
+.bg-blue-deep {
+    background-color: #0C2340 !important;
+}
+
+.btn-evai-green {
+    background-color: #8CC63F;
+    border-color: #8CC63F;
+    color: #0C2340;
+    font-weight: bold;
+}
+
+.btn-evai-green:hover {
+    background-color: #72a933;
+    border-color: #72a933;
+    color: #0C2340;
+}
+
+.btn-outline-evai {
+    border-color: #4499BB;
+    color: #4499BB;
+}
+
+.btn-outline-evai:hover {
+    background-color: #4499BB;
+    color: #FFFFFF;
+}
+
+.hover-text-accent:hover {
+    color: #8CC63F !important;
+}
+
+.transition {
+    transition: all 0.3s ease;
+}
+
+.hero-section {
+    min-height: 100vh;
+    background-color: #0C2340;
+    display: flex;
+    align-items: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Degradado sutil para el estilo "cool" */
+    background: radial-gradient(circle at 10% 90%, rgba(68, 153, 187, 0.1) 0%, rgba(0, 0, 0, 0) 50%),
+        radial-gradient(circle at 90% 10%, rgba(140, 198, 63, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
+    z-index: 0;
+}
+
+.hero-content {
+    z-index: 1;
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #C8CCC9;
+    /* Borde sutil */
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ... (Mantén todos los estilos anteriores de colores, botones, hero-section, etc.) ... */
+
+/* Ajustes para el logo en la navbar */
+.evai-navbar-logo {
+    height: 35px; /* Ajusta la altura de tu logo EVAi */
+    width: auto; /* Mantiene la proporción */
+}
+
+/* Estilos para el Navbar general */
+.navbar {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+/* Estilos para los enlaces de la navbar */
+.navbar-nav .nav-link {
+    color: #C8CCC9 !important; /* Texto de enlaces en gris claro para contraste */
+    font-size: 1rem;
+    margin-right: 15px; /* Espacio entre enlaces */
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--evai-blue-main) !important; /* Azul principal al pasar el ratón */
+}
+
+/* Ajustes específicos para los botones en el navbar */
+.navbar-nav .btn {
+    font-size: 0.9rem; /* Un poco más pequeños que los CTA del hero */
+    padding: 0.4rem 1rem; /* Padding ajustado */
+}
+
+/* Estilo para el botón "Iniciar Sesión" (outline) */
+.navbar-nav .btn-outline-light {
+    border-color: #C8CCC9; /* Borde gris claro */
+    color: #C8CCC9;       /* Texto gris claro */
+}
+.navbar-nav .btn-outline-light:hover {
+    background-color: #C8CCC9; /* Fondo gris claro al pasar el ratón */
+    color: var(--evai-blue-deep); /* Texto oscuro */
+}
+
+/* Estilo para el botón "Registrar Institución" (verde principal) */
+/* btn-evai-green ya está definido con los colores correctos */
+
+/* Dropdown para usuarios logueados */
+.navbar-nav .dropdown-menu {
+    border: none; /* Sin borde */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra suave */
+}
+.navbar-nav .dropdown-item {
+    color: #C8CCC9 !important; /* Texto gris claro */
+    background-color: var(--evai-blue-deep); /* Fondo del dropdown */
+}
+.navbar-nav .dropdown-item:hover,
+.navbar-nav .dropdown-item:focus {
+    background-color: rgba(68, 153, 187, 0.2) !important; /* Un poco de azul principal transparente al pasar el ratón */
+    color: var(--evai-blue-main) !important;
+}
+.navbar-nav .dropdown-toggle {
+    color: var(--evai-green-accent) !important; /* Icono y texto del usuario en verde acento */
+}
+
+/* ... (Mantener todos los estilos existentes, incluyendo las variables) ... */
+
+.btn-evai-green { 
+    border-radius: 50rem; /* Añadir redondez extrema para el estilo pill */
+}
+
+.btn-outline-evai { 
+    border-radius: 50rem; /* Añadir redondez extrema para el estilo pill */
+}
+
+/* Navbar Button: Estilo para el botón "Iniciar Sesión" (outline) */
+.navbar-nav .btn-outline-light {
+    border-radius: 50rem; /* Redondeo extremo */
+}
+
