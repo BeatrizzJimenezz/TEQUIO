@@ -21,15 +21,10 @@ Route::get('/events', [PublicEventController::class, 'index'])->name('events.pub
 Route::get('/events/{id}', [PublicEventController::class, 'show'])->name('events.public.show');
 
 // ============ Dashboard ============
-Route::get('/dashboard', [EventController::class, 'dashboard']) 
+Route::get('/dashboard', [EventController::class, 'index']) 
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// ============ Force Password Change Routes ============
-Route::middleware('auth')->group(function () {
-    Route::get('/force-password-change', [ProfileController::class, 'forceChangePassword'])->name('password.force-change');
-    Route::post('/force-password-change', [ProfileController::class, 'forceUpdatePassword'])->name('password.force-update');
-});
 
 // ============ Standard Profile Routes ============
 Route::middleware('auth')->group(function () {
