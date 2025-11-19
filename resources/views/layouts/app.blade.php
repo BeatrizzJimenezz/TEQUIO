@@ -51,7 +51,7 @@
                 @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
                     <div class="sidebar-category">Organizar</div>
 
-                    <a class="sidebar-link" href="#">
+                    <a class="sidebar-link" href="{{ route('events.index') }}">
                         <i class="bi bi-calendar3"></i>
                         <span class="link-text ms-6">Mis Eventos</span>
                     </a>

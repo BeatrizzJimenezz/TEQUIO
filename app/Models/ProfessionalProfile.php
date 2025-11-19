@@ -42,6 +42,19 @@ class ProfessionalProfile extends Model
             'event_profiles'
         )->withPivot('role')->withTimestamps();
     }
+    // Relación con eventos donde es colaborador
+    public function collaborations()
+    {
+        return $this->belongsToMany(Event::class, 'event_profiles')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    // Todos los eventos (como organizador principal o colaborador)
+    public function allEvents()
+    {
+        return $this->events->merge($this->collaborations);
+    }
 
     /**
      * Relationship: A professional profile can be speaker in components
