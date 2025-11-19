@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo',        // ← AGREGA ESTA LÍNEA
+        'must_change_password', // ← Y esta si no la tienes
     ];
 
     /**
@@ -44,5 +47,31 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Relationship with professional profile
+    public function professionalProfile()
+    {
+        return $this->hasOne(ProfessionalProfile::class);
+    }
+
+    // Helper method to get or create profile
+    public function getOrCreateProfessionalProfile()
+    {
+        if (!$this->professionalProfile) {
+            return $this->professionalProfile()->create([]);
+        }
+        return $this->professionalProfile;
+    }
+
+    // Get profile photo URL or default avatar
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+        
+        // Return default avatar
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 }

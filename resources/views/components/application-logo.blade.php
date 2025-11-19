@@ -1,0 +1,1 @@
+<img src="{{ asset('img/3.svg') }}" alt="Tequio">
