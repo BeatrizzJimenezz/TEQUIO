@@ -4,12 +4,13 @@
 
 @push('styles')
     <link href="{{ asset('css/profile.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/profile-edit.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
 <div class="container-fluid">
 
-    <!-- Botón Volver -->
+    <!-- Volver -->
     <div class="mb-4">
         <a href="{{ route('professional-profile.show') }}" class="btn btn-link text-decoration-none p-0 text-secondary hover-scale">
             <i class="bi bi-arrow-left me-1"></i> Volver al perfil
@@ -33,7 +34,7 @@
 
     <div class="row g-4">
         
-        <!-- COLUMNA IZQUIERDA: FOTO DE PERFIL -->
+        <!-- COLUMNA IZQUIERDA -->
         <div class="col-lg-4 col-xl-3">
             <div class="card shadow-sm border-0 sticky-top" style="top: 20px; z-index: 1;">
                 <div class="card-header bg-white border-bottom-0 pt-4 text-center">
@@ -95,6 +96,7 @@
         <!-- COLUMNA DERECHA -->
         <div class="col-lg-8 col-xl-9">
             
+            <!-- Informacion general -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white border-bottom-0 pt-4 ps-4">
                     <h5 class="fw-bold mb-0" style="color: #0c2340;">
@@ -144,140 +146,137 @@
             </div>
 
             <!-- SECCIÓN DE REDES SOCIALES -->
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white border-bottom-0 pt-4 ps-4 d-flex justify-content-between align-items-center">
-        <h5 class="fw-bold mb-0" style="color: #0c2340;">
-            <i class="bi bi-share me-2" style="color: #4499bb;"></i>Redes Sociales
-        </h5>
-        <button class="btn btn-sm btn-outline-evai rounded-pill px-3" 
-                onclick="toggleSocialForm()">
-            <i class="bi bi-plus-lg me-1"></i> Agregar
-        </button>
-    </div>
-    <div class="card-body p-4">
-        
-        <!-- Formulario Agregar (Oculto por defecto) -->
-        <div id="social-form" class="mb-4 p-4 rounded-3 bg-light border border-dashed d-none">
-            <h6 class="fw-bold mb-3" style="color: #002855;">Nueva red social</h6>
-            <form action="{{ route('professional-profile.social-networks.store') }}" method="POST">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">Plataforma *</label>
-                        <select name="platform" class="form-select" required>
-                            <option value="">Selecciona una plataforma</option>
-                            <option value="LinkedIn">LinkedIn</option>
-                            <option value="GitHub">GitHub</option>
-                            <option value="Twitter">Twitter (X)</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="YouTube">YouTube</option>
-                            <option value="TikTok">TikTok</option>
-                            <option value="Behance">Behance</option>
-                            <option value="Dribbble">Dribbble</option>
-                            <option value="Portfolio">Sitio Web / Portfolio</option>
-                            <option value="Otra">Otra</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small text-muted">Enlace *</label>
-                        <input type="url" name="link" class="form-control" required 
-                               placeholder="https://ejemplo.com/tu-perfil">
-                    </div>
-                </div>
-                <div class="mt-3 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-link text-secondary text-decoration-none" 
-                            onclick="toggleSocialForm()">Cancelar</button>
-                    <button class="btn text-white px-4 py-2 fw-bold shadow-sm hover-scale" 
-                            style="background-color: #8cc63f; border: none;">
-                        <i class="bi bi-plus-circle me-1"></i> Agregar
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 ps-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0" style="color: #0c2340;">
+                        <i class="bi bi-share me-2" style="color: #4499bb;"></i>Redes Sociales
+                    </h5>
+                    <button class="btn btn-sm btn-outline-evai rounded-pill px-3" id="toggle-social-btn">
+                        <i class="bi bi-plus-lg me-1"></i> Agregar
                     </button>
                 </div>
-            </form>
-        </div>
+                <div class="card-body p-4">
+            
+                <!-- Formulario para agregar -->
+                <div id="social-form" class="mb-4 p-4 rounded-3 bg-light border border-dashed d-none">
+                    <h6 class="fw-bold mb-3" style="color: #002855;">Nueva red social</h6>
+                    <form action="{{ route('professional-profile.social-networks.store') }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Plataforma *</label>
+                                <select name="platform" class="form-select" required>
+                                    <option value="">Selecciona una plataforma</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="GitHub">GitHub</option>
+                                    <option value="Twitter">Twitter (X)</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Behance">Behance</option>
+                                    <option value="Dribbble">Dribbble</option>
+                                    <option value="Portfolio">Sitio Web / Portfolio</option>
+                                    <option value="Otra">Otra</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Enlace *</label>
+                                <input type="url" name="link" class="form-control" required 
+                                    placeholder="https://ejemplo.com/tu-perfil">
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-link text-secondary text-decoration-none" 
+                                    onclick="toggleSocialForm()">Cancelar</button>
+                            <button class="btn text-white px-4 py-2 fw-bold shadow-sm hover-scale" 
+                                    style="background-color: #8cc63f; border: none;">Agregar
+                            </button>
+                        </div>
+                    </form>
+            </div>
 
-        <!-- Lista de Redes Sociales -->
-        <div class="d-flex flex-column gap-3">
-            @forelse($profile->socialNetworks as $social)
-                <div class="d-flex justify-content-between align-items-center p-3 border rounded hover-shadow bg-white">
-                    <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        <!-- Icono según plataforma -->
-                        <div class="social-icon-wrapper">
-                            @switch($social->platform)
-                                @case('LinkedIn')
-                                    <i class="bi bi-linkedin" style="font-size: 1.5rem; color: #0077B5;"></i>
-                                    @break
-                                @case('GitHub')
-                                    <i class="bi bi-github" style="font-size: 1.5rem; color: #181717;"></i>
-                                    @break
-                                @case('Twitter')
-                                    <i class="bi bi-twitter-x" style="font-size: 1.5rem; color: #000000;"></i>
-                                    @break
-                                @case('Facebook')
-                                    <i class="bi bi-facebook" style="font-size: 1.5rem; color: #1877F2;"></i>
-                                    @break
-                                @case('Instagram')
-                                    <i class="bi bi-instagram" style="font-size: 1.5rem; color: #E4405F;"></i>
-                                    @break
-                                @case('YouTube')
-                                    <i class="bi bi-youtube" style="font-size: 1.5rem; color: #FF0000;"></i>
-                                    @break
-                                @case('TikTok')
-                                    <i class="bi bi-tiktok" style="font-size: 1.5rem; color: #000000;"></i>
-                                    @break
-                                @case('Portfolio')
-                                    <i class="bi bi-globe" style="font-size: 1.5rem; color: #4499bb;"></i>
-                                    @break
-                                @default
-                                    <i class="bi bi-link-45deg" style="font-size: 1.5rem; color: #6c757d;"></i>
-                            @endswitch
+            <!-- Lista de Redes Sociales -->
+            <div class="d-flex flex-column gap-3">
+                @forelse($profile->socialNetworks as $social)
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded hover-shadow bg-white">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                            <!-- Icono según plataforma -->
+                            <div class="social-icon-wrapper">
+                                @switch($social->platform)
+                                    @case('LinkedIn')
+                                        <i class="bi bi-linkedin" style="font-size: 1.5rem; color: #0077B5;"></i>
+                                        @break
+                                    @case('GitHub')
+                                        <i class="bi bi-github" style="font-size: 1.5rem; color: #181717;"></i>
+                                        @break
+                                    @case('Twitter')
+                                        <i class="bi bi-twitter-x" style="font-size: 1.5rem; color: #000000;"></i>
+                                        @break
+                                    @case('Facebook')
+                                        <i class="bi bi-facebook" style="font-size: 1.5rem; color: #1877F2;"></i>
+                                        @break
+                                    @case('Instagram')
+                                        <i class="bi bi-instagram" style="font-size: 1.5rem; color: #E4405F;"></i>
+                                        @break
+                                    @case('YouTube')
+                                        <i class="bi bi-youtube" style="font-size: 1.5rem; color: #FF0000;"></i>
+                                        @break
+                                    @case('TikTok')
+                                        <i class="bi bi-tiktok" style="font-size: 1.5rem; color: #000000;"></i>
+                                        @break
+                                    @case('Portfolio')
+                                        <i class="bi bi-globe" style="font-size: 1.5rem; color: #4499bb;"></i>
+                                        @break
+                                    @default
+                                        <i class="bi bi-link-45deg" style="font-size: 1.5rem; color: #6c757d;"></i>
+                                @endswitch
+                            </div>
+                            
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-dark">{{ $social->platform }}</h6>
+                                <a href="{{ $social->link }}" target="_blank" 
+                                class="small text-decoration-none" style="color: #4499bb;">
+                                    {{ Str::limit($social->link, 50) }}
+                                    <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                            </div>
                         </div>
                         
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1 text-dark">{{ $social->platform }}</h6>
-                            <a href="{{ $social->link }}" target="_blank" 
-                               class="small text-decoration-none" style="color: #4499bb;">
-                                {{ Str::limit($social->link, 50) }}
-                                <i class="bi bi-box-arrow-up-right ms-1"></i>
-                            </a>
-                        </div>
+                        <form action="{{ route('professional-profile.social-networks.destroy', $social->id) }}" 
+                            method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-outline-danger btn-sm border-0" 
+                                    onclick="return confirm('¿Estás seguro de eliminar esta red social?')"
+                                    data-bs-toggle="tooltip" title="Eliminar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
                     </div>
-                    
-                    <form action="{{ route('professional-profile.social-networks.destroy', $social->id) }}" 
-                          method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-outline-danger btn-sm border-0" 
-                                onclick="return confirm('¿Estás seguro de eliminar esta red social?')"
-                                data-bs-toggle="tooltip" title="Eliminar">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </form>
-                </div>
-            @empty
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-share display-6 mb-2 d-block opacity-50"></i>
-                    No hay redes sociales registradas.
-                </div>
-            @endforelse
+                @empty
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-share display-6 mb-2 d-block opacity-50"></i>
+                        No hay redes sociales registradas.
+                    </div>
+                @endforelse
+            </div>
         </div>
 
-    </div>
-</div>
-
-            <div class="card shadow-sm border-0">
+        </div>
+        <!-- Formacion academica -->
+        <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-bottom-0 pt-4 ps-4 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0" style="color: #4499bb;">
                         <i class="bi bi-mortarboard me-2" style="color: #4499bb;"></i>Formación académica
                     </h5>
-                    <button class="btn btn-sm btn-outline-evai rounded-pill px-3" 
-                            onclick="toggleTrainingForm()">
+                    <button class="btn btn-sm btn-outline-evai rounded-pill px-3" id="toggle-training-btn">
                         <i class="bi bi-plus-lg me-1"></i> Agregar
                     </button>
                 </div>
                 <div class="card-body p-4">
                     
-                    <!-- Formulario Agregar (Oculto por defecto) -->
+                    <!-- Formulario agregar formacion -->
                     <div id="training-form" class="mb-5 p-4 rounded-3 bg-light border border-dashed d-none">
                         <h6 class="fw-bold mb-3" style="color: #002855;">Nueva formación</h6>
                         <form action="{{ route('professional-profile.academic-training.store') }}" method="POST">
@@ -354,110 +353,8 @@
     </div>
 </div>
 
-<style>
-    .btn-outline-evai {
-    border-color: #4499BB;
-    color: #4499BB;
-}
-
-.btn-outline-evai:hover {
-    background-color: #4499BB;
-    color: #FFFFFF;
-}
-
-.btn-outline-evai { 
-    border-radius: 50rem; /* Añadir redondez extrema para el estilo pill */
-}
-    .border-dashed {
-        border-style: dashed !important;
-    }
-    .hover-scale:hover {
-        transform: scale(1.02);
-        transition: transform 0.2s;
-    }
-    /* Ajuste para inputs de solo lectura visual (estilo light) */
-    .form-control:focus {
-        border-color: #4499bb;
-        box-shadow: 0 0 0 0.25rem rgba(68, 153, 187, 0.25);
-    }
-</style>
-
-<script>
-    // Mostrar/Ocultar formulario de formación
-    function toggleTrainingForm() {
-        const form = document.getElementById('training-form');
-        form.classList.toggle('d-none');
-    }
-
-    // Previsualización de imagen al seleccionar
-    document.getElementById('profile_photo')?.addEventListener('change', function(e) {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            const uploadBtn = document.getElementById('upload-btn');
-            
-            reader.onload = function(e) {
-                const container = document.getElementById('photo-preview-container');
-                
-                // Reemplazar contenido con nueva imagen
-                container.innerHTML = `
-                    <img src="${e.target.result}"
-                         class="rounded-circle border border-4 shadow-sm"
-                         width="160" height="160" 
-                         style="object-fit: cover; border-color: #4499bb;">
-                `;
-                
-                // Mostrar el botón de guardar foto
-                if(uploadBtn) uploadBtn.classList.remove('d-none');
-            };
-            
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-
-    // Lógica de eliminación (AJAX)
-    const deleteBtn = document.getElementById('delete-photo-btn');
-    if(deleteBtn) {
-        deleteBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!confirm('¿Eliminar foto de perfil?')) return;
-            
-            const btn = this;
-            const originalContent = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
-            fetch('{{ route("professional-profile.photo.delete") }}', {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    // Recargar para ver el avatar por defecto o actualizar el DOM
-                    location.reload(); 
-                } else {
-                    alert('Error al eliminar');
-                    btn.disabled = false;
-                    btn.innerHTML = originalContent;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-            });
-        });
-    }
-
-    // Mostrar/Ocultar formulario de redes sociales
-function toggleSocialForm() {
-    const form = document.getElementById('social-form');
-    form.classList.toggle('d-none');
-}
-</script>
+@push('scripts')
+    <script src="{{ asset('js/profile-edit.js') }}"></script>
+@endpush
 
 @endsection

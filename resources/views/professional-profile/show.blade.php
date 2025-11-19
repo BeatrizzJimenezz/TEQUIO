@@ -64,7 +64,7 @@
         
         <div class="col-lg-4 col-xl-3">
             
-            <!-- About Me -->
+            <!-- Sobre mi -->
             @if($profile->about_me)
             <div class="card shadow-sm border-0 mb-4 h-90">
                 <div class="card-body">
@@ -76,7 +76,7 @@
             </div>
             @endif
 
-            <!-- Skills -->
+            <!-- Habilidades -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-3" style="color: #0c2340;">
@@ -97,8 +97,7 @@
                 </div>
             </div>
 
-            <!-- Social Networks -->
-            <!-- Social Networks (ACTUALIZADO CON ICONOS) -->
+            <!-- Redes sociales -->
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-3" style="color: #0c2340;">
@@ -167,7 +166,7 @@
         <!-- COLUMNA DERECHA -->
         <div class="col-lg-8 col-xl-9">
             
-            <!-- Academic Training -->
+            <!-- Experiencia -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white border-bottom-0 pt-4 ps-4">
                     <h5 class="fw-bold mb-0" style="color: #0c2340;">
@@ -179,7 +178,6 @@
                         <div class="timeline">
                             @foreach($profile->academicTrainings as $training)
                                 <div class="timeline-item">
-                                    <!-- Punto del timeline (definido en CSS) -->
                                     <div class="timeline-dot"></div>
                                     
                                     <h5 class="fw-bold mb-1 text-dark">{{ $training->degree }}</h5>
@@ -206,7 +204,7 @@
                 </div>
             </div>
 
-            <!-- Talks / Workshops -->
+            <!-- Ponencias dadas -->
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-bottom-0 pt-4 ps-4">
                     <h5 class="fw-bold mb-0" style="color: #0c2340;">
