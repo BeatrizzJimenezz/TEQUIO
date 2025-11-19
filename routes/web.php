@@ -25,6 +25,15 @@ Route::get('/dashboard', [EventController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// ============ Force Password Change Routes ============
+Route::middleware(['auth'])->group(function () {
+    Route::get('/force-change-password', function () {
+        return view('auth.force-change-password');
+    })->name('password.force-change');
+
+    Route::post('/force-change-password', [App\Http\Controllers\Auth\PasswordController::class, 'forceUpdate'])
+        ->name('password.force-update');
+});
 
 // ============ Standard Profile Routes ============
 Route::middleware('auth')->group(function () {

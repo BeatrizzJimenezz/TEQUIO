@@ -18,53 +18,53 @@ class EventTeamController extends Controller
     /**
      * Show the event organizers team
      */
-    public function index(Event $evento)
+    public function index(Event $event)
     {
-        $this->authorize('isOrganizer', $evento);
+        $this->authorize('isOrganizer', $event);
 
-        $mainOrganizer = $evento->perfilProfesional;
+        $leadOrganizer = $event->professionalProfile;
 
-        $collaborators = $evento->colaboradores()
-            ->wherePivot('rol', 'Organizador')
+        $collaborators = $event->collaborators()
+            ->wherePivot('role', 'Organizador')
             ->with('user')
             ->get();
 
-        return view('eventos.equipo.index', compact('evento', 'mainOrganizer', 'collaborators'));
+        return view('events.team.index', compact('event', 'leadOrganizer', 'collaborators'));
     }
 
     /**
      * Show form to add an organizer
      */
-    public function create(Event $evento)
+    public function create(Event $event)
     {
-        $this->authorize('isOrganizer', $evento);
+        $this->authorize('isOrganizer', $event);
 
-        $availableUsers = User::whereDoesntHave('perfilProfesional.eventos', function($query) use ($evento) {
-            $query->where('eventos.id', $evento->id);
+        $availableUsers = User::whereDoesntHave('professionalProfile.events', function($query) use ($event) {
+            $query->where('events.id', $event->id);
         })
-        ->where('id', '!=', $evento->perfilProfesional->user_id)
-        ->whereDoesntHave('perfilProfesional', function($query) use ($evento) {
-            $query->whereHas('colaboraciones', function($q) use ($evento) {
-                $q->where('evento_id', $evento->id)
-                  ->where('perfil_evento.rol', 'Organizador');
+        ->where('id', '!=', $event->professionalProfile->user_id)
+        ->whereDoesntHave('professionalProfile', function($query) use ($event) {
+            $query->whereHas('events', function($q) use ($event) {
+                $q->where('events.id', $event->id)
+                ->where('event_profiles.role', 'Organizador');
             });
         })
         ->orderBy('name')
         ->get();
 
-        return view('eventos.equipo.create', compact('evento', 'availableUsers'));
+        return view('events.team.create', compact('event', 'availableUsers'));
     }
 
     /**
      * Add an existing or new organizer to the event
      */
-    public function store(Request $request, Event $evento)
+    public function store(Request $request, Event $event)
     {
-        $this->authorize('isOrganizer', $evento);
+        $this->authorize('isOrganizer', $event);
 
-        $rules = ['tipo' => 'required|in:existing,new'];
+        $rules = ['type' => 'required|in:existing,new'];
 
-        if ($request->tipo === 'existing') {
+        if ($request->type === 'existing') {
             $rules['user_id'] = 'required|exists:users,id';
         } else {
             $rules['name'] = 'required|string|max:255';
@@ -85,17 +85,17 @@ class EventTeamController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($request->tipo === 'new') {
+            if ($request->type === 'new') {
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
-                    'debe_cambiar_password' => true,
+                    'must_change_password' => true,
                 ]);
 
                 $user->assignRole('Organizador');
 
-                $professionalProfile = $user->perfilProfesional()->create([]);
+                $professionalProfile = $user->professionalProfile()->create([]);
             } else {
                 $user = User::findOrFail($request->user_id);
 
@@ -103,12 +103,12 @@ class EventTeamController extends Controller
                     $user->assignRole('Organizador');
                 }
 
-                $professionalProfile = $user->perfilProfesional ?? $user->perfilProfesional()->create([]);
+                $professionalProfile = $user->professionalProfile ?? $user->professionalProfile()->create([]);
             }
 
-            $alreadyOrganizer = $evento->colaboradores()
-                ->wherePivot('perfil_profesional_id', $professionalProfile->id)
-                ->wherePivot('rol', 'Organizador')
+            $alreadyOrganizer = $event->collaborators()
+                ->wherePivot('professional_profile_id', $professionalProfile->id)
+                ->wherePivot('role', 'Organizador')
                 ->exists();
 
             if ($alreadyOrganizer) {
@@ -116,18 +116,20 @@ class EventTeamController extends Controller
                 return back()->with('error', 'This user is already an organizer of the event.');
             }
 
-            $evento->colaboradores()->attach($professionalProfile->id, [
-                'rol' => 'Organizador',
+            $event->collaborators()->attach($professionalProfile->id, [
+                'role' => 'Organizador',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
             DB::commit();
 
-            return redirect()->route('eventos.equipo.index', $evento)
-                ->with('success', $request->tipo === 'new' 
+            return redirect()->route('events.team.index', $event)
+                ->with('success', $request->type === 'new' 
                     ? 'New organizer created and added successfully.' 
-                    : 'Organizer added successfully.');
+                    : 'Organizador added successfully.');
+
+           
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -139,33 +141,33 @@ class EventTeamController extends Controller
     /**
      * Remove organizer from the team
      */
-    public function destroy(Event $evento, $professionalProfileId)
+    public function destroy(Event $event, $professionalProfileId)
     {
-        $this->authorize('isOrganizer', $evento);
+        $this->authorize('isOrganizer', $event);
 
         try {
-            if ($evento->perfil_profesional_id == $professionalProfileId) {
+            if ($event->professional_profile_id == $professionalProfileId) {
                 return back()->with('error', 'You cannot remove the main organizer of the event.');
             }
 
-            $professionalProfile = PerfilProfesional::findOrFail($professionalProfileId);
+            $professionalProfile = ProfessionalProfile::findOrFail($professionalProfileId);
             $user = $professionalProfile->user;
 
-            $evento->colaboradores()->detach($professionalProfileId);
+            $event->collaborators()->detach($professionalProfileId);
 
-            $isMainOrganizer = Event::where('perfil_profesional_id', $professionalProfileId)->exists();
+            $isMainOrganizer = Event::where('professional_profile_id', $professionalProfileId)->exists();
 
-            $isCollaboratorElsewhere = DB::table('perfil_evento')
-                ->where('perfil_profesional_id', $professionalProfileId)
-                ->where('rol', 'Organizador')
+            $isCollaboratorElsewhere = DB::table('professional_profile_event')
+                ->where('professional_profile_id', $professionalProfileId)
+                ->where('role', 'Organizador')
                 ->exists();
 
             if (!$isMainOrganizer && !$isCollaboratorElsewhere) {
                 $user->removeRole('Organizador');
             }
 
-            return redirect()->route('eventos.equipo.index', $evento)
-                ->with('success', 'Organizer removed from the team successfully.');
+            return redirect()->route('events.team.index', $event)
+                ->with('success', 'Organizador removed from the team successfully.');
 
         } catch (\Exception $e) {
             return back()->with('error', 'Error removing organizer: ' . $e->getMessage());

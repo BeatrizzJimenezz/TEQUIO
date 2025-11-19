@@ -16,6 +16,7 @@ class EventComponentController extends Controller
             abort(401, 'You must be logged in.');
         }
 
+        // Mantener los nombres de roles en español
         if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
             abort(403, 'You do not have permission to access this section.');
         }

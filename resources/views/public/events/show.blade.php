@@ -417,4 +417,3 @@
     });
 </script>
 @endpush
-@endsection

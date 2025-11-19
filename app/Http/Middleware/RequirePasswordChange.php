@@ -10,14 +10,15 @@ class RequirePasswordChange
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->debe_cambiar_password) {
+        // Cambiar debe_cambiar_password a must_change_password
+        if (auth()->check() && auth()->user()->must_change_password) {
             if (!$request->routeIs('password.force-change') && 
                 !$request->routeIs('password.force-update') && 
                 !$request->routeIs('logout')) {
                 return redirect()->route('password.force-change');
             }
         }
-
+        
         return $next($request);
     }
 }
