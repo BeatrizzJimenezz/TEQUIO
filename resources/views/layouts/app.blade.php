@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <link href="{{ asset('css/sidebar.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/background.css') }}" rel="stylesheet">
     @stack('styles')
 </head>
-<body>
+<body class="bg-tequio-black">
     <div id="wrapper">
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
@@ -100,7 +101,7 @@
         </div>
         
         <!-- Contenido Principal -->
-        <div id="page-content-wrapper">
+        <div id="page-content-wrapper" class="">
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3" style="height: 70px;">
                 
                 <button class="btn btn-outline-secondary d-md-none me-3" id="mobileToggle">

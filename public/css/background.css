@@ -1,0 +1,13 @@
+/*-- Fondo repetitivo de Eva en negro transparencia 25% --*/
+.bg-tequio-black {
+    background-image: url('/images/p13.png');
+    background-size: 80px;
+    background-repeat: repeat;
+}
+
+/*-- Fondo repetitivo de Eva en blanco transparencia 25% --*/
+.bg-tequio-white {
+    background-image: url('/images/p14.png');
+    background-size: 80px;
+    background-repeat: repeat;
+}
