@@ -19,7 +19,7 @@ class UsersRolesSeeder extends Seeder
         
         // usuario Administrador
         $admin = User::firstOrCreate(
-            ['email' => 'admin@evai.com'],
+            ['email' => 'admin@tequio.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('1234')
@@ -29,7 +29,7 @@ class UsersRolesSeeder extends Seeder
 
         // usuario Organizador
         $organizador = User::firstOrCreate(
-            ['email' => 'organizador@evai.com'],
+            ['email' => 'organizador@tequio.com'],
             [
                 'name' => 'Organizador',
                 'password' => Hash::make('1234')
@@ -39,7 +39,7 @@ class UsersRolesSeeder extends Seeder
 
         // usuario Participante
         $participante = User::firstOrCreate(
-            ['email' => 'participante@evai.com'],
+            ['email' => 'participante@tequio.com'],
             [
                 'name' => 'Participante',
                 'password' => Hash::make('1234')
