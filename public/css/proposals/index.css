@@ -1,0 +1,58 @@
+/* Estilos para la vista de propuestas usando los colores de Tequio */
+:root {
+    --primary-blue: #0E2FBC;
+    --dark-blue: #0E2773;
+    --deep-blue: #0D2840;
+    --teal: #0D8B8C;
+    --brown: #735A45;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+}
+
+.btn-outline-primary {
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+.badge.bg-info {
+    background-color: var(--teal) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--primary-blue) !important;
+}
+
+.card {
+    border: 1px solid #e0e0e0;
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(14, 47, 188, 0.1);
+}
+
+.alert-danger {
+    border-left: 4px solid #dc3545;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.bi {
+    margin-right: 5px;
+}

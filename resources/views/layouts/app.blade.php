@@ -57,7 +57,7 @@
                         <i class="bi bi-search"></i>
                         <span class="link-text ms-6">Ofertas</span>
                     </a>
-                    <a class="sidebar-link" href="">
+                    <a class="sidebar-link" href="{{ route('event') }}">
                         <i class="bi bi-send"></i>
                         <span class="link-text ms-6">Propuestas</span>
                     </a>
@@ -101,7 +101,7 @@
         
         <!-- Contenido Principal -->
         <div id="page-content-wrapper">
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3" style="height: 70px;">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3">
                 
                 <button class="btn btn-outline-secondary d-md-none me-3" id="mobileToggle">
                     <i class="bi bi-list"></i>
@@ -116,7 +116,7 @@
             </nav>
 
             <main class="container-fluid p-4">
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </div>
