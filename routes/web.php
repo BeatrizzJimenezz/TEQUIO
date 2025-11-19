@@ -1,17 +1,23 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProposalController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Reemplaza tu ruta actual de dashboard
+Route::get('/dashboard', [EventController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+// Ruta para ver detalle de evento
+Route::get('/events/{id}', [EventController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('events.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -42,4 +48,6 @@ Route::prefix('proposals')->group(function () {
         ->name('proposals.my-proposals');
 });
 
+
+require __DIR__.'/profile.php';
 require __DIR__.'/auth.php';

@@ -12,8 +12,9 @@ class ProfessionalProfile extends Model
 {
     use HasFactory;
 
-    protected $table = 'professional_profiles';
 
+    protected $table = 'professional_profiles';
+    
     protected $fillable = [
         'user_id',
         'about_me',
@@ -21,7 +22,8 @@ class ProfessionalProfile extends Model
         'skills',
     ];
 
-    public function user(): BelongsTo
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
@@ -51,5 +53,26 @@ class ProfessionalProfile extends Model
     public function academicTrainings(): HasMany
     {
         return $this->hasMany(AcademicTraining::class);
+    }
+
+    /**
+     * Relationship: A professional profile can be speaker in components
+     */
+    public function componentsAsSpeaker()
+    {
+        return $this->hasMany(EventComponent::class, 'speaker_id');
+    }
+
+    /**
+     * Relationship: Applications sent by the profile
+     */
+    public function offerApplications()
+    {
+        return $this->hasMany(OfferApplication::class);
+    }
+
+    public function socialNetworks()
+    {
+        return $this->hasMany(SocialNetwork::class, 'professional_profile_id');
     }
 }

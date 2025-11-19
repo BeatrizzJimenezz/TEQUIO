@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'must_change_password',
+        'profile_photo',        // ← AGREGA ESTA LÍNEA
+        'must_change_password', // ← Y esta si no la tienes
     ];
 
     /**
@@ -63,4 +65,16 @@ class User extends Authenticatable
 
         return $this->professionalProfile;
     }
+
+    // Get profile photo URL or default avatar
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+        
+        // Return default avatar
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
 }
+

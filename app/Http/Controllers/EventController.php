@@ -33,7 +33,6 @@ class EventController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // 🔥 FIX: corregido el nombre de tabla en el pivot
         $eventsAsCollaborator = $professionalProfile->collaborations()
             ->wherePivot('role', 'Organizer')
             ->with(['tags', 'components'])
