@@ -1,0 +1,121 @@
+.timeline {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.timeline-item {
+    position: relative;
+    border-left: 2px solid #e9ecef;
+    padding-bottom: 2rem;
+    padding-left: 1.5rem;
+}
+
+.timeline-item:last-child {
+    border-left-color: transparent !important;
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    top: 0;
+    left: -2px; 
+    transform: translate(-50%, 0);
+    width: 14px;
+    height: 14px;
+    background-color: #0c2340; 
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    background-color: #fff !important;
+}
+
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.profile-avatar {
+    width: 160px; 
+    height: 160px; 
+    object-fit: cover; 
+    background-color: #fff;
+}
+
+.profile-avatar-fallback {
+    width: 160px; 
+    height: 160px; 
+    background-color: #0c2340; 
+    font-size: 3.5rem;
+}.timeline {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.timeline-item {
+    position: relative;
+    border-left: 2px solid #e9ecef;
+    padding-bottom: 2rem;
+    padding-left: 1.5rem;
+}
+
+.timeline-item:last-child {
+    border-left-color: transparent !important;
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    top: 0;
+    left: -2px; 
+    transform: translate(-50%, 0);
+    width: 14px;
+    height: 14px;
+    background-color: #0c2340;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    background-color: #fff !important;
+}
+
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.profile-avatar {
+    width: 160px; 
+    height: 160px; 
+    object-fit: cover; 
+    background-color: #fff;
+}
+
+.profile-avatar-fallback {
+    width: 160px; 
+    height: 160px; 
+    background-color: #0c2340; 
+    font-size: 3.5rem;
+}
