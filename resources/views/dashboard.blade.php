@@ -14,7 +14,6 @@
                     <form action="{{ route('dashboard') }}" method="GET" id="filtersForm">
                         <div class="row g-3">
                             
-                            <!-- Search -->
                             <div class="col-md-3">
                                 <label for="search" class="form-label fw-medium text-secondary small mb-1">
                                     🔍 Search

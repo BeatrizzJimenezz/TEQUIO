@@ -150,24 +150,24 @@
 
     </div>
 
-    <!-- PAGE CONTENT -->
-    <div id="page-content-wrapper">
 
-        <nav class="navbar navbar-light bg-white border-bottom px-3" style="height: 70px;">
-            <button class="btn btn-outline-secondary d-md-none me-3" id="mobileToggle">
-                <i class="bi bi-list"></i>
-            </button>
 
-            @if (isset($header))
-                <div class="fw-bold text-uppercase text-dark h5 mb-0">
-                    {{ $header }}
+       <!-- Contenido Principal -->
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3 d-md-none text-center" style="height: 70px;">
+                <button class="btn btn-outline-secondary me-3" id="mobileToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div class="fw-bold text-uppercase text-center text-dark h5 mb-0">
+                    @yield('header') 
                 </div>
-            @endif
-        </nav>
+            </nav>
 
-        <main class="container-fluid p-4">
-            @yield('content')
-        </main>
+            <main class="container-fluid p-4">
+                {{ $slot ?? '' }}
+                @yield('content')
+            </main>
 
     </div>
 
