@@ -36,7 +36,7 @@
 
             <div class="sidebar-category">General</div>
 
-            <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('events.public.index') }}" class="sidebar-link {{ request()->routeIs('events.public.index') ? 'active' : '' }}">
                 <i class="bi bi-calendar-event"></i>
                 <span class="link-text ms-6">Eventos</span>
             </a>
@@ -51,7 +51,7 @@
                 @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
                     <div class="sidebar-category">Organizar</div>
 
-                    <a class="sidebar-link" href="#">
+                    <a class="sidebar-link" href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="bi bi-calendar3"></i>
                         <span class="link-text ms-6">Mis Eventos</span>
                     </a>
@@ -163,4 +163,3 @@
 
 @stack('scripts')
 </body>
-</html>
