@@ -111,7 +111,7 @@
             <!-- Results Info -->
             <div class="mb-4">
                 <p class="text-muted small">
-                    ℹ️ Found <strong>{{ $events->total() }}</strong> event(s)
+                    ℹ️ Found <strong>{{ $events->count() }}</strong> event(s)
                 </p>
             </div>
 

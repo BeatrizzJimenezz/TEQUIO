@@ -36,71 +36,85 @@
 
             <div class="sidebar-category">General</div>
 
+            {{-- Dashboard Link --}}
             <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-speedometer2"></i>
+                <span class="link-text ms-6">Dashboard</span>
+            </a>
+
+            {{-- Public Catalog Link (New) --}}
+            <a href="{{ route('events.public.index') }}" class="sidebar-link {{ request()->routeIs('events.public.*') ? 'active' : '' }}">
                 <i class="bi bi-calendar-event"></i>
-                <span class="link-text ms-6">Eventos</span>
+                <span class="link-text ms-6">Event Catalog</span>
             </a>
 
             @auth
-                <a href="#" class="sidebar-link {{ request()->routeIs('mis-inscripciones') ? 'active' : '' }}">
-                    <i class="bi bi-ticket"></i>
-                    <span class="link-text ms-6">Inscripciones</span>
+                {{-- Registrations Link --}}
+                <a href="{{ route('registrations.index') }}" class="sidebar-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span class="link-text ms-6">My Registrations</span>
                 </a>
 
-                <!-- ORGANIZADOR / ADMIN -->
+                <!-- ORGANIZER / ADMIN SECTION -->
+                {{-- NOTE: Update role names to 'admin', 'organizer' if you migrated DB roles --}}
                 @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
-                    <div class="sidebar-category">Organizar</div>
+                    <div class="sidebar-category">Organize</div>
 
-                    <a class="sidebar-link" href="#">
+                    <a href="{{ route('events.index') }}" class="sidebar-link {{ request()->routeIs('events.*') && !request()->routeIs('events.public.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar3"></i>
-                        <span class="link-text ms-6">Mis Eventos</span>
+                        <span class="link-text ms-6">My Events</span>
+                    </a>
+
+                    {{-- Tags Management (Admin/Organizer usually) --}}
+                    <a href="{{ route('tags.index') }}" class="sidebar-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">
+                        <i class="bi bi-tags"></i>
+                        <span class="link-text ms-6">Tags</span>
                     </a>
 
                     <a class="sidebar-link" href="#">
                         <i class="bi bi-grid-fill"></i>
-                        <span class="link-text ms-6">Reportes</span>
+                        <span class="link-text ms-6">Reports</span>
                     </a>
                 @endif
 
-                <!-- CONTRIBUCIONES -->
-                <div class="sidebar-category">Contribuciones</div>
+                <!-- CONTRIBUTIONS SECTION -->
+                <div class="sidebar-category">Contributions</div>
 
-                <a class="sidebar-link" href="#">
+                {{-- Open Offers (Marketplace) --}}
+                <a href="{{ route('offers.public') }}" class="sidebar-link {{ request()->routeIs('offers.public') ? 'active' : '' }}">
                     <i class="bi bi-search"></i>
-                    <span class="link-text ms-6">Ofertas</span>
+                    <span class="link-text ms-6">Find Offers</span>
                 </a>
 
-                <a class="sidebar-link" href="#">
+                {{-- My Proposals --}}
+                <a href="{{ route('proposals.my_proposals') }}" class="sidebar-link {{ request()->routeIs('proposals.*') ? 'active' : '' }}">
                     <i class="bi bi-send"></i>
-                    <span class="link-text ms-6">Propuestas</span>
+                    <span class="link-text ms-6">My Proposals</span>
                 </a>
 
-                <!-- MI CUENTA -->
-                <div class="sidebar-category">Mi Cuenta</div>
+                <!-- MY ACCOUNT SECTION -->
+                <div class="sidebar-category">My Account</div>
 
-                <!-- Vista de perfil profesional -->
+                <!-- Professional Profile -->
                 <a href="{{ route('professional-profile.show') }}"
-                   class="sidebar-link {{ request()->routeIs('professional-profile.show') ? 'active' : '' }}">
+                   class="sidebar-link {{ request()->routeIs('professional-profile.*') ? 'active' : '' }}">
                     <i class="bi bi-person-circle"></i>
-                    <span class="link-text ms-6">Perfil Profesional</span>
+                    <span class="link-text ms-6">Professional Profile</span>
                 </a>
 
-                <!-- Editar perfil profesional -->
-              
-
-                <!-- Configuración de Laravel -->
+                <!-- Settings (Profile Edit) -->
                 <a href="{{ route('profile.edit') }}"
                    class="sidebar-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                     <i class="bi bi-gear"></i>
-                    <span class="link-text ms-6">Configuración</span>
+                    <span class="link-text ms-6">Settings</span>
                 </a>
 
-                <!-- Cerrar Sesión -->
+                <!-- Logout -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="sidebar-link bg-transparent border-0 w-100">
                         <i class="bi bi-box-arrow-right"></i>
-                        <span class="link-text ms-6">Cerrar Sesión</span>
+                        <span class="link-text ms-6">Logout</span>
                     </button>
                 </form>
 
@@ -113,20 +127,21 @@
             <div class="user-card bg-white rounded-3 p-2 d-flex align-items-center gap-3 shadow-sm">
                 @if(Auth::user()->profile_photo)
                     <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}"
-                        class="rounded-circle border border-2 border-light"
-                        width="42" height="42"
-                        style="object-fit: cover;"
-                        alt="Profile photo">
+                         class="rounded-circle border border-2 border-light"
+                         width="42" height="42"
+                         style="object-fit: cover;"
+                         alt="Profile photo">
                 @else
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=0d6efd&color=fff"
-                        class="rounded-circle border border-2 border-light"
-                        width="42" height="42"
-                        alt="Default avatar">
+                         class="rounded-circle border border-2 border-light"
+                         width="42" height="42"
+                         alt="Default avatar">
                 @endif
                 <div class="overflow-hidden user-info-text lh-1">
                     <div class="text-dark fw-bold small text-truncate">{{ Auth::user()->name }}</div>
                     <div class="text-secondary" style="font-size: 0.75rem;">
-                        <i class="bi bi-shield-lock-fill me-1"></i>{{ Auth::user()->roles->first()->name ?? 'Usuario' }}
+                        {{-- Update role display if needed --}}
+                        <i class="bi bi-shield-lock-fill me-1"></i>{{ Auth::user()->roles->first()->name ?? 'User' }}
                     </div>
                 </div>
             </div>
@@ -154,14 +169,13 @@
             @yield('content')
         </main>
 
-
-
     </div>
 
 </div>
 
 <!-- JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{{-- Ensure this file exists or update path --}}
 <script src="{{ asset('js/sidebar.js') }}"></script>
 
 @stack('scripts')
