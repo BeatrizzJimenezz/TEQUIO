@@ -4,42 +4,40 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <div class="card mb-4">
+            {{-- Header --}}
+            <div class="card mb-4 border-0 shadow-sm" style="border-left: 4px solid #4499BB !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h3 class="mb-1">{{ $event->name }}</h3>
+                            <h3 class="mb-1 fw-bold" style="color: #0C2340;">{{ $event->name }}</h3>
                             <p class="text-muted mb-0">
-                                <i class="bi bi-calendar"></i> {{ $event->start_date->format('m/d/Y') }} - {{ $event->end_date->format('m/d/Y') }}
+                                <i class="bi bi-calendar3 me-1" style="color: #4499BB;"></i>
+                                {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
                             </p>
                         </div>
-                        {{-- Assumes route is now 'events.index' --}}
-                        <a href="{{ route('events.index') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Back to My Events
+                        <a href="{{ route('events.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a Mis Eventos
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="row mb-4">
+            {{-- Action Buttons --}}
+            <div class="row mb-4 g-3">
                 <div class="col-md-3">
-                    {{-- Assumes route is now 'components.create' --}}
-                    <a href="{{ route('components.create', $event) }}" class="btn btn-primary w-100 mb-2">
-                        <i class="bi bi-plus-circle"></i> Add Component
+                    <a href="{{ route('components.create', $event) }}" class="btn w-100 text-white shadow-sm" style="background-color: #8CC63F;">
+                        <i class="bi bi-plus-lg me-1"></i> Agregar Componente
                     </a>
                 </div>
                 <div class="col-md-3">
-                    {{-- Assumes route is now 'offers.index' --}}
-                    <a href="{{ route('offers.index', $event) }}" class="btn btn-success w-100 mb-2">
-                        <i class="bi bi-megaphone"></i> Manage Offers
+                    <a href="{{ route('offers.index', $event) }}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-megaphone me-1"></i> Gestionar Ofertas
                     </a>
                 </div>
                 <div class="col-md-3">
-                    {{-- Assumes route is now 'offers.evaluation' --}}
-                    <a href="{{ route('offers.evaluation', $event) }}" class="btn btn-warning w-100 mb-2">
-                        <i class="bi bi-clipboard-check"></i> Evaluate Proposals
+                    <a href="{{ route('offers.evaluation', $event) }}" class="btn btn-outline-warning w-100">
+                        <i class="bi bi-clipboard-check me-1"></i> Evaluar Propuestas
                         @php
-                            // Logic updated to English: components() -> where('proposal_status', 'proposed')
                             $pendingProposals = $event->components()->where('proposal_status', 'proposed')->count();
                         @endphp
                         @if($pendingProposals > 0)
@@ -48,132 +46,146 @@
                     </a>
                 </div>
                 <div class="col-md-3">
-                    {{-- Assumes route is now 'events.public.show' --}}
-                    <a href="{{ route('events.public.show', $event->id) }}" class="btn btn-outline-info w-100 mb-2" target="_blank">
-                        <i class="bi bi-eye"></i> View Public Event
+                    <a href="{{ route('events.public.show', $event->id) }}" class="btn w-100" style="background-color: #4499BB; color: white;" target="_blank">
+                        <i class="bi bi-eye me-1"></i> Ver Evento Público
                     </a>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Event Components</h4>
+            {{-- Components List --}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                        <i class="bi bi-collection me-2" style="color: #4499BB;"></i>
+                        Componentes del Evento
+                    </h5>
                 </div>
                 <div class="card-body">
                     @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i>
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
                     @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             {{ session('error') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
                     @forelse($components as $component)
-                        {{-- Logic: proposal_status == 'open_offer' --}}
-                        <div class="card mb-3 {{ $component->proposal_status == 'open_offer' ? 'border-success' : '' }}">
-                            <div class="card-body">
+                        <div class="card mb-3 border {{ $component->proposal_status == 'open_offer' ? 'border-success' : 'border-light' }} shadow-sm">
+                            <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <h5 class="mb-0 me-2">{{ $component->name }}</h5>
-                                            
+                                        {{-- Header --}}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <h5 class="mb-0 me-3 fw-bold" style="color: #0C2340;">{{ $component->name }}</h5>
+
                                             @if($component->proposal_status == 'open_offer')
-                                                <span class="badge bg-success">
-                                                    <i class="bi bi-megaphone"></i> Open Offer
+                                                <span class="badge" style="background-color: #8CC63F;">
+                                                    <i class="bi bi-megaphone me-1"></i> Oferta Abierta
                                                 </span>
                                             @elseif($component->proposal_status == 'proposed')
                                                 <span class="badge bg-warning text-dark">
-                                                    <i class="bi bi-clock"></i> External Proposal
+                                                    <i class="bi bi-clock me-1"></i> Propuesta Externa
                                                 </span>
                                             @else
-                                                <span class="badge bg-primary">
-                                                    <i class="bi bi-check-circle"></i> Approved
+                                                <span class="badge" style="background-color: #4499BB;">
+                                                    <i class="bi bi-check-circle me-1"></i> Aprobado
                                                 </span>
                                             @endif
                                         </div>
-                                        
-                                        <div class="mb-2">
-                                            {{-- Assumes type is capitalized or handled by an accessor --}}
-                                            <span class="badge bg-primary">{{ ucfirst($component->type) }}</span>
-                                            <span class="badge bg-info">{{ ucfirst($component->modality) }}</span>
-                                            
+
+                                        {{-- Badges --}}
+                                        <div class="mb-3">
+                                            <span class="badge me-1" style="background-color: #0C2340;">{{ ucfirst($component->type) }}</span>
+                                            <span class="badge me-1" style="background-color: #4499BB;">{{ ucfirst($component->modality) }}</span>
+
                                             @if($component->level)
-                                                <span class="badge bg-secondary">{{ ucfirst($component->level) }}</span>
+                                                <span class="badge bg-secondary me-1">{{ ucfirst($component->level) }}</span>
                                             @endif
-                                            
+
                                             @if($component->slots)
-                                                <span class="badge bg-warning text-dark">
-                                                    <i class="bi bi-people"></i> {{ $component->slots }} slots
+                                                <span class="badge bg-light text-dark border me-1">
+                                                    <i class="bi bi-people me-1"></i>{{ $component->slots }} cupos
                                                 </span>
                                             @endif
-                                            
+
                                             @if($component->attendee_price > 0)
-                                                <span class="badge bg-success">
+                                                <span class="badge" style="background-color: #8CC63F;">
                                                     ${{ number_format($component->attendee_price, 2) }}
                                                 </span>
                                             @else
-                                                <span class="badge bg-success">Free</span>
+                                                <span class="badge" style="background-color: #8CC63F;">Gratis</span>
                                             @endif
                                         </div>
-                                        
-                                        {{-- Logic: relationship 'ponente' changed to 'speaker' --}}
+
+                                        {{-- Speaker --}}
                                         @if($component->speaker)
                                             <p class="mb-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> Speaker: 
-                                                    <strong>{{ $component->speaker->user->name }}</strong>
-                                                </small>
+                                                <i class="bi bi-person me-1" style="color: #4499BB;"></i>
+                                                <span class="text-muted">Ponente:</span>
+                                                <strong>{{ $component->speaker->user->name }}</strong>
                                             </p>
                                         @endif
-                                        
-                                        <p class="card-text">{{ Str::limit($component->description, 150) }}</p>
-                                        
+
+                                        {{-- Description --}}
+                                        <p class="text-muted mb-3">{{ Str::limit($component->description, 150) }}</p>
+
+                                        {{-- Location --}}
                                         @if($component->location)
                                         <p class="mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-geo-alt"></i> {{ $component->location }}
-                                            </small>
+                                            <i class="bi bi-geo-alt me-1" style="color: #8CC63F;"></i>
+                                            <span class="text-muted">{{ $component->location }}</span>
                                         </p>
                                         @endif
 
-                                        <div class="mt-2">
-                                            <strong>Schedules:</strong>
-                                            <ul class="list-unstyled ms-3 mb-0">
-                                                {{-- Logic: relationship 'horarios' changed to 'schedules' --}}
-                                                @foreach($component->schedules as $schedule)
-                                                    <li>
-                                                        <i class="bi bi-clock"></i>
-                                                        {{-- Logic: 'fecha' -> 'date', 'hora_inicio' -> 'start_time' --}}
-                                                        {{ $schedule->date->format('m/d/Y') }} 
-                                                        from {{ $schedule->start_time }} to {{ $schedule->end_time }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
+                                        {{-- Schedules --}}
+                                        @if($component->schedules->count() > 0)
+                                        <div class="mt-3 p-3 rounded" style="background-color: #f8f9fa;">
+                                            <strong class="d-block mb-2" style="color: #0C2340;">
+                                                <i class="bi bi-clock-history me-1" style="color: #4499BB;"></i>
+                                                Horarios:
+                                            </strong>
+                                            @foreach($component->schedules as $schedule)
+                                                <span class="badge bg-light text-dark border me-2 mb-1">
+                                                    <i class="bi bi-calendar3 me-1"></i>
+                                                    {{ $schedule->date->format('d/m/Y') }}
+                                                    de {{ substr($schedule->start_time, 0, 5) }} a {{ substr($schedule->end_time, 0, 5) }}
+                                                </span>
+                                            @endforeach
                                         </div>
+                                        @endif
                                     </div>
-                                    
-                                    <div class="ms-3">
+
+                                    {{-- Actions --}}
+                                    <div class="ms-4">
                                         <div class="btn-group-vertical" role="group">
                                             @if($component->proposal_status != 'open_offer')
-                                                <a href="{{ route('components.edit', [$event, $component]) }}" 
-                                                   class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-pencil"></i> Edit
+                                                <a href="{{ route('components.edit', [$event, $component]) }}"
+                                                   class="btn btn-sm btn-outline-warning mb-1">
+                                                    <i class="bi bi-pencil me-1"></i> Editar
                                                 </a>
                                             @endif
-                                            
-                                            <form action="{{ route('components.destroy', [$event, $component]) }}" 
-                                                  method="POST" class="d-inline">
+
+                                            <a href="{{ route('schedules.index', [$event, $component]) }}"
+                                               class="btn btn-sm mb-1"
+                                               style="background-color: #4499BB; color: white;">
+                                                <i class="bi bi-calendar-event me-1"></i> Horarios
+                                            </a>
+
+                                            <form action="{{ route('components.destroy', [$event, $component]) }}"
+                                                  method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger w-100" 
-                                                        onclick="return confirm('Are you sure you want to delete this component?')">
-                                                    <i class="bi bi-trash"></i> Delete
+                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100"
+                                                        onclick="return confirm('¿Estás seguro de eliminar este componente?')">
+                                                    <i class="bi bi-trash me-1"></i> Eliminar
                                                 </button>
                                             </form>
                                         </div>
@@ -183,10 +195,13 @@
                         </div>
                     @empty
                         <div class="text-center py-5">
-                            <i class="bi bi-calendar-event" style="font-size: 3rem; color: #ccc;"></i>
-                            <p class="text-muted mt-3">No components found for this event</p>
-                            <a href="{{ route('components.create', $event) }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Add the first component
+                            <div class="mb-4">
+                                <i class="bi bi-collection" style="font-size: 4rem; color: #C8CCC9;"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">No hay componentes para este evento</h5>
+                            <p class="text-muted mb-4">Agrega talleres, presentaciones o actividades a tu evento.</p>
+                            <a href="{{ route('components.create', $event) }}" class="btn btn-lg text-white" style="background-color: #8CC63F;">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar el primer componente
                             </a>
                         </div>
                     @endforelse
