@@ -4,44 +4,65 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card mb-4">
+            {{-- Header --}}
+            <div class="card mb-4 border-0 shadow-sm" style="border-left: 4px solid #4499BB !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="mb-1">{{ $event->name }}</h5>
+                            <h3 class="mb-1 fw-bold" style="color: #0C2340;">
+                                <i class="bi bi-plus-circle me-2" style="color: #8CC63F;"></i>
+                                Agregar Nuevo Componente
+                            </h3>
                             <p class="text-muted mb-0">
-                                <i class="bi bi-calendar"></i> {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
+                                <i class="bi bi-calendar me-1"></i> {{ $event->name }} |
+                                {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
                             </p>
                         </div>
-                        <a href="{{ route('components.index', $event) }}" class="btn btn-secondary">
+                        <a href="{{ route('components.index', $event) }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Volver
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Agregar Nuevo Componente</h4>
+            @if(session('error'))
+                <div class="alert border-0 shadow-sm mb-4" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;">
+                    <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                    {{ session('error') }}
                 </div>
-                <div class="card-body">
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
+            @endif
 
-                    <form action="{{ route('components.store', $event) }}" method="POST" id="componentForm">
-                        @csrf
+            @if($errors->any())
+                <div class="alert border-0 shadow-sm mb-4" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;">
+                    <strong class="text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Error de validación:
+                    </strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Información Básica</h5>
-                            </div>
+            <form action="{{ route('components.store', $event) }}" method="POST" id="componentForm">
+                @csrf
 
+                {{-- Información Básica --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-info-circle me-2" style="color: #4499BB;"></i>
+                            Información Básica
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
                             <div class="col-md-8 mb-3">
-                                <label for="name" class="form-label">Nombre del Componente *</label>
+                                <label for="name" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Nombre del Componente <span class="text-danger">*</span>
+                                </label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
                                        id="name" name="name" value="{{ old('name') }}" required>
                                 @error('name')
@@ -50,13 +71,15 @@
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label for="type" class="form-label">Tipo *</label>
+                                <label for="type" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Tipo <span class="text-danger">*</span>
+                                </label>
                                 <select class="form-select @error('type') is-invalid @enderror"
                                         id="type" name="type" required>
                                     <option value="">Seleccionar...</option>
-                                    <option value="Activity" {{ old('type') == 'Activity' ? 'selected' : '' }}>Actividad</option>
-                                    <option value="Talk" {{ old('type') == 'Talk' ? 'selected' : '' }}>Conferencia</option>
-                                    <option value="Workshop" {{ old('type') == 'Workshop' ? 'selected' : '' }}>Taller</option>
+                                    <option value="activity" {{ old('type') == 'activity' ? 'selected' : '' }}>Actividad</option>
+                                    <option value="talk" {{ old('type') == 'talk' ? 'selected' : '' }}>Conferencia</option>
+                                    <option value="workshop" {{ old('type') == 'workshop' ? 'selected' : '' }}>Taller</option>
                                 </select>
                                 @error('type')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -64,7 +87,9 @@
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label for="description" class="form-label">Descripción *</label>
+                                <label for="description" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Descripción <span class="text-danger">*</span>
+                                </label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="4" required>{{ old('description') }}</textarea>
                                 @error('description')
@@ -73,42 +98,86 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="cover_url" class="form-label">URL de Imagen de Portada</label>
-                                <input type="url" class="form-control @error('cover_url') is-invalid @enderror"
-                                       id="cover_url" name="cover_url" value="{{ old('cover_url') }}"
+                                <label for="cover_image" class="form-label fw-semibold" style="color: #0C2340;">
+                                    URL de Imagen de Portada
+                                </label>
+                                <input type="url" class="form-control @error('cover_image') is-invalid @enderror"
+                                       id="cover_image" name="cover_image" value="{{ old('cover_image') }}"
                                        placeholder="https://ejemplo.com/imagen.jpg">
-                                @error('cover_url')
+                                @error('cover_image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="level" class="form-label">Nivel</label>
+                                <label for="level" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Nivel
+                                </label>
                                 <select class="form-select @error('level') is-invalid @enderror"
                                         id="level" name="level">
                                     <option value="">Seleccionar...</option>
-                                    <option value="Beginner" {{ old('level') == 'Beginner' ? 'selected' : '' }}>Principiante</option>
-                                    <option value="Intermediate" {{ old('level') == 'Intermediate' ? 'selected' : '' }}>Intermedio</option>
-                                    <option value="Advanced" {{ old('level') == 'Advanced' ? 'selected' : '' }}>Avanzado</option>
+                                    <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Principiante</option>
+                                    <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Intermedio</option>
+                                    <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Avanzado</option>
                                 </select>
                                 @error('level')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Modalidad y Ubicación</h5>
-                            </div>
+                {{-- Ponente --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-person me-2" style="color: #8CC63F;"></i>
+                            Ponente / Tallerista
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="speaker_id" class="form-label fw-semibold" style="color: #0C2340;">
+                                Seleccionar Ponente
+                            </label>
+                            <select class="form-select @error('speaker_id') is-invalid @enderror"
+                                    id="speaker_id" name="speaker_id">
+                                <option value="">-- Seleccionar --</option>
+                                @foreach($speakers as $profile)
+                                    <option value="{{ $profile->id }}"
+                                        {{ old('speaker_id') == $profile->id ? 'selected' : '' }}>
+                                        {{ $profile->user->name }} ({{ $profile->skills ?? 'Sin habilidades registradas' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('speaker_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Si no se selecciona, quedará sin asignar.</small>
+                        </div>
+                    </div>
+                </div>
 
+                {{-- Modalidad y Ubicación --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-geo-alt me-2" style="color: #4499BB;"></i>
+                            Modalidad y Ubicación
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="modality" class="form-label">Modalidad *</label>
+                                <label for="modality" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Modalidad <span class="text-danger">*</span>
+                                </label>
                                 <select class="form-select @error('modality') is-invalid @enderror"
                                         id="modality" name="modality" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="virtual" {{ old('modality') == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                                    <option value="presential" {{ old('modality') == 'presential' ? 'selected' : '' }}>Presencial</option>
+                                    <option value="in_person" {{ old('modality') == 'in_person' ? 'selected' : '' }}>Presencial</option>
                                     <option value="hybrid" {{ old('modality') == 'hybrid' ? 'selected' : '' }}>Híbrido</option>
                                 </select>
                                 @error('modality')
@@ -117,7 +186,9 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="location" class="form-label">Ubicación</label>
+                                <label for="location" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Ubicación
+                                </label>
                                 <input type="text" class="form-control @error('location') is-invalid @enderror"
                                        id="location" name="location" value="{{ old('location') }}"
                                        placeholder="Ej: Sala de Conferencias A, Link de Zoom, etc.">
@@ -126,25 +197,36 @@
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Capacidad y Precios</h5>
-                            </div>
-
+                {{-- Capacidad y Precios --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-currency-dollar me-2" style="color: #8CC63F;"></i>
+                            Capacidad y Precios
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="slots" class="form-label">Número de Cupos</label>
-                                <input type="number" class="form-control @error('slots') is-invalid @enderror"
-                                       id="slots" name="slots" value="{{ old('slots') }}" min="1"
+                                <label for="capacity" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Número de Cupos
+                                </label>
+                                <input type="number" class="form-control @error('capacity') is-invalid @enderror"
+                                       id="capacity" name="capacity" value="{{ old('capacity') }}" min="1"
                                        placeholder="Ej: 30">
                                 <small class="text-muted">Dejar vacío para cupos ilimitados</small>
-                                @error('slots')
+                                @error('capacity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label for="attendee_price" class="form-label">Precio para Asistente</label>
+                                <label for="attendee_price" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Precio para Asistente
+                                </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number" class="form-control @error('attendee_price') is-invalid @enderror"
@@ -158,7 +240,9 @@
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label for="organizer_cost" class="form-label">Costo del Organizador</label>
+                                <label for="organizer_cost" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Costo del Organizador
+                                </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number" class="form-control @error('organizer_cost') is-invalid @enderror"
@@ -171,14 +255,23 @@
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Requisitos</h5>
-                            </div>
-
+                {{-- Requisitos --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-list-check me-2" style="color: #4499BB;"></i>
+                            Requisitos
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="participant_requirements" class="form-label">Requisitos del Participante</label>
+                                <label for="participant_requirements" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Requisitos del Participante
+                                </label>
                                 <textarea class="form-control @error('participant_requirements') is-invalid @enderror"
                                           id="participant_requirements" name="participant_requirements" rows="3"
                                           placeholder="Ej: Laptop, conocimientos básicos de programación, etc.">{{ old('participant_requirements') }}</textarea>
@@ -188,7 +281,9 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="instructor_requirements" class="form-label">Requisitos del Instructor</label>
+                                <label for="instructor_requirements" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Requisitos del Instructor
+                                </label>
                                 <textarea class="form-control @error('instructor_requirements') is-invalid @enderror"
                                           id="instructor_requirements" name="instructor_requirements" rows="3"
                                           placeholder="Ej: Proyector, micrófono, conexión a internet, etc.">{{ old('instructor_requirements') }}</textarea>
@@ -197,85 +292,83 @@
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Horarios *</h5>
-                            </div>
-
-                            <div class="col-12">
-                                <div id="schedulesContainer">
-                                    <div class="schedule-item card mb-3">
-                                        <div class="card-body">
-                                            <div class="row align-items-end">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label">Fecha *</label>
-                                                    <input type="date" class="form-control @error('schedules.0.date') is-invalid @enderror"
-                                                           name="schedules[0][date]"
-                                                           value="{{ old('schedules.0.date') }}"
-                                                           min="{{ $event->start_date->format('Y-m-d') }}"
-                                                           max="{{ $event->end_date->format('Y-m-d') }}"
-                                                           required>
-                                                    @error('schedules.0.date')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label">Hora Inicio *</label>
-                                                    <input type="time" class="form-control @error('schedules.0.start_time') is-invalid @enderror"
-                                                           name="schedules[0][start_time]"
-                                                           value="{{ old('schedules.0.start_time') }}"
-                                                           required>
-                                                    @error('schedules.0.start_time')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label">Hora Fin *</label>
-                                                    <input type="time" class="form-control @error('schedules.0.end_time') is-invalid @enderror"
-                                                           name="schedules[0][end_time]"
-                                                           value="{{ old('schedules.0.end_time') }}"
-                                                           required>
-                                                    @error('schedules.0.end_time')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeSchedule(this)" disabled>
-                                                        <i class="bi bi-trash"></i> Quitar
-                                                    </button>
-                                                </div>
-                                            </div>
+                {{-- Horarios --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold" style="color: #0C2340;">
+                            <i class="bi bi-clock me-2" style="color: #8CC63F;"></i>
+                            Horarios <span class="text-danger">*</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="schedulesContainer">
+                            <div class="schedule-item card mb-3 border">
+                                <div class="card-body">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label fw-semibold" style="color: #0C2340;">Fecha *</label>
+                                            <input type="date" class="form-control @error('schedules.0.date') is-invalid @enderror"
+                                                   name="schedules[0][date]"
+                                                   value="{{ old('schedules.0.date') }}"
+                                                   min="{{ $event->start_date->format('Y-m-d') }}"
+                                                   max="{{ $event->end_date->format('Y-m-d') }}"
+                                                   required>
+                                            @error('schedules.0.date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <label class="form-label fw-semibold" style="color: #0C2340;">Hora Inicio *</label>
+                                            <input type="time" class="form-control @error('schedules.0.start_time') is-invalid @enderror"
+                                                   name="schedules[0][start_time]"
+                                                   value="{{ old('schedules.0.start_time') }}"
+                                                   required>
+                                            @error('schedules.0.start_time')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <label class="form-label fw-semibold" style="color: #0C2340;">Hora Fin *</label>
+                                            <input type="time" class="form-control @error('schedules.0.end_time') is-invalid @enderror"
+                                                   name="schedules[0][end_time]"
+                                                   value="{{ old('schedules.0.end_time') }}"
+                                                   required>
+                                            @error('schedules.0.end_time')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-2 mb-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeSchedule(this)" disabled>
+                                                <i class="bi bi-trash"></i> Quitar
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-
-                                <button type="button" class="btn btn-outline-primary" onclick="addSchedule()">
-                                    <i class="bi bi-plus-circle"></i> Agregar Otro Horario
-                                </button>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-12">
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ route('components.index', $event) }}" class="btn btn-secondary">
-                                        <i class="bi bi-x-circle"></i> Cancelar
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save"></i> Guardar Componente
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                        <button type="button" class="btn btn-outline-primary" onclick="addSchedule()" style="border-color: #4499BB; color: #4499BB;">
+                            <i class="bi bi-plus-lg me-1"></i> Agregar Otro Horario
+                        </button>
+                    </div>
                 </div>
-            </div>
+
+                {{-- Botones --}}
+                <div class="d-flex justify-content-between">
+                    <a href="{{ route('components.index', $event) }}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-x-lg me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-lg text-white" style="background-color: #8CC63F;">
+                        <i class="bi bi-check-lg me-1"></i> Guardar Componente
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
@@ -288,11 +381,11 @@ function addSchedule() {
     const maxDate = '{{ $event->end_date->format("Y-m-d") }}';
 
     const newSchedule = `
-        <div class="schedule-item card mb-3">
+        <div class="schedule-item card mb-3 border">
             <div class="card-body">
                 <div class="row align-items-end">
                     <div class="col-md-4 mb-2">
-                        <label class="form-label">Fecha *</label>
+                        <label class="form-label fw-semibold" style="color: #0C2340;">Fecha *</label>
                         <input type="date" class="form-control"
                                name="schedules[${scheduleIndex}][date]"
                                min="${minDate}"
@@ -300,19 +393,19 @@ function addSchedule() {
                                required>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label class="form-label">Hora Inicio *</label>
+                        <label class="form-label fw-semibold" style="color: #0C2340;">Hora Inicio *</label>
                         <input type="time" class="form-control"
                                name="schedules[${scheduleIndex}][start_time]"
                                required>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label class="form-label">Hora Fin *</label>
+                        <label class="form-label fw-semibold" style="color: #0C2340;">Hora Fin *</label>
                         <input type="time" class="form-control"
                                name="schedules[${scheduleIndex}][end_time]"
                                required>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeSchedule(this)">
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeSchedule(this)">
                             <i class="bi bi-trash"></i> Quitar
                         </button>
                     </div>

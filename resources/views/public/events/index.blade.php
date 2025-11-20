@@ -1,98 +1,96 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12 text-center">
-            <h1 class="display-4 mb-3">Event Catalog</h1>
-            <p class="lead text-muted">Discover events, workshops, and activities</p>
+    <div class="card mb-4 border-0 shadow-sm" style="border-left: 4px solid #4499BB !important;">
+        <div class="card-body">
+            <div class="text-center">
+                <h2 class="fw-bold mb-2" style="color: #0C2340;">
+                    <i class="bi bi-calendar-event me-2" style="color: #4499BB;"></i>
+                    Catálogo de Eventos
+                </h2>
+                <p class="text-muted mb-0">Descubre eventos, talleres y actividades disponibles</p>
+            </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4 shadow-sm">
+    <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
-            {{-- Route updated to events.public.index --}}
             <form action="{{ route('dashboard') }}" method="GET" id="filtersForm">
                 <div class="row g-3">
                     <!-- Search -->
                     <div class="col-md-4">
-                        <label for="search" class="form-label">
-                            <i class="bi bi-search"></i> Search
+                        <label for="search" class="form-label fw-semibold" style="color: #0C2340;">
+                            <i class="bi bi-search me-1" style="color: #4499BB;"></i> Buscar
                         </label>
-                        {{-- Input name updated to 'search' --}}
-                        <input type="text" 
-                               class="form-control" 
-                               id="search" 
-                               name="search" 
-                               placeholder="Name or description..."
+                        <input type="text"
+                               class="form-control"
+                               id="search"
+                               name="search"
+                               placeholder="Nombre o descripción..."
                                value="{{ request('search') }}">
                     </div>
 
                     <!-- Modality -->
                     <div class="col-md-3">
-                        <label for="modality" class="form-label">
-                            <i class="bi bi-laptop"></i> Modality
+                        <label for="modality" class="form-label fw-semibold" style="color: #0C2340;">
+                            <i class="bi bi-laptop me-1" style="color: #4499BB;"></i> Modalidad
                         </label>
                         <select class="form-select" id="modality" name="modality">
-                            <option value="">All</option>
-                            {{-- Values updated to English Enums --}}
+                            <option value="">Todas</option>
                             <option value="virtual" {{ request('modality') == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                            <option value="in_person" {{ request('modality') == 'in_person' ? 'selected' : '' }}>In-Person</option>
-                            <option value="hybrid" {{ request('modality') == 'hybrid' ? 'selected' : '' }}>Hybrid</option>
+                            <option value="in_person" {{ request('modality') == 'in_person' ? 'selected' : '' }}>Presencial</option>
+                            <option value="hybrid" {{ request('modality') == 'hybrid' ? 'selected' : '' }}>Híbrido</option>
                         </select>
                     </div>
 
                     <!-- Date From -->
                     <div class="col-md-2">
-                        <label for="date_from" class="form-label">
-                            <i class="bi bi-calendar"></i> From
+                        <label for="date_from" class="form-label fw-semibold" style="color: #0C2340;">
+                            <i class="bi bi-calendar me-1" style="color: #4499BB;"></i> Desde
                         </label>
-                        {{-- Input name updated to 'date_from' --}}
-                        <input type="date" 
-                               class="form-control" 
-                               id="date_from" 
+                        <input type="date"
+                               class="form-control"
+                               id="date_from"
                                name="date_from"
                                value="{{ request('date_from') }}">
                     </div>
 
                     <!-- Date To -->
                     <div class="col-md-2">
-                        <label for="date_to" class="form-label">
-                            <i class="bi bi-calendar"></i> To
+                        <label for="date_to" class="form-label fw-semibold" style="color: #0C2340;">
+                            <i class="bi bi-calendar me-1" style="color: #4499BB;"></i> Hasta
                         </label>
-                        {{-- Input name updated to 'date_to' --}}
-                        <input type="date" 
-                               class="form-control" 
-                               id="date_to" 
+                        <input type="date"
+                               class="form-control"
+                               id="date_to"
                                name="date_to"
                                value="{{ request('date_to') }}">
                     </div>
 
                     <!-- Filter Button -->
                     <div class="col-md-1 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
+                        <button type="submit" class="btn w-100" style="background-color: #4499BB; color: white;">
                             <i class="bi bi-funnel"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Tag Filter -->
-                {{-- Variable updated to $tags --}}
                 @if($tags->count() > 0)
                 <div class="row mt-3">
                     <div class="col-12">
-                        <label class="form-label">
-                            <i class="bi bi-tags"></i> Tags
+                        <label class="form-label fw-semibold" style="color: #0C2340;">
+                            <i class="bi bi-tags me-1" style="color: #4499BB;"></i> Etiquetas
                         </label>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach($tags as $tag)
                                 <div class="form-check">
-                                    {{-- Input name updated to tags[] --}}
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           name="tags[]" 
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="tags[]"
                                            value="{{ $tag->id }}"
                                            id="tag{{ $tag->id }}"
                                            {{ in_array($tag->id, request('tags', [])) ? 'checked' : '' }}
@@ -108,12 +106,11 @@
                 @endif
 
                 <!-- Clear Filters -->
-                {{-- Check for English input names --}}
                 @if(request()->hasAny(['search', 'modality', 'date_from', 'date_to', 'tags']))
                 <div class="row mt-3">
                     <div class="col-12">
                         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-x-circle"></i> Clear Filters
+                            <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
                         </a>
                     </div>
                 </div>
@@ -125,61 +122,67 @@
     <!-- Results Count -->
     <div class="row mb-3">
         <div class="col-12">
-            <p class="text-muted">
-                <i class="bi bi-info-circle"></i> 
-                Found <strong>{{ $events->total() }}</strong> event(s)
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-1" style="color: #4499BB;"></i>
+                Se encontraron <strong style="color: #0C2340;">{{ $events->total() }}</strong> evento(s)
             </p>
         </div>
     </div>
 
     <!-- Events Grid -->
-    {{-- Variable updated to $events --}}
     @if($events->count() > 0)
     <div class="row g-4 mb-4">
         @foreach($events as $event)
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm hover-shadow">
-                {{-- Attribute updated to cover_image --}}
+            <div class="card h-100 border-0 shadow-sm hover-card">
                 @if($event->cover_image)
-                <img src="{{ $event->cover_image }}" 
-                     class="card-img-top" 
+                <img src="{{ $event->cover_image }}"
+                     class="card-img-top"
                      alt="{{ $event->name }}"
                      style="height: 200px; object-fit: cover;">
                 @else
-                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" 
-                     style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-img-top d-flex align-items-center justify-content-center"
+                     style="height: 200px; background: linear-gradient(135deg, #0C2340 0%, #4499BB 100%);">
                     <i class="bi bi-calendar-event text-white" style="font-size: 4rem;"></i>
                 </div>
                 @endif
 
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ $event->name }}</h5>
-                    
+                    <h5 class="card-title fw-bold" style="color: #0C2340;">{{ $event->name }}</h5>
+
                     <!-- Badges -->
                     <div class="mb-2">
-                        <span class="badge bg-info">{{ ucfirst($event->modality) }}</span>
-                        {{-- Relationship updated to approvedComponents (or just components based on your logic) --}}
+                        @php
+                            $modalityLabels = [
+                                'virtual' => 'Virtual',
+                                'in_person' => 'Presencial',
+                                'hybrid' => 'Híbrido'
+                            ];
+                        @endphp
+                        <span class="badge" style="background-color: #4499BB;">
+                            {{ $modalityLabels[$event->modality] ?? ucfirst($event->modality) }}
+                        </span>
                         @if($event->approvedComponents->count() > 0)
-                        <span class="badge bg-success">
-                            {{ $event->approvedComponents->count() }} component(s)
+                        <span class="badge" style="background-color: #8CC63F;">
+                            {{ $event->approvedComponents->count() }} componente(s)
                         </span>
                         @endif
                     </div>
 
-                    <p class="card-text text-muted small">
+                    <p class="card-text text-muted small flex-grow-1">
                         {{ Str::limit($event->description, 120) }}
                     </p>
 
                     <!-- Event Info -->
                     <div class="mt-auto">
                         <p class="small mb-2">
-                            <i class="bi bi-calendar"></i>
-                            {{ $event->start_date->format('m/d/Y') }} - {{ $event->end_date->format('m/d/Y') }}
+                            <i class="bi bi-calendar me-1" style="color: #4499BB;"></i>
+                            {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
                         </p>
 
                         @if($event->location)
                         <p class="small mb-2">
-                            <i class="bi bi-geo-alt"></i>
+                            <i class="bi bi-geo-alt me-1" style="color: #8CC63F;"></i>
                             {{ Str::limit($event->location, 30) }}
                         </p>
                         @endif
@@ -196,10 +199,9 @@
                         </div>
                         @endif
 
-                        {{-- Route updated to events.public.show --}}
-                        <a href="{{ route('event.show', $event->id) }}" 
-                           class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-eye"></i> View Details
+                        <a href="{{ route('event.show', $event->id) }}"
+                           class="btn btn-sm w-100" style="background-color: #0C2340; color: white;">
+                            <i class="bi bi-eye me-1"></i> Ver Detalles
                         </a>
                     </div>
                 </div>
@@ -210,20 +212,24 @@
 
     <!-- Pagination -->
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 d-flex justify-content-center">
             {{ $events->links() }}
         </div>
     </div>
     @else
-    <div class="text-center py-5">
-        <i class="bi bi-calendar-x" style="font-size: 5rem; color: #ccc;"></i>
-        <h3 class="mt-4 text-muted">No events found</h3>
-        <p class="text-muted">Try adjusting your search filters</p>
-        @if(request()->hasAny(['search', 'modality', 'date_from', 'date_to', 'tags']))
-        <a href="{{ route('events.index') }}" class="btn btn-primary mt-3">
-            <i class="bi bi-arrow-counterclockwise"></i> View All Events
-        </a>
-        @endif
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-calendar-x" style="font-size: 4rem; color: #C8CCC9;"></i>
+            </div>
+            <h5 class="text-muted mb-3">No se encontraron eventos</h5>
+            <p class="text-muted mb-4">Intenta ajustar los filtros de búsqueda</p>
+            @if(request()->hasAny(['search', 'modality', 'date_from', 'date_to', 'tags']))
+            <a href="{{ route('dashboard') }}" class="btn" style="background-color: #8CC63F; color: white;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos los Eventos
+            </a>
+            @endif
+        </div>
     </div>
     @endif
 </div>
@@ -232,15 +238,12 @@
 
 @push('styles')
 <style>
-    .hover-shadow {
+    .hover-card {
         transition: all 0.3s ease;
     }
-    .hover-shadow:hover {
+    .hover-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-    .bg-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 </style>
 @endpush

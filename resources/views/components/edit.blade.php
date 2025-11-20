@@ -77,9 +77,9 @@
                                 <select class="form-select @error('type') is-invalid @enderror"
                                         id="type" name="type" required>
                                     <option value="">Seleccionar...</option>
-                                    <option value="Activity" {{ old('type', $component->type) == 'Activity' ? 'selected' : '' }}>Actividad</option>
-                                    <option value="Talk" {{ old('type', $component->type) == 'Talk' ? 'selected' : '' }}>Conferencia</option>
-                                    <option value="Workshop" {{ old('type', $component->type) == 'Workshop' ? 'selected' : '' }}>Taller</option>
+                                    <option value="activity" {{ old('type', $component->type) == 'activity' ? 'selected' : '' }}>Actividad</option>
+                                    <option value="talk" {{ old('type', $component->type) == 'talk' ? 'selected' : '' }}>Conferencia</option>
+                                    <option value="workshop" {{ old('type', $component->type) == 'workshop' ? 'selected' : '' }}>Taller</option>
                                 </select>
                                 @error('type')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -98,13 +98,13 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="cover_url" class="form-label fw-semibold" style="color: #0C2340;">
+                                <label for="cover_image" class="form-label fw-semibold" style="color: #0C2340;">
                                     URL de Imagen de Portada
                                 </label>
-                                <input type="url" class="form-control @error('cover_url') is-invalid @enderror"
-                                       id="cover_url" name="cover_url" value="{{ old('cover_url', $component->cover_url) }}"
+                                <input type="url" class="form-control @error('cover_image') is-invalid @enderror"
+                                       id="cover_image" name="cover_image" value="{{ old('cover_image', $component->cover_image) }}"
                                        placeholder="https://ejemplo.com/imagen.jpg">
-                                @error('cover_url')
+                                @error('cover_image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -116,9 +116,9 @@
                                 <select class="form-select @error('level') is-invalid @enderror"
                                         id="level" name="level">
                                     <option value="">Seleccionar...</option>
-                                    <option value="Beginner" {{ old('level', $component->level) == 'Beginner' ? 'selected' : '' }}>Principiante</option>
-                                    <option value="Intermediate" {{ old('level', $component->level) == 'Intermediate' ? 'selected' : '' }}>Intermedio</option>
-                                    <option value="Advanced" {{ old('level', $component->level) == 'Advanced' ? 'selected' : '' }}>Avanzado</option>
+                                    <option value="beginner" {{ old('level', $component->level) == 'beginner' ? 'selected' : '' }}>Principiante</option>
+                                    <option value="intermediate" {{ old('level', $component->level) == 'intermediate' ? 'selected' : '' }}>Intermedio</option>
+                                    <option value="advanced" {{ old('level', $component->level) == 'advanced' ? 'selected' : '' }}>Avanzado</option>
                                 </select>
                                 @error('level')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -177,7 +177,7 @@
                                         id="modality" name="modality" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="virtual" {{ old('modality', $component->modality) == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                                    <option value="presential" {{ old('modality', $component->modality) == 'presential' ? 'selected' : '' }}>Presencial</option>
+                                    <option value="in_person" {{ old('modality', $component->modality) == 'in_person' ? 'selected' : '' }}>Presencial</option>
                                     <option value="hybrid" {{ old('modality', $component->modality) == 'hybrid' ? 'selected' : '' }}>Híbrido</option>
                                 </select>
                                 @error('modality')
@@ -211,14 +211,14 @@
                     <div class="card-body p-4">
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="slots" class="form-label fw-semibold" style="color: #0C2340;">
+                                <label for="capacity" class="form-label fw-semibold" style="color: #0C2340;">
                                     Número de Cupos
                                 </label>
-                                <input type="number" class="form-control @error('slots') is-invalid @enderror"
-                                       id="slots" name="slots" value="{{ old('slots', $component->slots) }}" min="1"
+                                <input type="number" class="form-control @error('capacity') is-invalid @enderror"
+                                       id="capacity" name="capacity" value="{{ old('capacity', $component->capacity) }}" min="1"
                                        placeholder="Ej: 30">
                                 <small class="text-muted">Dejar vacío para cupos ilimitados</small>
-                                @error('slots')
+                                @error('capacity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

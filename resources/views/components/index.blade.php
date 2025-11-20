@@ -46,7 +46,7 @@
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="{{ route('events.public.show', $event->id) }}" class="btn w-100" style="background-color: #4499BB; color: white;" target="_blank">
+                    <a href="{{ route('event.show', $event->id) }}" class="btn w-100" style="background-color: #4499BB; color: white;" target="_blank">
                         <i class="bi bi-eye me-1"></i> Ver Evento Público
                     </a>
                 </div>
@@ -79,9 +79,19 @@
 
                     @forelse($components as $component)
                         <div class="card mb-3 border {{ $component->proposal_status == 'open_offer' ? 'border-success' : 'border-light' }} shadow-sm">
-                            <div class="card-body p-4">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
+                            <div class="row g-0">
+                                @if($component->cover_image)
+                                <div class="col-md-3">
+                                    <img src="{{ $component->cover_image }}"
+                                         class="img-fluid rounded-start h-100"
+                                         alt="{{ $component->name }}"
+                                         style="object-fit: cover; max-height: 250px;">
+                                </div>
+                                @endif
+                                <div class="col-md-{{ $component->cover_image ? '9' : '12' }}">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
                                         {{-- Header --}}
                                         <div class="d-flex align-items-center mb-3">
                                             <h5 class="mb-0 me-3 fw-bold" style="color: #0C2340;">{{ $component->name }}</h5>
@@ -110,9 +120,9 @@
                                                 <span class="badge bg-secondary me-1">{{ ucfirst($component->level) }}</span>
                                             @endif
 
-                                            @if($component->slots)
+                                            @if($component->capacity)
                                                 <span class="badge bg-light text-dark border me-1">
-                                                    <i class="bi bi-people me-1"></i>{{ $component->slots }} cupos
+                                                    <i class="bi bi-people me-1"></i>{{ $component->capacity }} cupos
                                                 </span>
                                             @endif
 
@@ -192,6 +202,8 @@
                                     </div>
                                 </div>
                             </div>
+                            </div>
+                        </div>
                         </div>
                     @empty
                         <div class="text-center py-5">

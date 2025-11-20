@@ -71,8 +71,8 @@ class ScheduleConflictValidator
         ComponentSchedule $newSchedule,
         ?int $excludeScheduleId = null
     ): ?string {
-        // Only check location conflicts for presential or hybrid modalities
-        if (!in_array($component->modality, ['presential', 'hybrid'])) {
+        // Only check location conflicts for in_person or hybrid modalities
+        if (!in_array($component->modality, ['in_person', 'hybrid'])) {
             return null;
         }
 
@@ -99,8 +99,8 @@ class ScheduleConflictValidator
                     return false;
                 }
 
-                // Only check presential or hybrid components
-                if (!in_array($schedule->component->modality, ['presential', 'hybrid'])) {
+                // Only check in_person or hybrid components
+                if (!in_array($schedule->component->modality, ['in_person', 'hybrid'])) {
                     return false;
                 }
 

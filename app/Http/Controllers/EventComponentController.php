@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventComponent;
 use App\Models\ProfessionalProfile;
+use App\Services\ScheduleConflictValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -62,11 +63,11 @@ class EventComponentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:Activity,Talk,Workshop',
-            'modality' => 'required|in:virtual,presential,hybrid',
+            'type' => 'required|in:activity,talk,workshop',
+            'modality' => 'required|in:virtual,in_person,hybrid',
             'location' => 'nullable|string|max:255',
             'cover_image' => 'nullable|url|max:500',
-            'level' => 'nullable|in:Beginner,Intermediate,Advanced',
+            'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
             'attendee_price' => 'nullable|numeric|min:0',
             'organizer_cost' => 'nullable|numeric|min:0',
@@ -99,7 +100,35 @@ class EventComponentController extends Controller
                 'speaker_id' => $validated['speaker_id'] ?? null,
             ]);
 
-            // Create schedules
+            // Validate and create schedules
+            $validator = app(ScheduleConflictValidator::class);
+            $allErrors = [];
+
+            foreach ($request->schedules as $index => $schedule) {
+                // Validate for conflicts before creating
+                $conflictCheck = $validator->validate(
+                    $component->id,
+                    $schedule['date'],
+                    $schedule['start_time'],
+                    $schedule['end_time']
+                );
+
+                if (!$conflictCheck['valid']) {
+                    foreach ($conflictCheck['errors'] as $error) {
+                        $allErrors[] = "Horario " . ($index + 1) . ": " . $error;
+                    }
+                }
+            }
+
+            // If there are conflicts, rollback and return errors
+            if (!empty($allErrors)) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->withErrors($allErrors)
+                    ->with('error', 'No se pudo crear el componente debido a conflictos de horario.');
+            }
+
+            // Create schedules (no conflicts)
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -111,11 +140,11 @@ class EventComponentController extends Controller
             DB::commit();
 
             return redirect()->route('components.index', $event)
-                ->with('success', 'Component created successfully.');
+                ->with('success', 'Componente creado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
-                ->with('error', 'Error creating component: ' . $e->getMessage());
+                ->with('error', 'Error al crear componente: ' . $e->getMessage());
         }
     }
 
@@ -148,11 +177,11 @@ class EventComponentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:Activity,Talk,Workshop',
-            'modality' => 'required|in:virtual,presential,hybrid',
+            'type' => 'required|in:activity,talk,workshop',
+            'modality' => 'required|in:virtual,in_person,hybrid',
             'location' => 'nullable|string|max:255',
             'cover_image' => 'nullable|url|max:500',
-            'level' => 'nullable|in:Beginner,Intermediate,Advanced',
+            'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
             'attendee_price' => 'nullable|numeric|min:0',
             'organizer_cost' => 'nullable|numeric|min:0',
@@ -183,8 +212,38 @@ class EventComponentController extends Controller
                 'speaker_id' => $validated['speaker_id'] ?? null,
             ]);
 
-            // Replace schedules
+            // Delete old schedules first
             $component->schedules()->delete();
+
+            // Validate new schedules for conflicts
+            $validator = app(ScheduleConflictValidator::class);
+            $allErrors = [];
+
+            foreach ($request->schedules as $index => $schedule) {
+                // Validate for conflicts
+                $conflictCheck = $validator->validate(
+                    $component->id,
+                    $schedule['date'],
+                    $schedule['start_time'],
+                    $schedule['end_time']
+                );
+
+                if (!$conflictCheck['valid']) {
+                    foreach ($conflictCheck['errors'] as $error) {
+                        $allErrors[] = "Horario " . ($index + 1) . ": " . $error;
+                    }
+                }
+            }
+
+            // If there are conflicts, rollback and return errors
+            if (!empty($allErrors)) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->withErrors($allErrors)
+                    ->with('error', 'No se pudo actualizar el componente debido a conflictos de horario.');
+            }
+
+            // Create new schedules (no conflicts)
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -196,11 +255,11 @@ class EventComponentController extends Controller
             DB::commit();
 
             return redirect()->route('components.index', $event)
-                ->with('success', 'Component updated successfully.');
+                ->with('success', 'Componente actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
-                ->with('error', 'Error updating component: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar componente: ' . $e->getMessage());
         }
     }
 
