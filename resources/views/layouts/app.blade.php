@@ -43,9 +43,9 @@
 
             @auth
                 @if (auth()->user()->must_change_password == false)
-                    <a href="#" class="sidebar-link {{ request()->routeIs('mis-inscripciones') ? 'active' : '' }}">
+                    <a href="{{ route('registrations.index') }}" class="sidebar-link {{ request()->routeIs('registrations.index') ? 'active' : '' }}">
                         <i class="bi bi-ticket"></i>
-                        <span class="link-text ms-6">Inscripciones</span>
+                        <span class="link-text ms-6">Mis Inscripciones</span>
                     </a>
                     <!-- ORGANIZADOR / ADMIN -->
                     @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))

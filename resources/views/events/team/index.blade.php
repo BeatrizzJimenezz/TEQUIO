@@ -6,10 +6,9 @@
         <div class="col-md-10">
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('events.index') }}">My Events</a></li>
-                    {{-- Route updated to events.public.show --}}
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard', $event->id) }}">{{ $event->name }}</a></li>
-                    <li class="breadcrumb-item active">Organizing Team</li>
+                    <li class="breadcrumb-item"><a href="{{ route('events.index') }}">Mis Eventos</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('components.index', $event->id) }}">{{ $event->name }}</a></li>
+                    <li class="breadcrumb-item active">Equipo Organizador</li>
                 </ol>
             </nav>
 

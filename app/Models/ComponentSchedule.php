@@ -28,4 +28,24 @@ class ComponentSchedule extends Model
     {
         return $this->belongsTo(EventComponent::class, 'component_id');
     }
+
+    /**
+     * Check if this schedule overlaps with another schedule
+     */
+    public function overlapsWith(ComponentSchedule $other): bool
+    {
+        // Schedules must be on the same date to overlap
+        if (!$this->date->equalTo($other->date)) {
+            return false;
+        }
+
+        // Convert times to timestamps for comparison
+        $thisStart = strtotime($this->start_time);
+        $thisEnd = strtotime($this->end_time);
+        $otherStart = strtotime($other->start_time);
+        $otherEnd = strtotime($other->end_time);
+
+        // Two time ranges overlap if: start1 < end2 AND start2 < end1
+        return $thisStart < $otherEnd && $otherStart < $thisEnd;
+    }
 }

@@ -9,14 +9,35 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
 {
+    // List user's registrations
+    public function index()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $registrations = Registration::with([
+            'component.schedules',
+            'component.event'
+        ])
+        ->where('user_id', auth()->id())
+        ->orderBy('registered_at', 'desc')
+        ->get();
+
+        return view('registrations.index', compact('registrations'));
+    }
+
     // Register for a component
     public function store(Request $request)
     {
         if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You must be logged in to register.'
-            ], 401);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes iniciar sesión para inscribirte.'
+                ], 401);
+            }
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para inscribirte.');
         }
 
         $request->validate([
@@ -34,20 +55,26 @@ class RegistrationController extends Controller
             ->exists();
 
         if ($alreadyRegistered) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are already registered for this component.'
-            ], 422);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya estás inscrito en este componente.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Ya estás inscrito en este componente.');
         }
 
         // VALIDATION 2: Capacity check
         if ($component->capacity) {
             $registeredCount = Registration::where('component_id', $componentId)->count();
             if ($registeredCount >= $component->capacity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Sorry, there are no spots available.'
-                ], 422);
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Lo sentimos, ya no hay cupos disponibles.'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Lo sentimos, ya no hay cupos disponibles.');
             }
         }
 
@@ -62,17 +89,20 @@ class RegistrationController extends Controller
 
         foreach ($newSchedules as $new) {
             foreach ($registeredSchedules as $existing) {
-                if ($new->date == $existing->date) {
+                if ($new->date->format('Y-m-d') == $existing->date) {
                     $newStart = strtotime($new->start_time);
                     $newEnd = strtotime($new->end_time);
                     $existingStart = strtotime($existing->start_time);
                     $existingEnd = strtotime($existing->end_time);
 
                     if ($newStart < $existingEnd && $newEnd > $existingStart) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Schedule conflict. You are already registered in another activity at this time.'
-                        ], 422);
+                        if ($request->expectsJson()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Conflicto de horario. Ya estás inscrito en otra actividad a la misma hora.'
+                            ], 422);
+                        }
+                        return redirect()->back()->with('error', 'Conflicto de horario. Ya estás inscrito en otra actividad a la misma hora.');
                     }
                 }
             }
@@ -83,107 +113,108 @@ class RegistrationController extends Controller
                 'user_id' => $userId,
                 'component_id' => $componentId,
                 'ticket_qr' => Registration::generateTicketQR(),
-                'registration_date' => now(),
-                'expiration_date' => $component->event->end_date->addDays(1),
+                'registered_at' => now(),
+                'expires_at' => $component->event->end_date->addDays(1),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful!',
-                'data' => [
-                    'registration_id' => $registration->id,
-                    'ticket' => $registration->ticket_qr
-                ]
-            ], 201);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => '¡Inscripción exitosa!',
+                    'data' => [
+                        'registration_id' => $registration->id,
+                        'ticket' => $registration->ticket_qr
+                    ]
+                ], 201);
+            }
+
+            return redirect()->back()->with('success', '¡Inscripción exitosa! Te has registrado en ' . $component->name);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error creating registration: ' . $e->getMessage()
-            ], 500);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al crear la inscripción: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Error al crear la inscripción. Por favor intenta de nuevo.');
         }
-    }
-
-    public function index()
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $registrations = Registration::with([
-            'component.schedules',
-            'component.event'
-        ])
-        ->where('user_id', auth()->id())
-        ->orderBy('created_at', 'desc') // usar created_at si no tienes registration_date
-        ->get();
-
-        return view('registrations.my-registrations', compact('registrations'));
-    }
-
-
-
-    // View my registrations
-    public function myRegistrations()
-    {
-        if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You must be logged in.'
-            ], 401);
-        }
-
-        $registrations = Registration::with([
-            'component.schedules',
-            'component.event'
-        ])
-        ->where('user_id', auth()->id())
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $registrations
-        ]);
     }
 
     // Cancel registration
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You must be logged in.'
-            ], 401);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes iniciar sesión.'
+                ], 401);
+            }
+            return redirect()->route('login');
         }
 
-        $registration = Registration::where('id', $id)
+        $registration = Registration::with('component.schedules')
+            ->where('id', $id)
             ->where('user_id', auth()->id())
             ->first();
 
         if (!$registration) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration not found or you do not have permission.'
-            ], 404);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Inscripción no encontrada o no tienes permisos.'
+                ], 404);
+            }
+            return redirect()->route('registrations.index')
+                ->with('error', 'Inscripción no encontrada.');
+        }
+
+        // VALIDATION: Can only cancel 2 days before activity starts
+        if (!$registration->canBeCancelled()) {
+            $daysUntil = $registration->daysUntilStart();
+            $message = 'No puedes cancelar tu inscripción. Solo es posible cancelar hasta 2 días antes del inicio de la actividad.';
+
+            if ($daysUntil !== null && $daysUntil >= 0) {
+                $message .= " La actividad comienza en {$daysUntil} día(s).";
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 422);
+            }
+            return redirect()->route('registrations.index')
+                ->with('error', $message);
         }
 
         try {
             $registration->delete();
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration cancelled successfully.'
-            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Inscripción cancelada exitosamente.'
+                ]);
+            }
+            return redirect()->route('registrations.index')
+                ->with('success', 'Inscripción cancelada exitosamente.');
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error cancelling registration.'
-            ], 500);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al cancelar la inscripción.'
+                ], 500);
+            }
+            return redirect()->route('registrations.index')
+                ->with('error', 'Error al cancelar la inscripción.');
         }
     }
 
-    // Check if user is registered
-    public function checkRegistration($componentId)
+    // Check if user is registered for a component
+    public function checkStatus($componentId)
     {
         if (!auth()->check()) {
             return response()->json([
@@ -193,14 +224,19 @@ class RegistrationController extends Controller
             ]);
         }
 
-        $registered = Registration::where('user_id', auth()->id())
+        $registration = Registration::where('user_id', auth()->id())
             ->where('component_id', $componentId)
-            ->exists();
+            ->first();
+
+        $component = EventComponent::find($componentId);
+        $availableSlots = $component ? $component->available_seats : null;
 
         return response()->json([
             'success' => true,
-            'registered' => $registered,
-            'authenticated' => true
+            'registered' => $registration !== null,
+            'authenticated' => true,
+            'registration_id' => $registration?->id,
+            'available_slots' => $availableSlots
         ]);
     }
 }

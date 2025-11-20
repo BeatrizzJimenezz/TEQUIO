@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventComponent;
+use App\Services\ScheduleConflictValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,10 +41,10 @@ class OfferController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:Activity,Presentation,Workshop',
-            'modality' => 'required|in:virtual,presential,hybrid',
+            'type' => 'required|in:activity,talk,workshop',
+            'modality' => 'required|in:virtual,in_person,hybrid',
             'location' => 'nullable|string|max:255',
-            'level' => 'nullable|in:Beginner,Intermediate,Advanced',
+            'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
             'organizer_cost' => 'nullable|numeric|min:0',
             'instructor_requirements' => 'nullable|string',
@@ -70,6 +71,34 @@ class OfferController extends Controller
                 'attendee_price' => 0,
             ]);
 
+            // Validate schedules for conflicts
+            $validator = app(ScheduleConflictValidator::class);
+            $allErrors = [];
+
+            foreach ($request->schedules as $index => $schedule) {
+                $conflictCheck = $validator->validate(
+                    $component->id,
+                    $schedule['date'],
+                    $schedule['start_time'],
+                    $schedule['end_time']
+                );
+
+                if (!$conflictCheck['valid']) {
+                    foreach ($conflictCheck['errors'] as $error) {
+                        $allErrors[] = "Horario " . ($index + 1) . ": " . $error;
+                    }
+                }
+            }
+
+            // If there are conflicts, rollback and return errors
+            if (!empty($allErrors)) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->withErrors($allErrors)
+                    ->with('error', 'No se pudo publicar la oferta debido a conflictos de horario.');
+            }
+
+            // Create schedules (no conflicts)
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -81,11 +110,11 @@ class OfferController extends Controller
             DB::commit();
 
             return redirect()->route('offers.index', $event)
-                ->with('success', 'Offer published successfully.');
+                ->with('success', 'Oferta publicada exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
-                ->with('error', 'Error publishing the offer: ' . $e->getMessage());
+                ->with('error', 'Error al publicar la oferta: ' . $e->getMessage());
         }
     }
 

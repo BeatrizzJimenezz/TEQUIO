@@ -3,12 +3,13 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\EventComponentController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\OfferController;
-use App\Http\Controllers\EventTeamController; 
+use App\Http\Controllers\EventTeamController;
+use App\Http\Controllers\ComponentScheduleController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -72,13 +73,22 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::patch('/{event}/archive', [EventController::class, 'archive'])->name('events.archive');
     
     // Component Routes
-    Route::get('/{event}/components', [ComponentController::class, 'index'])->name('components.index');
-    Route::get('/{event}/components/create', [ComponentController::class, 'create'])->name('components.create');
-    Route::post('/{event}/components', [ComponentController::class, 'store'])->name('components.store');
-    Route::get('/{event}/components/{component}/edit', [ComponentController::class, 'edit'])->name('components.edit');
-    Route::put('/{event}/components/{component}', [ComponentController::class, 'update'])->name('components.update');
-    Route::delete('/{event}/components/{component}', [ComponentController::class, 'destroy'])->name('components.destroy');
-    
+    Route::get('/{event}/components', [EventComponentController::class, 'index'])->name('components.index');
+    Route::get('/{event}/components/create', [EventComponentController::class, 'create'])->name('components.create');
+    Route::post('/{event}/components', [EventComponentController::class, 'store'])->name('components.store');
+    Route::get('/{event}/components/{component}/edit', [EventComponentController::class, 'edit'])->name('components.edit');
+    Route::put('/{event}/components/{component}', [EventComponentController::class, 'update'])->name('components.update');
+    Route::delete('/{event}/components/{component}', [EventComponentController::class, 'destroy'])->name('components.destroy');
+
+    // Schedule Routes
+    Route::get('/{event}/schedules', [ComponentScheduleController::class, 'eventSchedule'])->name('events.schedules');
+    Route::get('/{event}/components/{component}/schedules', [ComponentScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('/{event}/components/{component}/schedules/create', [ComponentScheduleController::class, 'create'])->name('schedules.create');
+    Route::post('/{event}/components/{component}/schedules', [ComponentScheduleController::class, 'store'])->name('schedules.store');
+    Route::get('/{event}/components/{component}/schedules/{schedule}/edit', [ComponentScheduleController::class, 'edit'])->name('schedules.edit');
+    Route::put('/{event}/components/{component}/schedules/{schedule}', [ComponentScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('/{event}/components/{component}/schedules/{schedule}', [ComponentScheduleController::class, 'destroy'])->name('schedules.destroy');
+
     // Offers Management & Evaluation (For Organizers)
     Route::get('/{event}/offers', [OfferController::class, 'index'])->name('offers.index'); 
     Route::get('/{event}/offers/create', [OfferController::class, 'create'])->name('offers.create');
