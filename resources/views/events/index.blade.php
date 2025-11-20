@@ -4,162 +4,183 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">My Events</h4>
-                    {{-- Route updated to events.create --}}
-                    <a href="{{ route('events.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Create Event
-                    </a>
-                </div>
+            {{-- Header --}}
+            <div class="card mb-4 border-0 shadow-sm" style="border-left: 4px solid #4499BB !important;">
                 <div class="card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1 fw-bold" style="color: #0C2340;">
+                                <i class="bi bi-calendar-event me-2" style="color: #4499BB;"></i>
+                                Mis Eventos
+                            </h3>
+                            <p class="text-muted mb-0">Administra y organiza tus eventos</p>
                         </div>
-                    @endif
+                        <a href="{{ route('events.create') }}" class="btn text-white" style="background-color: #8CC63F;">
+                            <i class="bi bi-plus-lg"></i> Crear Evento
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @forelse($events as $event)
+                <div class="card mb-4 border-0 shadow-sm" style="transition: transform 0.2s ease;">
+                    <div class="row g-0">
+                        @if($event->cover_image)
+                        <div class="col-md-3">
+                            <img src="{{ $event->cover_image }}" class="img-fluid rounded-start h-100" alt="{{ $event->name }}" style="object-fit: cover;">
                         </div>
-                    @endif
+                        @endif
 
-                    @forelse($events as $event)
-                        <div class="card mb-3">
-                            <div class="row g-0">
-                                {{-- Property updated to cover_image --}}
-                                @if($event->cover_image)
-                                <div class="col-md-3">
-                                    <img src="{{ $event->cover_image }}" class="img-fluid rounded-start" alt="{{ $event->name }}" style="height: 100%; object-fit: cover;">
+                        <div class="col-md-{{ $event->cover_image ? '9' : '12' }}">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h4 class="fw-bold mb-2" style="color: #0C2340;">{{ $event->name }}</h4>
+                                        <p class="mb-0">
+                                            <span class="me-3">
+                                                <i class="bi bi-calendar3 me-1" style="color: #4499BB;"></i>
+                                                {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
+                                            </span>
+                                            <span>
+                                                <i class="bi bi-clock me-1" style="color: #8CC63F;"></i>
+                                                {{ $event->start_time }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        @php
+                                            $statusColors = [
+                                                'active' => '#8CC63F',
+                                                'planning' => '#ffc107',
+                                                'finished' => '#6c757d'
+                                            ];
+                                            $statusLabels = [
+                                                'active' => 'Activo',
+                                                'planning' => 'Planificando',
+                                                'finished' => 'Finalizado'
+                                            ];
+                                        @endphp
+                                        <span class="badge text-white" style="background-color: {{ $statusColors[$event->status] ?? '#6c757d' }};">
+                                            {{ $statusLabels[$event->status] ?? ucfirst($event->status) }}
+                                        </span>
+                                        <span class="badge ms-1" style="background-color: #4499BB;">
+                                            {{ ucfirst($event->modality) }}
+                                        </span>
+                                        <span class="badge ms-1" style="background-color: {{ $event->visibility === 'public' ? '#0C2340' : '#495057' }};">
+                                            {{ $event->visibility === 'public' ? 'Público' : 'Privado' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="text-muted mb-3">{{ Str::limit($event->description, 150) }}</p>
+
+                                @if($event->location)
+                                <p class="mb-2">
+                                    <i class="bi bi-geo-alt me-1" style="color: #8CC63F;"></i>
+                                    <span class="text-muted">{{ $event->location }}</span>
+                                </p>
+                                @endif
+
+                                @if($event->tags->count() > 0)
+                                <div class="mb-3">
+                                    @foreach($event->tags as $tag)
+                                        <span class="badge bg-light text-dark border me-1">{{ $tag->name }}</span>
+                                    @endforeach
                                 </div>
                                 @endif
-                                
-                                <div class="col-md-{{ $event->cover_image ? '9' : '12' }}">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h5 class="card-title">{{ $event->name }}</h5>
-                                                <p class="card-text">
-                                                    <small class="text-muted">
-                                                        <i class="bi bi-calendar"></i> 
-                                                        {{-- Properties updated to start_date and end_date --}}
-                                                        {{ $event->start_date->format('m/d/Y') }} - {{ $event->end_date->format('m/d/Y') }}
-                                                        <span class="ms-2">
-                                                            {{-- Property updated to start_time --}}
-                                                            <i class="bi bi-clock"></i> {{ $event->start_time }}
-                                                        </span>
-                                                    </small>
-                                                </p>
-                                            </div>
-                                            <div>
-                                                {{-- Logic updated to English status values: active, planning --}}
-                                                <span class="badge bg-{{ $event->status === 'active' ? 'success' : ($event->status === 'planning' ? 'warning' : 'secondary') }}">
-                                                    {{ ucfirst($event->status) }}
-                                                </span>
-                                                <span class="badge bg-info ms-1">
-                                                    {{ ucfirst($event->modality) }}
-                                                </span>
-                                                {{-- Logic updated to English visibility: public --}}
-                                                <span class="badge bg-{{ $event->visibility === 'public' ? 'primary' : 'dark' }} ms-1">
-                                                    {{ ucfirst($event->visibility) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        
-                                        <p class="card-text mt-2">{{ Str::limit($event->description, 150) }}</p>
-                                        
-                                        @if($event->location)
-                                        <p class="card-text">
-                                            <small class="text-muted">
-                                                <i class="bi bi-geo-alt"></i> {{ $event->location }}
-                                            </small>
-                                        </p>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="me-3">
+                                            <i class="bi bi-collection me-1" style="color: #4499BB;"></i>
+                                            <strong>{{ $event->components->count() }}</strong> componente(s)
+                                        </span>
+                                    </div>
+
+                                    <div class="btn-group" role="group">
+                                        @can('manageTeam', $event)
+                                        <a href="{{ route('events.team.index', $event) }}"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="Administrar equipo organizador">
+                                            <i class="bi bi-people-fill"></i>
+                                        </a>
+                                        @endcan
+
+                                        <a href="{{ route('components.index', $event) }}"
+                                           class="btn btn-sm"
+                                           style="background-color: #4499BB; color: white;"
+                                           title="Administrar Componentes">
+                                            <i class="bi bi-collection"></i> Componentes
+                                        </a>
+
+                                        <a href="{{ route('events.schedules', $event) }}"
+                                           class="btn btn-sm"
+                                           style="background-color: #0C2340; color: white;"
+                                           title="Ver Agenda del Evento">
+                                            <i class="bi bi-calendar-week"></i> Agenda
+                                        </a>
+
+                                        <a href="{{ route('events.edit', $event) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        @if($event->status !== 'finished')
+                                        <form action="{{ route('events.archive', $event) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                    onclick="return confirm('¿Archivar este evento?')"
+                                                    title="Archivar">
+                                                <i class="bi bi-archive"></i>
+                                            </button>
+                                        </form>
                                         @endif
 
-                                        {{-- Relationship updated to tags --}}
-                                        @if($event->tags->count() > 0)
-                                        <div class="mb-2">
-                                            @foreach($event->tags as $tag)
-                                                <span class="badge bg-secondary">{{ $tag->name }}</span>
-                                            @endforeach
-                                        </div>
-                                        @endif
-                                        
-                                        <!-- Component Count -->
-                                        <div class="mb-3">
-                                            <small class="text-muted">
-                                                <i class="bi bi-collection"></i> 
-                                                {{-- Relationship updated to components --}}
-                                                <strong>{{ $event->components->count() }}</strong> component(s)
-                                            </small>
-                                        </div>
-                                        
-                                        <!-- Action Buttons -->
-                                        <div class="btn-group" role="group">
-                                            <!-- Manage Team Button -->
-                                            {{-- Policy updated to manageTeam --}}
-                                            @can('manageTeam', $event)
-                                            <a href="{{ route('events.team.index', $event) }}" 
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Manage organizing team">
-                                                <i class="bi bi-people-fill"></i> Team
-                                            </a>
-                                            @endcan
-                                            
-                                            <!-- View Components Button -->
-                                            {{-- Route updated to components.index --}}
-                                            <a href="{{ route('components.index', $event) }}" 
-                                               class="btn btn-sm btn-info text-white"
-                                               title="Manage Components (Workshops, Presentations, Activities)">
-                                                <i class="bi bi-collection"></i> Components
-                                            </a>
-                                            
-                                            {{-- Route updated to events.edit --}}
-                                            <a href="{{ route('events.edit', $event) }}" class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                            
-                                            {{-- Status updated to finished --}}
-                                            @if($event->status !== 'finished')
-                                            {{-- Route updated to events.archive --}}
-                                            <form action="{{ route('events.archive', $event) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-secondary" 
-                                                        onclick="return confirm('Archive this event?')">
-                                                    <i class="bi bi-archive"></i> Archive
-                                                </button>
-                                            </form>
-                                            @endif
-                                            
-                                            {{-- Route updated to events.destroy --}}
-                                            <form action="{{ route('events.destroy', $event) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                        onclick="return confirm('Are you sure you want to delete this event? This will also delete all its components.')">
-                                                    <i class="bi bi-trash"></i> Delete
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <form action="{{ route('events.destroy', $event) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('¿Estás seguro de eliminar este evento? Esto también eliminará todos sus componentes.')"
+                                                    title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center py-5">
-                            <i class="bi bi-calendar-x" style="font-size: 3rem; color: #ccc;"></i>
-                            <p class="text-muted mt-3">You have no created events</p>
-                            <a href="{{ route('events.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Create your first event
-                            </a>
-                        </div>
-                    @endforelse
+                    </div>
                 </div>
-            </div>
+            @empty
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <i class="bi bi-calendar-x" style="font-size: 4rem; color: #C8CCC9;"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">No tienes eventos creados</h5>
+                        <p class="text-muted mb-4">Comienza creando tu primer evento para gestionar actividades, componentes y horarios.</p>
+                        <a href="{{ route('events.create') }}" class="btn btn-lg text-white" style="background-color: #8CC63F;">
+                            <i class="bi bi-plus-lg me-1"></i> Crear tu primer evento
+                        </a>
+                    </div>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>
