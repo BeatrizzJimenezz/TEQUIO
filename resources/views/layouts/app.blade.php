@@ -42,58 +42,66 @@
             </a>
 
             @auth
-                <a href="#" class="sidebar-link {{ request()->routeIs('mis-inscripciones') ? 'active' : '' }}">
-                    <i class="bi bi-ticket"></i>
-                    <span class="link-text ms-6">Inscripciones</span>
-                </a>
+                @if (auth()->user()->must_change_password == false)
+                    <a href="#" class="sidebar-link {{ request()->routeIs('mis-inscripciones') ? 'active' : '' }}">
+                        <i class="bi bi-ticket"></i>
+                        <span class="link-text ms-6">Inscripciones</span>
+                    </a>
+                    <!-- ORGANIZADOR / ADMIN -->
+                    @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
+                        
+                        <div class="sidebar-category">Organizar</div>
 
-                <!-- ORGANIZADOR / ADMIN -->
-                @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
-                    <div class="sidebar-category">Organizar</div>
+                            <a class="sidebar-link" href="{{ route('events.index') }}" class="sidebar-link {{ request()->routeIs('events.index') ? 'active' : '' }}">
+                                <i class="bi bi-calendar3"></i>
+                                <span class="link-text ms-6">Mis Eventos</span>
+                            </a>
 
-                    <a class="sidebar-link" href="{{ route('events.index') }}" class="sidebar-link {{ request()->routeIs('events.index') ? 'active' : '' }}">
-                        <i class="bi bi-calendar3"></i>
-                        <span class="link-text ms-6">Mis Eventos</span>
+                            <a class="sidebar-link" href="#">
+                                <i class="bi bi-grid-fill"></i>
+                                <span class="link-text ms-6">Reportes</span>
+                            </a>             
+                    @endif
+
+                    <!-- CONTRIBUCIONES -->
+                    <div class="sidebar-category">Contribuciones</div>
+
+                    <a class="sidebar-link" href="#">
+                        <i class="bi bi-search"></i>
+                        <span class="link-text ms-6">Ofertas</span>
                     </a>
 
                     <a class="sidebar-link" href="#">
-                        <i class="bi bi-grid-fill"></i>
-                        <span class="link-text ms-6">Reportes</span>
+                        <i class="bi bi-send"></i>
+                        <span class="link-text ms-6">Propuestas</span>
+                    </a>
+
+                    <!-- MI CUENTA -->
+                    <div class="sidebar-category">Mi Cuenta</div>
+
+                    <!-- Vista de perfil profesional -->
+                    <a href="{{ route('professional-profile.show') }}"
+                    class="sidebar-link {{ request()->routeIs('professional-profile.show') ? 'active' : '' }}">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="link-text ms-6">Perfil Profesional</span>
+                    </a>
+
+                    <!-- Editar perfil profesional -->
+                
+
+                    <!-- Configuración de Laravel -->
+                    <a href="{{ route('profile.edit') }}"
+                    class="sidebar-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+                        <i class="bi bi-gear"></i>
+                        <span class="link-text ms-6">Configuración</span>
+                    </a>
+                @else
+                    <a href="{{ route('password.force-change') }}"
+                    class="sidebar-link {{ request()->routeIs('password.force-change') ? 'active' : '' }}">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span class="link-text ms-6">Actualizar contraseña para continuar</span>
                     </a>
                 @endif
-
-                <!-- CONTRIBUCIONES -->
-                <div class="sidebar-category">Contribuciones</div>
-
-                <a class="sidebar-link" href="#">
-                    <i class="bi bi-search"></i>
-                    <span class="link-text ms-6">Ofertas</span>
-                </a>
-
-                <a class="sidebar-link" href="#">
-                    <i class="bi bi-send"></i>
-                    <span class="link-text ms-6">Propuestas</span>
-                </a>
-
-                <!-- MI CUENTA -->
-                <div class="sidebar-category">Mi Cuenta</div>
-
-                <!-- Vista de perfil profesional -->
-                <a href="{{ route('professional-profile.show') }}"
-                   class="sidebar-link {{ request()->routeIs('professional-profile.show') ? 'active' : '' }}">
-                    <i class="bi bi-person-circle"></i>
-                    <span class="link-text ms-6">Perfil Profesional</span>
-                </a>
-
-                <!-- Editar perfil profesional -->
-              
-
-                <!-- Configuración de Laravel -->
-                <a href="{{ route('profile.edit') }}"
-                   class="sidebar-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
-                    <i class="bi bi-gear"></i>
-                    <span class="link-text ms-6">Configuración</span>
-                </a>
 
                 <!-- Cerrar Sesión -->
                 <form method="POST" action="{{ route('logout') }}">
