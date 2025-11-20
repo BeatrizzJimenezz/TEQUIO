@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 {{-- Route updated to events.public.index --}}
-                <a href="{{ route('events.public.index') }}">Events</a>
+                <a href="{{ route('events.index') }}">Events</a>
             </li>
             <li class="breadcrumb-item active">{{ $event->name }}</li>
         </ol>
@@ -113,7 +113,7 @@
 
                     @auth
                     <div class="d-grid mt-4">
-                        <a href="{{ route('events.public.index') }}" class="btn btn-outline-primary">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-primary">
                             <i class="bi bi-arrow-left"></i> Back to Catalog
                         </a>
                     </div>
@@ -122,7 +122,7 @@
                         <a href="{{ route('login') }}" class="btn btn-primary">
                             <i class="bi bi-box-arrow-in-right"></i> Login to Register
                         </a>
-                        <a href="{{ route('events.public.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Back
                         </a>
                     </div>
