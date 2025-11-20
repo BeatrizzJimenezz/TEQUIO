@@ -17,14 +17,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ============ Public Event Routes (No Auth Required) ============
-Route::get('/events', [PublicEventController::class, 'index'])->name('events.public.index');
-Route::get('/events/{id}', [PublicEventController::class, 'show'])->name('events.public.show');
-
-// ============ Dashboard ============
-Route::get('/dashboard', [EventController::class, 'index']) 
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// ============ Public Event Routes ============
+Route::get('/dashboard', [PublicEventController::class, 'index'])->name('dashboard');
+Route::get('/event/{id}', [PublicEventController::class, 'show'])->name('event.show');
 
 // ============ Force Password Change Routes ============
 Route::middleware(['auth'])->group(function () {

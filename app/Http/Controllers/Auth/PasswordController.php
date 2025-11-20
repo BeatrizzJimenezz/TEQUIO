@@ -22,8 +22,30 @@ class PasswordController extends Controller
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),
+            'must_change_password' => false,
         ]);
 
         return back()->with('status', 'password-updated');
+    }
+
+    public function forceUpdate(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', function ($attribute, $value, $fail) {
+                if (!Hash::check($value, auth()->user()->password)) {
+                    $fail('The current password is incorrect.');
+                }
+            }],
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        // Update password
+        auth()->user()->update([
+            'password' => Hash::make($request->password),
+            'must_change_password' => false, // Actualizado a inglés
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Your password has been changed successfully.');
     }
 }

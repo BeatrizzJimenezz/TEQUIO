@@ -14,7 +14,7 @@
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             {{-- Route updated to events.public.index --}}
-            <form action="{{ route('events.public.index') }}" method="GET" id="filtersForm">
+            <form action="{{ route('dashboard') }}" method="GET" id="filtersForm">
                 <div class="row g-3">
                     <!-- Search -->
                     <div class="col-md-4">
@@ -112,7 +112,7 @@
                 @if(request()->hasAny(['search', 'modality', 'date_from', 'date_to', 'tags']))
                 <div class="row mt-3">
                     <div class="col-12">
-                        <a href="{{ route('events.public.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-x-circle"></i> Clear Filters
                         </a>
                     </div>
@@ -197,7 +197,7 @@
                         @endif
 
                         {{-- Route updated to events.public.show --}}
-                        <a href="{{ route('events.public.show', $event->id) }}" 
+                        <a href="{{ route('event.show', $event->id) }}" 
                            class="btn btn-primary btn-sm w-100">
                             <i class="bi bi-eye"></i> View Details
                         </a>
@@ -220,7 +220,7 @@
         <h3 class="mt-4 text-muted">No events found</h3>
         <p class="text-muted">Try adjusting your search filters</p>
         @if(request()->hasAny(['search', 'modality', 'date_from', 'date_to', 'tags']))
-        <a href="{{ route('events.public.index') }}" class="btn btn-primary mt-3">
+        <a href="{{ route('events.index') }}" class="btn btn-primary mt-3">
             <i class="bi bi-arrow-counterclockwise"></i> View All Events
         </a>
         @endif

@@ -65,16 +65,19 @@
         <div class="col-lg-4 col-xl-3">
             
             <!-- Sobre mi -->
-            @if($profile->about_me)
             <div class="card shadow-sm border-0 mb-4 h-90">
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-3" style="color: #0c2340;">
                         <i class="bi bi-person-lines-fill me-2" style="color: #4499bb;"></i>Sobre mí
                     </h5>
-                    <p class="card-text text-secondary" style="white-space: pre-wrap; line-height: 1.6;">{{ $profile->about_me }}</p>
+                    @if($profile->about_me)
+                        <p class="card-text text-secondary" style="white-space: pre-wrap; line-height: 1.6;">{{ $profile->about_me }}</p>
+                    @else
+                        <p class="text-muted small fst-italic">Aún no hay información sobre ti.</p>
+                    @endif
                 </div>
             </div>
-            @endif
+            
 
             <!-- Habilidades -->
             <div class="card shadow-sm border-0 mb-4">
