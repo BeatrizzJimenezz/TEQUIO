@@ -129,8 +129,6 @@ class EventTeamController extends Controller
                     ? 'New organizer created and added successfully.' 
                     : 'Organizador added successfully.');
 
-           
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -145,31 +143,44 @@ class EventTeamController extends Controller
     {
         $this->authorize('isOrganizer', $event);
 
+        DB::beginTransaction();
         try {
             if ($event->professional_profile_id == $professionalProfileId) {
+                DB::rollBack();
                 return back()->with('error', 'You cannot remove the main organizer of the event.');
             }
 
             $professionalProfile = ProfessionalProfile::findOrFail($professionalProfileId);
             $user = $professionalProfile->user;
 
+            // Remover de este evento
             $event->collaborators()->detach($professionalProfileId);
 
+            // Verificar si es organizador principal de algún evento
             $isMainOrganizer = Event::where('professional_profile_id', $professionalProfileId)->exists();
 
-            $isCollaboratorElsewhere = DB::table('professional_profile_event')
-                ->where('professional_profile_id', $professionalProfileId)
-                ->where('role', 'Organizador')
+            // Verificar si es colaborador organizador en otros eventos usando la relación
+            $isCollaboratorElsewhere = $professionalProfile->events()
+                ->wherePivot('role', 'Organizador')
                 ->exists();
 
+            // Si no es organizador en ningún lado, remover el rol y asignar Participante
             if (!$isMainOrganizer && !$isCollaboratorElsewhere) {
                 $user->removeRole('Organizador');
+                
+                // Asignar rol de Participante si no lo tiene
+                if (!$user->hasRole('Participante')) {
+                    $user->assignRole('Participante');
+                }
             }
+
+            DB::commit();
 
             return redirect()->route('events.team.index', $event)
                 ->with('success', 'Organizador removed from the team successfully.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'Error removing organizer: ' . $e->getMessage());
         }
     }
