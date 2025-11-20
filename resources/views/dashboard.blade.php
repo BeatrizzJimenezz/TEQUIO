@@ -188,7 +188,7 @@
                             </div>
                             @endif
 
-                            <a href="{{ route('events.show', $event->id) }}" 
+                            <a href="{{ route('event.show', $event->id) }}" 
                                class="btn btn-primary w-100 btn-sm py-2">
                                 👁️ View Details
                             </a>

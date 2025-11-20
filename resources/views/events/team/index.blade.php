@@ -8,7 +8,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('events.index') }}">My Events</a></li>
                     {{-- Route updated to events.public.show --}}
-                    <li class="breadcrumb-item"><a href="{{ route('events.public.show', $event->id) }}">{{ $event->name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard', $event->id) }}">{{ $event->name }}</a></li>
                     <li class="breadcrumb-item active">Organizing Team</li>
                 </ol>
             </nav>

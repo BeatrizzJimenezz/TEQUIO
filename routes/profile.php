@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfessionalProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Professional profile routes (require authentication)
-Route::middleware(['auth', 'require.password.change'])->prefix('professional-profile')->name('professional-profile.')->group(function () {
+Route::middleware(['auth'])->prefix('professional-profile')->name('professional-profile.')->group(function () {
     
     // View my profile
     Route::get('/', [ProfessionalProfileController::class, 'show'])->name('show');
