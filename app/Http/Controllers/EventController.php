@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use App\Notifications\EventUpdatedNotification;
 
 class EventController extends Controller
 {
@@ -34,7 +35,7 @@ class EventController extends Controller
         return view('dashboard', compact('events', 'tags'));
     }
 
-    // Listado de eventos propios con filtros
+    // Listado de eventos propios con filtros y paginación
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -44,9 +45,10 @@ class EventController extends Controller
         $query = Event::with(['tags', 'components'])
             ->whereHas('professionalProfile', function($q) use ($user) {
                 $q->where('user_id', $user->id);
-            });
+            })
+            ->orderBy('start_date', 'desc');
 
-        // Filtro de búsqueda por nombre o descripción
+        // Filtros de búsqueda
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -143,7 +145,6 @@ class EventController extends Controller
     {
         $this->checkPermissions();
 
-        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para editar este evento.');
         }
@@ -159,11 +160,18 @@ class EventController extends Controller
     {
         $this->checkPermissions();
 
-        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para editar este evento.');
         }
 
+        // Capturar valores antes de editar
+        $oldValues = $event->only([
+            'name', 'start_date', 'end_date', 'start_time',
+            'description', 'cover_image', 'logo', 'modality',
+            'location', 'visibility', 'status'
+        ]);
+
+        // Validación
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
@@ -180,12 +188,45 @@ class EventController extends Controller
             'tags.*' => 'exists:tags,id',
         ]);
 
+        // Actualizar evento
         $event->update($validated);
 
         if ($request->has('tags')) {
             $event->tags()->sync($request->tags);
         } else {
             $event->tags()->detach();
+        }
+
+        // Detectar cambios
+        $changes = [];
+        foreach ($validated as $field => $newValue) {
+
+            $old = $this->normalizeValue($oldValues[$field] ?? null, $field);
+            $new = $this->normalizeValue($newValue, $field);
+
+            if ($old !== $new) {
+                $changes[$field] = [
+                    'old' => $old,
+                    'new' => $new
+                ];
+            }
+        }
+
+        // Enviar notificación a inscritos
+        if (!empty($changes)) {
+            $registrations = $event->components()
+                ->with('registrations.user')
+                ->get()
+                ->pluck('registrations')
+                ->flatten();
+
+            foreach ($registrations as $registration) {
+                if ($registration->user) {
+                    $registration->user->notify(
+                        new EventUpdatedNotification($event, $changes)
+                    );
+                }
+            }
         }
 
         return redirect()->route('events.index')
@@ -197,7 +238,6 @@ class EventController extends Controller
     {
         $this->checkPermissions();
 
-        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para eliminar este evento.');
         }
@@ -229,7 +269,6 @@ class EventController extends Controller
         
         $event->save();
         
-        // Mensaje de éxito
         $message = $event->is_archived 
             ? 'Evento archivado correctamente.' 
             : 'Evento restaurado correctamente.';
@@ -237,7 +276,7 @@ class EventController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
-    // Mostrar detalles públicos del evento
+    // Mostrar detalles del evento
     public function show($id)
     {
         $event = Event::with(['tags', 'components', 'professionalProfile.user', 'approvedComponents.schedules'])
@@ -252,4 +291,32 @@ class EventController extends Controller
 
         return view('events.show', compact('event', 'componentsByType'));
     }
+
+    /* =====================================================
+     *  Normaliza valores para comparación 
+     * ===================================================== */
+    private function normalizeValue($value, $field)
+    {
+        if ($value instanceof \Carbon\Carbon) {
+            return $value->format('Y-m-d');
+        }
+
+        if ($field === 'modality') {
+            return [
+                'virtual' => 'Virtual',
+                'in_person' => 'Presencial',
+                'hybrid' => 'Híbrido'
+            ][$value] ?? $value;
+        }
+
+        if ($field === 'visibility') {
+            return [
+                'public' => 'Público',
+                'private' => 'Privado'
+            ][$value] ?? $value;
+        }
+
+        return $value;
+    }
+
 }

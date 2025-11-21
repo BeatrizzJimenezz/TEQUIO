@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User; 
 
 class EventComponent extends Model
 {
@@ -37,50 +38,99 @@ class EventComponent extends Model
         'organizer_cost' => 'decimal:2',
     ];
 
-    // Relacion con Event
+    /*
+    |--------------------------------------------------------------------------
+    | DETECTOR DE CAMBIO DE ESTADO
+    |--------------------------------------------------------------------------
+    | Cada vez que un componente cambie su estado (proposal_status),
+    | se enviará notificación al usuario que lo propuso.
+    */
+    protected static function booted()
+    {
+        static::updating(function ($component) {
+            // Si el estado NO cambió → no hacemos nada
+            if (!$component->isDirty('proposal_status')) {
+                return;
+            }
+
+            $oldStatus = $component->getOriginal('proposal_status');
+            $newStatus = $component->proposal_status;
+
+            // Usuario que creó/propuso el componente
+            $proposer = $component->proposedBy;
+
+            if ($proposer) {
+                $proposer->notify(
+                    new \App\Notifications\ProposalStatusChanged(
+                        $component,
+                        $oldStatus,
+                        $newStatus
+                    )
+                );
+            }
+        });
+    }
+
+    /**
+     * Relación con Event
+     */
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
-    // Relacion con Speaker
+    /**
+     * Relación con Speaker (Professional Profile)
+     */
     public function speaker(): BelongsTo
     {
         return $this->belongsTo(ProfessionalProfile::class, 'speaker_id');
     }
 
-    // Relacion con usuario que propuso el componente
+    /**
+     * Relación con usuario que propuso el componente
+     */
     public function proposedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'proposed_by_user_id');
     }
 
-    // Relacion con horarios
+    /**
+     * Relación con horarios
+     */
     public function schedules(): HasMany
     {
         return $this->hasMany(ComponentSchedule::class, 'component_id');
     }
 
-    // Relacion con inscripciones
+    /**
+     * Relación con inscripciones
+     */
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class, 'component_id');
     }
 
-    // Relacion con aplicaciones de oferta
+    /**
+     * Relación con aplicaciones de oferta
+     */
     public function applications(): HasMany
     {
         return $this->hasMany(OfferApplication::class, 'component_id');
     }
 
-    // Aplicaciones pendientes
+    /**
+     * Aplicaciones pendientes
+     */
     public function pendingApplications(): HasMany
     {
         return $this->hasMany(OfferApplication::class, 'component_id')
             ->where('status', 'pending');
     }
 
-    // Calcular asientos disponibles
+    /**
+     * Calcular asientos disponibles
+     */
     public function getAvailableSeatsAttribute()
     {
         if (!class_exists(\App\Models\Registration::class) || !$this->capacity) {
