@@ -9,8 +9,7 @@ use Illuminate\Validation\Rule;
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
-     *
+     * Determina si el usuario está autorizado para hacer esta solicitud.
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array

@@ -10,9 +10,8 @@ use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
 {
-    /**
-     * Update the user's password.
-     */
+
+    // Actualizar la contraseña del usuario autenticado
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validateWithBag('updatePassword', [
@@ -39,13 +38,13 @@ class PasswordController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        // Update password
+        // Actualizar la contraseña y restablecer el indicador
         auth()->user()->update([
             'password' => Hash::make($request->password),
-            'must_change_password' => false, // Actualizado a inglés
+            'must_change_password' => false,
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Your password has been changed successfully.');
+            ->with('success', 'Tu contraseña ha sido actualizada exitosamente.');
     }
 }

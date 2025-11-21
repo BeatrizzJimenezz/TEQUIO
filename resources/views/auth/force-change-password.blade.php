@@ -7,28 +7,27 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header text-white" style="background-color: #0C2340; border-bottom: 3px solid #4499BB;">
                     <h4 class="mb-0">
-                        <i class="bi bi-shield-lock"></i> Change Password
+                        <i class="bi bi-shield-lock"></i> Cambiar contraseña
                     </h4>
                 </div>
                 
                 <div class="card-body p-4">
                     
-                    <!-- Required action alert -->
                     <div class="alert alert-warning border-start border-warning border-4" role="alert">
                         <h5 class="alert-heading">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Action Required
+                            <i class="bi bi-exclamation-triangle-fill"></i> Acción requerida
                         </h5>
-                        <p class="mb-0">For security reasons, you must change your temporary password before continuing to use the system.</p>
+                        <p class="mb-0">Por razones de seguridad, debe cambiar su contraseña temporal antes de continuar usando el sistema.</p>
                     </div>
 
-                    <!-- Change password form -->
+                    <!-- Formulario para cambiar la contraseña -->
                     <form method="POST" action="{{ route('password.force-update') }}">
                         @csrf
 
-                        <!-- Current password -->
+                        <!-- Contraseña actual -->
                         <div class="mb-3">
                             <label for="current_password" class="form-label fw-semibold" style="color: #0C2340;">
-                                <i class="bi bi-key"></i> Current Password (temporary)
+                                <i class="bi bi-key"></i> Contraseña actual (temporal)
                             </label>
                             <input type="password" 
                                    class="form-control @error('current_password') is-invalid @enderror" 
@@ -42,10 +41,10 @@
                             @enderror
                         </div>
 
-                        <!-- New password -->
+                        <!-- Nueva contraseña -->
                         <div class="mb-3">
                             <label for="password" class="form-label fw-semibold" style="color: #0C2340;">
-                                <i class="bi bi-shield-lock"></i> New Password
+                                <i class="bi bi-shield-lock"></i> Nueva contraseña
                             </label>
                             <input type="password" 
                                    class="form-control @error('password') is-invalid @enderror" 
@@ -57,14 +56,14 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">
-                                <i class="bi bi-info-circle"></i> Must be at least 8 characters.
+                                <i class="bi bi-info-circle"></i> Debe tener al menos 8 caracteres.
                             </div>
                         </div>
 
-                        <!-- Confirm password -->
+                        <!-- Confirmar contraseña -->
                         <div class="mb-4">
                             <label for="password_confirmation" class="form-label fw-semibold" style="color: #0C2340;">
-                                <i class="bi bi-shield-check"></i> Confirm New Password
+                                <i class="bi bi-shield-check"></i> Confirmar contraseña
                             </label>
                             <input type="password" 
                                    class="form-control" 
@@ -74,23 +73,23 @@
                                    style="border-color: #4499BB;">
                         </div>
 
-                        <!-- Change password button -->
+                        <!-- Botón para cambiar la contraseña -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-lg text-white" style="background-color: #0C2340; border-color: #4499BB;">
-                                <i class="bi bi-check-circle"></i> Change Password
+                                <i class="bi bi-check-circle"></i> Cambiar contraseña
                             </button>
                         </div>
                     </form>
 
-                    <!-- Separator -->
+                    <!-- Separador -->
                     <hr class="my-4">
 
-                    <!-- Logout button -->
+                    <!-- Botón de cierre de sesión -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <div class="d-grid">
                             <button type="submit" class="btn btn-outline-secondary">
-                                <i class="bi bi-box-arrow-right"></i> Log Out
+                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
                             </button>
                         </div>
                     </form>

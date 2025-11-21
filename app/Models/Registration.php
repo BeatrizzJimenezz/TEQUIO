@@ -26,19 +26,19 @@ class Registration extends Model
         'expires_at' => 'datetime',
     ];
 
-    // Relation with user
+    // Relacion con el usuario
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relation with component
+    // Relacion con el componente
     public function component(): BelongsTo
     {
         return $this->belongsTo(EventComponent::class, 'component_id');
     }
 
-    // Generate unique QR ticket
+    // Generar ticket QR único
     public static function generateTicketQR(): string
     {
         do {
@@ -48,7 +48,7 @@ class Registration extends Model
         return $ticket;
     }
 
-    // Check if the ticket is active
+    // Verificar si el ticket está activo
     public function isActive(): bool
     {
         if ($this->expires_at) {
@@ -57,7 +57,7 @@ class Registration extends Model
         return true;
     }
 
-    // Check if registration can be cancelled (2 days before first schedule)
+    // Verificar si la inscripción puede ser cancelada (2 días antes del primer horario)
     public function canBeCancelled(): bool
     {
         $firstSchedule = $this->component->schedules()
@@ -75,7 +75,7 @@ class Registration extends Model
         return now()->lt($twoDaysBefore);
     }
 
-    // Get days until activity starts
+    // Obtener días hasta que inicia la actividad
     public function daysUntilStart(): ?int
     {
         $firstSchedule = $this->component->schedules()

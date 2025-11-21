@@ -1,0 +1,165 @@
+:root {
+    --evai-blue-main: #4499BB;
+    --evai-blue-deep: #0C2340;
+    --evai-green-accent: #8CC63F;
+    --evai-white: #FFFFFF;
+    --evai-gray-light: #e9ecef;
+}
+
+.hero-catalog {
+    background-color: var(--evai-blue-deep);
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+    position: relative;
+}
+
+.hero-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+    pointer-events: none;
+}
+
+.hero-icon {
+    font-size: 4rem;
+    opacity: 0.25;
+}
+
+.filters-card {
+    margin-top: -3rem;
+    border: none;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+}
+
+.filters-header {
+    color: var(--evai-blue-main);
+}
+
+.form-label-custom {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6c757d;
+}
+
+/* Inputs de filtro */
+.form-control-filter, .form-select-filter {
+    background-color: #f8f9fa;
+}
+
+.form-control-filter:focus, .form-select-filter:focus {
+    border-color: var(--evai-blue-main);
+    box-shadow: 0 0 0 0.25rem rgba(68, 153, 187, 0.15);
+    background-color: #fff;
+}
+
+.btn-tag-check:checked + .btn-tag-label {
+    background-color: var(--evai-blue-deep);
+    color: var(--evai-white);
+    border-color: var(--evai-blue-deep);
+}
+
+.btn-tag-check:not(:checked) + .btn-tag-label:hover {
+    background-color: var(--evai-gray-light);
+    color: var(--evai-blue-deep);
+}
+
+.btn-apply-filters {
+    background-color: var(--evai-blue-main);
+    color: white;
+}
+.btn-apply-filters:hover {
+    background-color: #367a96;
+    color: white;
+}
+
+.event-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(12, 35, 64, 0.15) !important;
+}
+
+/* Contenedor de imagen */
+.event-img-container {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+    background-color: var(--evai-blue-deep);
+}
+
+.event-img-fallback {
+    height: 200px;
+    background-color: var(--evai-blue-deep);
+    background-image: linear-gradient(135deg, var(--evai-blue-deep) 0%, #1a3b66 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badge de modalidad */
+.modality-badge {
+    background-color: rgba(255,255,255,0.95);
+    color: var(--evai-blue-deep);
+    font-weight: 600;
+}
+
+/* Iconos y textos */
+.text-brand-deep { color: var(--evai-blue-deep) !important; }
+.text-brand-main { color: var(--evai-blue-main) !important; }
+.text-brand-accent { color: var(--evai-green-accent) !important; }
+
+.event-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.btn-details {
+    background-color: var(--evai-green-accent);
+    color: white;
+    transition: transform 0.2s;
+}
+
+.btn-details:hover {
+    transform: scale(1.05);
+    color: white;
+    background-color: #7ab32e;
+}
+
+.empty-state-icon {
+    width: 80px; 
+    height: 80px;
+    background-color: #f8f9fa;
+}
+
+.btn-evai-green {
+    background-color: var(--evai-green-accent);
+    border-color: var(--evai-green-accent);
+    color: white;
+    font-weight: bold;
+    border-radius: 50rem;
+}
+
+.btn-evai-green:hover {
+    background-color: #72a933;
+    border-color: #72a933;
+}
+
+.btn-outline-evai {
+    border-color: var(--evai-blue-main);
+    color: var(--evai-blue-main);
+    border-radius: 50rem;
+}
+
+.btn-outline-evai:hover {
+    background-color: var(--evai-blue-main);
+    color: var(--evai-white);
+}

@@ -11,19 +11,13 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    // Determina si el usuario está autorizado para hacer esta solicitud.
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    // Obtiene las reglas de validación que se aplican a la solicitud.
     public function rules(): array
     {
         return [
@@ -33,7 +27,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Intenta autenticar al usuario con las credenciales proporcionadas.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -53,7 +47,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * Asegura que la solicitud no esté limitada por la tasa de solicitudes.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -75,9 +69,7 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     */
+    // Obtiene la clave de limitación de tasa para la solicitud.
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());

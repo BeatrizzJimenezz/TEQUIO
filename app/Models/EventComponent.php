@@ -37,50 +37,50 @@ class EventComponent extends Model
         'organizer_cost' => 'decimal:2',
     ];
 
-    // Relation with Event
+    // Relacion con Event
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
-    // Relation with Speaker
+    // Relacion con Speaker
     public function speaker(): BelongsTo
     {
         return $this->belongsTo(ProfessionalProfile::class, 'speaker_id');
     }
 
-    // Relation with user who proposed the component
+    // Relacion con usuario que propuso el componente
     public function proposedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'proposed_by_user_id');
     }
 
-    // Relation with schedules
+    // Relacion con horarios
     public function schedules(): HasMany
     {
         return $this->hasMany(ComponentSchedule::class, 'component_id');
     }
 
-    // Relation with registrations
+    // Relacion con inscripciones
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class, 'component_id');
     }
 
-    // Relation with offer applications
+    // Relacion con aplicaciones de oferta
     public function applications(): HasMany
     {
         return $this->hasMany(OfferApplication::class, 'component_id');
     }
 
-    // Pending applications
+    // Aplicaciones pendientes
     public function pendingApplications(): HasMany
     {
         return $this->hasMany(OfferApplication::class, 'component_id')
             ->where('status', 'pending');
     }
 
-    // Calculate available seats
+    // Calcular asientos disponibles
     public function getAvailableSeatsAttribute()
     {
         if (!class_exists(\App\Models\Registration::class) || !$this->capacity) {

@@ -23,29 +23,27 @@ class ComponentSchedule extends Model
         'date' => 'date',
     ];
 
-    // Relation with component
+    // Relación con el componente del evento
     public function component(): BelongsTo
     {
         return $this->belongsTo(EventComponent::class, 'component_id');
     }
 
-    /**
-     * Check if this schedule overlaps with another schedule
-     */
+    // Método para verificar si dos horarios se superponen
     public function overlapsWith(ComponentSchedule $other): bool
     {
-        // Schedules must be on the same date to overlap
+        // Los horarios deben ser en la misma fecha para superponerse
         if (!$this->date->equalTo($other->date)) {
             return false;
         }
 
-        // Convert times to timestamps for comparison
+        // Convertir los tiempos a marcas de tiempo para la comparación
         $thisStart = strtotime($this->start_time);
         $thisEnd = strtotime($this->end_time);
         $otherStart = strtotime($other->start_time);
         $otherEnd = strtotime($other->end_time);
 
-        // Two time ranges overlap if: start1 < end2 AND start2 < end1
+        // Dos rangos de tiempo se superponen si: start1 < end2 Y start2 < end1
         return $thisStart < $otherEnd && $otherStart < $thisEnd;
     }
 }

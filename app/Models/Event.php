@@ -32,49 +32,30 @@ class Event extends Model
         'end_date' => 'date',
     ];
 
-    /**
-     * Relación con el organizador (Professional Profile)
-     * Antes: perfilProfesional
-     */
+    // Perfil profesional que organiza el evento
     public function professionalProfile(): BelongsTo
     {
         return $this->belongsTo(ProfessionalProfile::class);
     }
 
-    /**
-     * Relación con etiquetas
-     * Antes: etiquetas
-     * [cite_start]Tabla pivote actualizada a 'event_tags' [cite: 73]
-     */
+    // Etiquetas asociadas al evento
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'event_tags');
     }
 
-    /**
-     * Relación con componentes del evento
-     * Antes: componentes
-     */
+    // Componentes del evento
     public function components(): HasMany
     {
         return $this->hasMany(EventComponent::class);
     }
 
-    /**
-     * Componentes aprobados
-     * Antes: componentesAprobados
-     * [cite_start]Estado actualizado a 'approved' [cite: 83]
-     */
+    // Componentes del evento con estado aprobado
     public function approvedComponents(): HasMany
     {
         return $this->hasMany(EventComponent::class)->where('proposal_status', 'approved');
     }
 
-    /**
-     * Relación con colaboradores (equipo organizador)
-     * Antes: colaboradores
-     * [cite_start]Tabla pivote actualizada a 'event_profiles' y columna a 'role' [cite: 64]
-     */
     public function teamMembers(): BelongsToMany
     {
         return $this->belongsToMany(ProfessionalProfile::class, 'event_profiles')
@@ -82,10 +63,7 @@ class Event extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Scope para eventos del usuario actual
-     * Antes: scopeDelUsuario
-     */
+    // Scope para filtrar eventos por el ID de usuario del perfil profesional
     public function scopeOfUser($query, $userId)
     {
         return $query->whereHas('professionalProfile', function($q) use ($userId) {
@@ -93,13 +71,14 @@ class Event extends Model
         });
     }
 
+    // Colaboradores del evento con sus roles
     public function collaborators()
     {
         return $this->belongsToMany(
             ProfessionalProfile::class, 
-            'event_profiles', // tabla pivote correcta
-            'event_id',       // FK de Event
-            'professional_profile_id' // FK de ProfessionalProfile
+            'event_profiles',
+            'event_id',    
+            'professional_profile_id'
         )
         ->withPivot('role')
         ->withTimestamps();

@@ -7,17 +7,14 @@ use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+
+    // Registrar cualquier servicio de la aplicación.
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
+    // Bootstrap cualquier servicio de la aplicación.
     public function boot(): void
     {
         Paginator::useBootstrapFive();

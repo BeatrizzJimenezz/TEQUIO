@@ -9,9 +9,7 @@ use Illuminate\Http\RedirectResponse;
 
 class VerifyEmailController extends Controller
 {
-    /**
-     * Mark the authenticated user's email address as verified.
-     */
+    // Maneja la verificación del correo electrónico
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {

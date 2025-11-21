@@ -16,25 +16,19 @@ class ProfessionalProfile extends Model
         'skills',
     ];
 
-    /**
-     * Relationship: Profile belongs to User (1:1)
-     */
+    // Relacion con el usuario
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relationship: One profile has many academic trainings (1:N)
-     */
+    // Relacion con las formaciones academicas
     public function academicTrainings()
     {
         return $this->hasMany(AcademicTraining::class);
     }
 
-    /**
-     * Relationship: One profile participates in many events (N:N)
-     */
+    // Relacion con los eventos en los que ha participado
     public function events()
     {
         return $this->belongsToMany(
@@ -43,22 +37,19 @@ class ProfessionalProfile extends Model
         )->withPivot('role')->withTimestamps();
     }
 
-    /**
-     * Relationship: A professional profile can be speaker in components
-     */
+    // Relacion con los componentes en los que ha sido ponente
     public function componentsAsSpeaker()
     {
         return $this->hasMany(EventComponent::class, 'speaker_id');
     }
 
-    /**
-     * Relationship: Applications sent by the profile
-     */
+    // Relacion con las solicitudes de oferta
     public function offerApplications()
     {
         return $this->hasMany(OfferApplication::class);
     }
 
+    // Relacion con las redes sociales
     public function socialNetworks()
     {
         return $this->hasMany(SocialNetwork::class, 'professional_profile_id');

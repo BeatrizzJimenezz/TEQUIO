@@ -1,58 +1,136 @@
+/* Definición de variables*/
+:root {
+    --evai-blue-main: #4499BB;
+    --evai-blue-deep: #002855;
+    --evai-green-accent: #8CC63F;
+    --evai-white: #FFFFFF;
+    --evai-gray-light: #ced4da;
+}
+
 body, html {
     height: 100%;
-    margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #002855;
+    background-color: var(--evai-blue-deep);
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
-.login-right-section {
-    background-color: #0a0a0a;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.bg-deep-blue {
+    background-color: var(--evai-blue-deep);
 }
+
+/* Patrón de cubos de fondo */
+.bg-pattern-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Contenido por encima del patrón */
+.z-index-1 {
+    z-index: 1;
+    position: relative;
+}
+
+.sidebar-logo {
+    height: 200px;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+}
+
+.sidebar-divider {
+    width: 100px;
+    height: 5px;
+    background-color: var(--evai-blue-main);
+    border-radius: 50rem;
+    margin: 0 auto 1.5rem auto;
+}
+
+/* Tarjeta con efecto cristal (Glassmorphism) */
+.glass-card {
+    background-color: rgba(0, 61, 115, 0.5);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(68, 153, 187, 0.3);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175);
+}
+
+.text-blue-light { color: #cfe2ff; }
+.text-blue-lighter { color: #9ec5fe; }
+
 
 .login-card {
-    background-color: #111111;
-    border: 1px solid #333;
+    background-color: var(--evai-white);
+    border: 1px solid var(--evai-gray-light);
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-.form-control {
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    color: #212529;
-    padding: 12px 15px;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+.text-brand-deep {
+    color: var(--evai-blue-deep);
 }
 
-.form-control::placeholder {
-    color: #6c757d;
-    opacity: 0.8;
+.text-brand-main {
+    color: var(--evai-blue-main);
+}
+
+/* Inputs personalizados */
+.form-control-lg {
+    font-size: 1rem;
+    padding: 12px 15px;
+    border-radius: 8px;
 }
 
 .form-control:focus {
-    background-color: #ffffff; 
-    color: #212529;
-    border-color: #8cc63f; 
-    box-shadow: 0 0 0 0.25rem rgba(140, 198, 63, 0.25); 
-    outline: none;
+    border-color: var(--evai-green-accent);
+    box-shadow: 0 0 0 0.25rem rgba(140, 198, 63, 0.25);
 }
 
+/* Botón de ver contraseña */
+.btn-password-toggle {
+    background-color: var(--evai-white);
+    border: 1px solid var(--evai-gray-light);
+    border-left: 0;
+    color: #6c757d;
+}
+
+.btn-password-toggle:hover {
+    color: var(--evai-blue-main);
+    background-color: #f8f9fa;
+}
+
+/* Checkbox personalizado */
+.form-check-input:checked {
+    background-color: var(--evai-green-accent);
+    border-color: var(--evai-green-accent);
+}
+
+/* Enlaces */
+.link-evai {
+    color: var(--evai-blue-main);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.link-evai:hover {
+    color: var(--evai-blue-deep);
+    text-decoration: underline;
+}
+
+/* Botón principal */
 .btn-login {
-    background-color: #8CC63F;
+    background-color: var(--evai-green-accent);
     border: none;
     color: #0a0a0a;
     font-weight: 800;
-    letter-spacing: 0.5px;
     padding: 12px;
     border-radius: 8px;
     transition: all 0.3s ease;
-    text-transform: uppercase;
 }
 
 .btn-login:hover {
@@ -60,33 +138,3 @@ body, html {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(140, 198, 63, 0.4);
 }
-
-.form-check-input {
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    cursor: pointer;
-    width: 1.2em;
-    height: 1.2em;
-    margin-top: 0.15em;
-}
-
-.form-check-input:checked {
-    background-color: #8cc63f;
-    border-color: #8cc63f;
-}
-
-.text-link {
-    color: #4499BB;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s;
-}
-
-.text-link:hover {
-    color: #fff;
-    text-decoration: underline;
-}
-
-.login-title { font-weight: 700; color: #fff; }
-.login-subtitle { color: #adb5bd; }
-.input-label { color: #e0e0e0; font-weight: 600; margin-bottom: 5px; }

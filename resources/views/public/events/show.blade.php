@@ -1,461 +1,296 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/public-event-show.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
-<div class="container py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ route('dashboard') }}" style="color: #4499BB;">Eventos</a>
-            </li>
-            <li class="breadcrumb-item active" style="color: #0C2340;">{{ $event->name }}</li>
-        </ol>
-    </nav>
 
-    <!-- Feedback Messages Container -->
-    <div id="feedback-message"></div>
-
-    <!-- Event Header -->
-    <div class="row mb-4">
-        <div class="col-lg-8">
-            @if($event->cover_image)
-            <img src="{{ $event->cover_image }}"
-                 class="img-fluid rounded shadow-sm mb-4"
-                 alt="{{ $event->name }}"
-                 style="width: 100%; max-height: 400px; object-fit: cover;">
-            @endif
-
-            <h1 class="fw-bold mb-3" style="color: #0C2340;">{{ $event->name }}</h1>
-
-            <div class="mb-3">
-                @php
-                    $modalityLabels = [
-                        'virtual' => 'Virtual',
-                        'in_person' => 'Presencial',
-                        'hybrid' => 'Híbrido'
-                    ];
-                    $statusLabels = [
-                        'planning' => 'En planificación',
-                        'active' => 'Activo',
-                        'finished' => 'Finalizado'
-                    ];
-                @endphp
-                <span class="badge" style="background-color: #8CC63F;">
-                    {{ $statusLabels[$event->status] ?? ucfirst($event->status) }}
-                </span>
-                <span class="badge" style="background-color: #4499BB;">
-                    {{ $modalityLabels[$event->modality] ?? ucfirst($event->modality) }}
-                </span>
-                @foreach($event->tags as $tag)
-                    <span class="badge bg-secondary">{{ $tag->name }}</span>
-                @endforeach
-            </div>
-
-            <p class="lead text-muted">{{ $event->description }}</p>
-        </div>
-
-        <!-- Sidebar with Information -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-3 fw-bold" style="color: #0C2340;">
-                        <i class="bi bi-info-circle me-1" style="color: #4499BB;"></i> Información del Evento
-                    </h5>
-
-                    <!-- Dates -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-calendar-event me-1" style="color: #4499BB;"></i> Fechas
-                        </h6>
-                        <p class="mb-0">
-                            <strong>Inicio:</strong> {{ $event->start_date->format('d/m/Y') }}<br>
-                            <strong>Fin:</strong> {{ $event->end_date->format('d/m/Y') }}<br>
-                            <strong>Hora:</strong> {{ $event->start_time }}
-                        </p>
-                    </div>
-
-                    <hr>
-
-                    <!-- Modality and Location -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-laptop me-1" style="color: #4499BB;"></i> Modalidad
-                        </h6>
-                        <p class="mb-0">{{ $modalityLabels[$event->modality] ?? ucfirst($event->modality) }}</p>
-                    </div>
-
-                    @if($event->location)
-                    <hr>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-geo-alt me-1" style="color: #8CC63F;"></i> Ubicación
-                        </h6>
-                        <p class="mb-0">{{ $event->location }}</p>
-                    </div>
-                    @endif
-
-                    <hr>
-
-                    <!-- Organizer -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-person-badge me-1" style="color: #4499BB;"></i> Organizador
-                        </h6>
-                        <p class="mb-0">
-                            {{ $event->professionalProfile->full_name ?? $event->professionalProfile->user->name }}
-                        </p>
-                    </div>
-
-                    <hr>
-
-                    <!-- Statistics -->
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-graph-up me-1" style="color: #8CC63F;"></i> Estadísticas
-                        </h6>
-                        <p class="mb-0">
-                            <strong>{{ $event->approvedComponents->count() }}</strong> componente(s)<br>
-                            <strong>{{ $event->approvedComponents->sum('capacity') ?: 'Ilimitados' }}</strong> cupos totales
-                        </p>
-                    </div>
-
-                    @auth
-                    <div class="d-grid mt-4">
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Volver al Catálogo
-                        </a>
-                    </div>
-                    @else
-                    <div class="d-grid gap-2 mt-4">
-                        <a href="{{ route('login') }}" class="btn" style="background-color: #0C2340; color: white;">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión para Inscribirse
-                        </a>
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Volver
-                        </a>
-                    </div>
-                    @endauth
-                </div>
-            </div>
+    <div class="event-hero ps-3">
+        <div class="event-hero-pattern"></div>
+        <div class="container position-relative">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-arrow-left me-1"></i> Catálogo</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Detalles del Evento</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold mb-2">{{ $event->name }}</h1>
         </div>
     </div>
 
-    <!-- Event Components -->
-    @if($event->approvedComponents->count() > 0)
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card mb-4 border-0 shadow-sm" style="border-left: 4px solid #4499BB !important;">
-                <div class="card-body py-3">
-                    <h4 class="mb-0 fw-bold" style="color: #0C2340;">
-                        <i class="bi bi-collection me-2" style="color: #4499BB;"></i> Componentes del Evento
-                    </h4>
+    <div class="container overlap-container pb-5" data-check-url-base="{{ url('/registrations/check') }}">
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="info-card p-1 mb-4">
+                    @if($event->cover_image)
+                        <img src="{{ Str::startsWith($event->cover_image, 'http') ? $event->cover_image : asset('storage/' . $event->cover_image) }}"
+                             class="img-fluid rounded-3 w-100"
+                             alt="{{ $event->name }}"
+                             style="max-height: 450px; object-fit: cover;"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'img-placeholder-lg rounded-3\'><i class=\'bi bi-image-alt text-muted display-1 opacity-25\'></i></div>'">
+                    @else
+                        <div class="img-placeholder-lg rounded-3">
+                            <i class="bi bi-calendar2-event text-secondary opacity-25 display-1"></i>
+                        </div>
+                    @endif
                 </div>
-            </div>
 
-            <!-- Tabs by Component Type -->
-            @if($componentsByType->count() > 1)
-            <ul class="nav nav-tabs mb-4" role="tablist">
-                @foreach($componentsByType as $type => $components)
-                @php
-                    $typeLabels = [
-                        'workshop' => 'Talleres',
-                        'talk' => 'Charlas',
-                        'activity' => 'Actividades'
-                    ];
-                @endphp
-                <li class="nav-item">
-                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
-                            data-bs-toggle="tab"
-                            data-bs-target="#{{ Str::slug($type) }}"
-                            type="button"
-                            style="{{ $loop->first ? 'color: #0C2340; border-bottom-color: #4499BB;' : '' }}">
-                        {{ $typeLabels[$type] ?? ucfirst($type) }} ({{ $components->count() }})
-                    </button>
-                </li>
-                @endforeach
-            </ul>
-            @endif
+                <div class="mb-5">
+                    <div class="mb-3">
+                        @php
+                            $modalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
+                            $statusLabels = ['planning' => 'En planificación', 'active' => 'Activo', 'finished' => 'Finalizado'];
+                        @endphp
+                        <span class="badge badge-status">
+                            {{ $statusLabels[$event->status] ?? ucfirst($event->status) }}
+                        </span>
+                        <span class="badge badge-modality">
+                            {{ $modalityLabels[$event->modality] ?? ucfirst($event->modality) }}
+                        </span>
+                        @foreach($event->tags as $tag)
+                            <span class="badge bg-secondary">{{ $tag->name }}</span>
+                        @endforeach
+                    </div>
+                    <h3 class="fw-bold mb-3 text-brand-deep">Sobre este evento</h3>
+                    <p class="text-secondary" style="line-height: 1.8; font-size: 1.05rem;">
+                        {{ $event->description }}
+                    </p>
+                </div>
 
-            <!-- Tab Content -->
-            <div class="tab-content">
-                @foreach($componentsByType as $type => $components)
-                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
-                     id="{{ Str::slug($type) }}">
+                <div id="feedback-message"></div>
 
-                    <div class="row g-4">
-                        @foreach($components as $component)
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-sm">
-                                @if($component->cover_image)
-                                <img src="{{ $component->cover_image }}"
-                                     class="card-img-top"
-                                     alt="{{ $component->name }}"
-                                     style="height: 180px; object-fit: cover;">
-                                @endif
+                @if($event->approvedComponents->count() > 0)
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h3 class="fw-bold mb-0 text-brand-deep">
+                            Actividades y Talleres
+                        </h3>
+                        <span class="badge bg-light text-secondary border rounded-pill">
+                            {{ $event->approvedComponents->count() }} Disponibles
+                        </span>
+                    </div>
 
-                                <div class="card-body">
-                                    <h5 class="card-title fw-bold" style="color: #0C2340;">{{ $component->name }}</h5>
+                    @if($componentsByType->count() > 1)
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        @foreach($componentsByType as $type => $components)
+                        @php
+                            $typeLabels = ['workshop' => 'Talleres', 'talk' => 'Charlas', 'activity' => 'Actividades'];
+                        @endphp
+                        <li class="nav-item">
+                            <button class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#{{ Str::slug($type) }}"
+                                    type="button">
+                                {{ $typeLabels[$type] ?? ucfirst($type) }} 
+                                <span class="badge bg-light text-dark ms-2">{{ $components->count() }}</span>
+                            </button>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @endif
 
-                                    <!-- Badges -->
-                                    <div class="mb-3">
-                                        @php
-                                            $typeLabels = [
-                                                'workshop' => 'Taller',
-                                                'talk' => 'Charla',
-                                                'activity' => 'Actividad'
-                                            ];
-                                            $levelLabels = [
-                                                'beginner' => 'Principiante',
-                                                'intermediate' => 'Intermedio',
-                                                'advanced' => 'Avanzado'
-                                            ];
-                                            $componentModalityLabels = [
-                                                'virtual' => 'Virtual',
-                                                'in_person' => 'Presencial',
-                                                'hybrid' => 'Híbrido'
-                                            ];
-                                        @endphp
-                                        <span class="badge" style="background-color: #0C2340;">
-                                            {{ $typeLabels[$component->type] ?? ucfirst($component->type) }}
-                                        </span>
-                                        <span class="badge" style="background-color: #4499BB;">
-                                            {{ $componentModalityLabels[$component->modality] ?? ucfirst($component->modality) }}
-                                        </span>
-                                        @if($component->level)
-                                            <span class="badge bg-secondary">
-                                                {{ $levelLabels[$component->level] ?? ucfirst($component->level) }}
-                                            </span>
+                    <div class="tab-content">
+                        @foreach($componentsByType as $type => $components)
+                        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ Str::slug($type) }}">
+                            <div class="d-flex flex-column gap-3">
+                                @foreach($components as $component)
+                                <div class="component-card p-4">
+                                    <div class="row g-4">
+                                        @if($component->cover_image)
+                                        <div class="col-md-4">
+                                            <img src="{{ $component->cover_image }}" 
+                                                 class="img-fluid rounded-3 w-100 h-100" 
+                                                 alt="{{ $component->name }}"
+                                                 style="object-fit: cover; min-height: 200px;">
+                                        </div>
                                         @endif
-                                        @if($component->attendee_price > 0)
-                                            <span class="badge" style="background-color: #8CC63F;">
-                                                ${{ number_format($component->attendee_price, 2) }}
-                                            </span>
-                                        @else
-                                            <span class="badge" style="background-color: #8CC63F;">Gratis</span>
-                                        @endif
+
+                                        <div class="{{ $component->cover_image ? 'col-md-8' : 'col-12' }}">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="fw-bold text-dark mb-0">{{ $component->name }}</h5>
+                                                @php
+                                                    $typeLabels = ['workshop' => 'Taller', 'talk' => 'Ponencia', 'activity' => 'Actividad'];
+                                                    $compModalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
+                                                    $compDificultyLabels = ['beginner' => 'Principiante', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado', '' => 'Avanzado'];
+                                                @endphp
+                                                <div>
+                                                     <span class="badge badge-type">
+                                                        {{ $typeLabels[$component->type] ?? ucfirst($component->type) }}
+                                                    </span>
+                                                    <span class="badge badge-modality">
+                                                        {{ $compModalityLabels[$component->modality] ?? ucfirst($component->modality) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex flex-wrap gap-3 text-muted small mb-3">
+                                                <span><i class="bi bi-bar-chart-fill me-1 text-brand-main"></i> 
+                                                    {{ $compDificultyLabels[$component->level] ?? ucfirst($component->level) }}
+                                                </span>
+                                                
+                                                @if($component->attendee_price > 0)
+                                                    <span><i class="bi bi-tag-fill me-1 text-brand-accent"></i> ${{ number_format($component->attendee_price, 2) }}</span>
+                                                @else
+                                                    <span><i class="bi bi-gift-fill me-1 text-brand-accent"></i> Gratis</span>
+                                                @endif
+                                                
+                                                @if($component->location)
+                                                    <span><i class="bi bi-geo-alt-fill me-1 text-danger"></i> {{ $component->location }}</span>
+                                                @endif
+                                            </div>
+
+                                            <p class="text-secondary mb-3">{{ $component->description }}</p>
+
+                                            <div class="bg-light p-3 rounded-3 mb-3 border border-light">
+                                                <div class="row g-3 small">
+                                                    @if($component->participant_requirements)
+                                                    <div class="col-12">
+                                                        <strong class="d-block text-dark mb-1">Requisitos:</strong>
+                                                        <span class="text-muted">{{ $component->participant_requirements }}</span>
+                                                    </div>
+                                                    @endif
+                                                    
+                                                    @if($component->capacity)
+                                                    <div class="col-sm-6">
+                                                        <strong class="d-block text-dark mb-1">Cupos:</strong>
+                                                        <span id="slots-count-{{ $component->id }}">{{ $component->available_seats }}</span> disponibles de {{ $component->capacity }}
+                                                        @if($component->available_seats <= 5 && $component->available_seats > 0)
+                                                            <span class="text-danger fw-bold">(¡Quedan pocos!)</span>
+                                                        @endif
+                                                    </div>
+                                                    @endif
+
+                                                    <div class="col-sm-6">
+                                                        <strong class="d-block text-dark mb-1">Horarios:</strong>
+                                                        <ul class="list-unstyled mb-0">
+                                                            @foreach($component->schedules as $schedule)
+                                                            <li>
+                                                                {{ $schedule->date->format('d/m/Y') }}: 
+                                                                {{ substr($schedule->start_time, 0, 5) }} - {{ substr($schedule->end_time, 0, 5) }}
+                                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="btn-container-{{ $component->id }}" class="mt-2">
+                                                @auth
+                                                    @if($component->capacity && $component->available_seats <= 0)
+                                                        <button class="btn btn-evai-green w-100" disabled>
+                                                            <i class="bi bi-x-circle me-2"></i>Agotado
+                                                        </button>
+                                                    @else
+                                                        <button class="btn btn-evai-green w-100 fw-bold text-white btn-register-action"
+                                                                data-component-id="{{ $component->id }}"
+                                                                data-register-url="{{ route('registrations.store') }}">
+                                                            Inscribirme ahora
+                                                        </button>
+                                                    @endif
+                                                @else
+                                                    <a href="{{ route('login') }}" class="btn btn-outline-evai w-100 text-center text-decoration-none d-block">
+                                                        Iniciar sesión para inscribirse
+                                                    </a>
+                                                @endauth
+                                            </div>
+                                            
+                                        </div>
                                     </div>
-
-                                    <p class="card-text text-muted">{{ $component->description }}</p>
-
-                                    @if($component->location)
-                                    <p class="small text-muted mb-2">
-                                        <i class="bi bi-geo-alt me-1" style="color: #8CC63F;"></i> {{ $component->location }}
-                                    </p>
-                                    @endif
-
-                                    <!-- Available Slots -->
-                                    @if($component->capacity)
-                                    <div class="alert py-2 mb-3" style="background-color: rgba(68, 153, 187, 0.1); border: 1px solid #4499BB;">
-                                        <i class="bi bi-people me-1" style="color: #4499BB;"></i>
-                                        <strong>Cupos:</strong>
-                                        <span id="slots-{{ $component->id }}">{{ $component->available_seats }}</span>
-                                        disponibles de {{ $component->capacity }}
-
-                                        @if($component->available_seats <= 0)
-                                            <span class="badge bg-danger ms-2">Lleno</span>
-                                        @elseif($component->available_seats <= 5)
-                                            <span class="badge bg-warning text-dark ms-2">Últimos cupos</span>
-                                        @endif
-                                    </div>
-                                    @endif
-
-                                    <!-- Schedules -->
-                                    <div class="mb-3">
-                                        <h6 class="text-muted mb-2">
-                                            <i class="bi bi-clock me-1" style="color: #4499BB;"></i> Horarios
-                                        </h6>
-                                        <ul class="list-unstyled mb-0">
-                                            @foreach($component->schedules as $schedule)
-                                            <li class="small mb-1">
-                                                <i class="bi bi-calendar-check me-1" style="color: #8CC63F;"></i>
-                                                {{ $schedule->date->format('d/m/Y') }}
-                                                de {{ substr($schedule->start_time, 0, 5) }} a {{ substr($schedule->end_time, 0, 5) }}
-                                            </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-
-                                    <!-- Requirements -->
-                                    @if($component->participant_requirements)
-                                    <div class="mb-3">
-                                        <h6 class="text-muted mb-2">
-                                            <i class="bi bi-check2-square me-1" style="color: #4499BB;"></i> Requisitos
-                                        </h6>
-                                        <p class="small mb-0">{{ $component->participant_requirements }}</p>
-                                    </div>
-                                    @endif
-
-                                    <!-- Registration Button -->
-                                    @auth
-                                    <div id="btn-container-{{ $component->id }}">
-                                        @if($component->capacity && $component->available_seats <= 0)
-                                        <button class="btn btn-secondary w-100" disabled>
-                                            <i class="bi bi-x-circle me-1"></i> Sin Cupos Disponibles
-                                        </button>
-                                        @else
-                                        <button class="btn w-100 btn-register"
-                                                style="background-color: #8CC63F; color: white;"
-                                                data-component-id="{{ $component->id }}"
-                                                onclick="register({{ $component->id }})">
-                                            <i class="bi bi-pencil-square me-1"></i> Inscribirse
-                                        </button>
-                                        @endif
-                                    </div>
-                                    @else
-                                    <a href="{{ route('login') }}" class="btn btn-outline-primary w-100">
-                                        <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión para Inscribirse
-                                    </a>
-                                    @endauth
                                 </div>
+                                @endforeach
                             </div>
                         </div>
                         @endforeach
                     </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @else
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center py-5">
-                    <div class="mb-3">
-                        <i class="bi bi-collection" style="font-size: 3rem; color: #C8CCC9;"></i>
+                @else
+                    <div class="text-center py-5 border rounded-3 bg-light">
+                        <i class="bi bi-calendar-x text-muted display-4 mb-3 d-block opacity-50"></i>
+                        <p class="text-muted mb-0">Este evento aún no tiene actividades publicadas.</p>
                     </div>
-                    <p class="text-muted mb-0">Este evento aún no tiene componentes publicados.</p>
+                @endif
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sticky-sidebar">
+                    <div class="info-card p-4 mb-4">
+                        <h5 class="fw-bold mb-4 text-brand-deep pb-2 border-bottom">
+                            Información del evento
+                        </h5>
+
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3 pb-2 border-bottom border-light">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Organizador</small>
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-file-person me-2 mt-1 text-brand-accent"></i>
+                                    <span class="fw-medium text-dark">
+                                        {{ $event->professionalProfile->full_name ?? $event->professionalProfile->user->name }}
+                                    </span>
+                                </div>
+                            </li>
+
+                            <li class="mb-3 pb-2 border-bottom border-light">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Fecha y Hora</small>
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-calendar-range me-2 mt-1 text-brand-accent"></i>
+                                    <span>{{ $event->start_date->format('d M') }} - {{ $event->end_date->format('d M, Y') }}</span>
+                                </div>
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-clock me-2 mt-1 text-brand-accent"></i>
+                                    <span>{{ $event->start_time }}</span>
+                                </div>
+                            </li>
+
+                            <li class="mb-3 pb-2 border-bottom border-light">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Ubicación</small>
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-geo-alt me-2 text-success mt-1"></i>
+                                    <span>{{ $event->location ?? 'No especificada' }}</span>
+                                </div>
+                            </li>
+
+                            <li class="mb-0">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Resumen</small>
+                                <div class="row text-center g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded border">
+                                            <strong class="d-block h5 mb-0 text-dark">{{ $event->approvedComponents->count() }}</strong>
+                                            <small class="text-secondary" style="font-size: 0.75rem;">Actividades</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded border">
+                                            <strong class="d-block h5 mb-0 text-dark">{{ $event->approvedComponents->sum('capacity') ?: '∞' }}</strong>
+                                            <small class="text-secondary" style="font-size: 0.75rem;">Cupos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+
+                        @auth
+                            <div class="d-grid mt-4">
+                                <a href="{{ route('dashboard') }}" class="btn btn-outline-evai rounded-pill py-2">
+                                    Volver al catálogo
+                                </a>
+                            </div>
+                        @else
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="{{ route('login') }}" class="btn btn-evai-green shadow-sm text-center text-decoration-none">
+                                    Iniciar sesión para inscribirse
+                                </a>
+                                <a href="{{ route('dashboard') }}" class="btn btn-link text-secondary text-decoration-none text-center small">
+                                    Volver al catálogo
+                                </a>
+                            </div>
+                        @endauth
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    @endif
-</div>
 @endsection
 
 @push('scripts')
-<script>
-    // CSRF Token for requests
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-    // Function to show messages
-    function showMessage(message, type = 'success') {
-        const feedbackDiv = document.getElementById('feedback-message');
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-
-        feedbackDiv.innerHTML = `
-            <div class="alert ${alertClass} alert-dismissible fade show border-0 shadow-sm" role="alert">
-                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}-fill me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-
-        // Scroll to top to see message
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // Auto-close after 5 seconds
-        setTimeout(() => {
-            const alert = feedbackDiv.querySelector('.alert');
-            if (alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }
-        }, 5000);
-    }
-
-    // Function to register
-    async function register(componentId) {
-        const button = document.querySelector(`button[data-component-id="${componentId}"]`);
-        const btnContainer = document.getElementById(`btn-container-${componentId}`);
-
-        // Disable button while processing
-        button.disabled = true;
-        button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Procesando...';
-
-        try {
-            const response = await fetch('{{ route("registrations.store") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    component_id: componentId
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                // Success
-                showMessage(data.message, 'success');
-
-                // Change button to "Already registered"
-                btnContainer.innerHTML = `
-                    <button class="btn btn-success w-100" disabled>
-                        <i class="bi bi-check-circle me-1"></i> Ya inscrito
-                    </button>
-                `;
-
-                // Update slots if they exist
-                const slotsElement = document.getElementById(`slots-${componentId}`);
-                if (slotsElement) {
-                    const currentSlots = parseInt(slotsElement.textContent);
-                    slotsElement.textContent = currentSlots - 1;
-                }
-
-            } else {
-                // Validation error
-                showMessage(data.message || 'Error al procesar la inscripción', 'error');
-                button.disabled = false;
-                button.innerHTML = '<i class="bi bi-pencil-square me-1"></i> Inscribirse';
-                button.style.backgroundColor = '#8CC63F';
-            }
-
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('Error de conexión. Por favor intenta de nuevo.', 'error');
-            button.disabled = false;
-            button.innerHTML = '<i class="bi bi-pencil-square me-1"></i> Inscribirse';
-            button.style.backgroundColor = '#8CC63F';
-        }
-    }
-
-    // Verify registrations on page load
-    document.addEventListener('DOMContentLoaded', async function() {
-        @auth
-        const registerButtons = document.querySelectorAll('.btn-register');
-
-        for (const button of registerButtons) {
-            const componentId = button.dataset.componentId;
-
-            try {
-                const response = await fetch(`{{ url('/registrations/check') }}/${componentId}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    credentials: 'same-origin'
-                });
-
-                const data = await response.json();
-
-                if (data.registered) {
-                    const btnContainer = document.getElementById(`btn-container-${componentId}`);
-                    btnContainer.innerHTML = `
-                        <button class="btn btn-success w-100" disabled>
-                            <i class="bi bi-check-circle me-1"></i> Ya inscrito
-                        </button>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error verificando inscripción:', error);
-            }
-        }
-        @endauth
-    });
-</script>
+    <script src="{{ asset('js/event-show.js') }}"></script>
 @endpush

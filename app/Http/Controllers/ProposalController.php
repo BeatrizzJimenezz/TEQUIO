@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProposalController extends Controller
 {
-    // View public events for proposing a component
+    // Ver eventos públicos disponibles para enviar propuestas
     public function index()
     {
         $events = Event::where('visibility', 'public')
@@ -22,35 +22,35 @@ class ProposalController extends Controller
         return view('proposals.index', compact('events'));
     }
 
-    // Form to create a new proposal
+    // Formulario para crear una nueva propuesta
     public function create(Event $event)
     {
-        // Check that the event is public and not finished
         if ($event->visibility !== 'public' || $event->status === 'finished') {
-            abort(403, 'You cannot submit proposals to this event.');
+            abort(403, 'No puedes enviar propuestas a este evento.');
         }
 
-        // Check that the user has a professional profile
         $profile = auth()->user()->professionalProfile;
+
         if (!$profile) {
             return redirect()->route('professional-profile.edit')
-                ->with('error', 'You must complete your professional profile before submitting a proposal.');
+                ->with('error', 'Debes completar tu perfil profesional antes de enviar una propuesta.');
         }
 
         return view('proposals.create', compact('event', 'profile'));
     }
 
-    // Store a new proposal
+    // Guardar una nueva propuesta
     public function store(Request $request, Event $event)
     {
         if ($event->visibility !== 'public' || $event->status === 'finished') {
-            abort(403, 'You cannot submit proposals to this event.');
+            abort(403, 'No puedes enviar propuestas a este evento.');
         }
 
         $profile = auth()->user()->professionalProfile;
+
         if (!$profile) {
             return redirect()->route('professional-profile.edit')
-                ->with('error', 'You must complete your professional profile before submitting a proposal.');
+                ->with('error', 'Debes completar tu perfil profesional antes de enviar una propuesta.');
         }
 
         $validated = $request->validate([
@@ -69,16 +69,16 @@ class ProposalController extends Controller
             'schedules.*.start_time' => 'required',
             'schedules.*.end_time' => 'required|after:schedules.*.start_time',
         ], [
-            'name.required' => 'The name is required.',
-            'description.required' => 'The description is required.',
-            'type.required' => 'The type is required.',
-            'modality.required' => 'The modality is required.',
-            'schedules.required' => 'You must add at least one schedule.',
+            'name.required' => 'El nombre es obligatorio.',
+            'description.required' => 'La descripción es obligatoria.',
+            'type.required' => 'El tipo es obligatorio.',
+            'modality.required' => 'La modalidad es obligatoria.',
+            'schedules.required' => 'Debes agregar al menos un horario.',
         ]);
 
         DB::beginTransaction();
         try {
-            // Create the component with status "proposed"
+            // Crear componente con estado "proposed"
             $component = $event->components()->create([
                 'presenter_id' => $profile->id,
                 'proposed_by_user_id' => auth()->id(),
@@ -95,7 +95,7 @@ class ProposalController extends Controller
                 'proposal_status' => 'proposed',
             ]);
 
-            // Validate schedules for conflicts
+            // Validar conflictos de horario
             $validator = app(ScheduleConflictValidator::class);
             $allErrors = [];
 
@@ -114,7 +114,7 @@ class ProposalController extends Controller
                 }
             }
 
-            // If there are conflicts, rollback and return errors
+            // Si hay conflictos, revertir y retornar errores
             if (!empty($allErrors)) {
                 DB::rollBack();
                 return back()->withInput()
@@ -122,7 +122,7 @@ class ProposalController extends Controller
                     ->with('error', 'No se pudo enviar la propuesta debido a conflictos de horario.');
             }
 
-            // Create schedules (no conflicts)
+            // Crear horarios si no hay conflictos
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -135,6 +135,7 @@ class ProposalController extends Controller
 
             return redirect()->route('proposals.my-proposals')
                 ->with('success', 'Propuesta enviada exitosamente. El organizador la revisará pronto.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -142,7 +143,7 @@ class ProposalController extends Controller
         }
     }
 
-    // View my proposals
+    // Ver mis propuestas enviadas
     public function myProposals()
     {
         $proposals = EventComponent::where('proposed_by_user_id', auth()->id())
