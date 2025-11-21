@@ -15,6 +15,7 @@ class SocialNetwork extends Model
         'link',
     ];
 
+    // Relacion con el perfil profesional
     public function profile()
     {
         return $this->belongsTo(ProfessionalProfile::class, 'professional_profile_id');

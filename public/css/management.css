@@ -1,0 +1,49 @@
+    .nav-tabs {
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background-color: #f8f9fa;
+        color: #0C2340;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #4499BB;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link.active .badge {
+        background-color: white !important;
+        color: #4499BB !important;
+    }
+    
+    /* Avatar Circle */
+    .avatar-circle {
+        flex-shrink: 0;
+    }
+    
+    /* Smooth transitions */
+    .tab-pane {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }

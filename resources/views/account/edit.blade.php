@@ -12,7 +12,6 @@
     <div class="row">
         <div class="col-12">
             
-            <!-- Alertas -->
             @if (session('status') === 'profile-updated')
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background-color: #d1e7dd; color: #0f5132;">
                     <i class="bi bi-check-circle-fill me-2"></i> Información del perfil actualizada correctamente.
@@ -25,14 +24,13 @@
                 </div>
             @endif
 
-            <!-- INFORMACIÓN DEL PERFIL -->
             <div class="settings-card">
                 <div class="settings-header d-flex align-items-center">
-                    <div class="section-icon" style="background-color: rgba(68, 153, 187, 0.1); color: #4499bb;">
+                    <div class="section-icon" style="background-color: rgba(68, 153, 187, 0.1); color: var(--evai-blue-main);">
                         <i class="bi bi-person-vcard fs-5"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0" style="color: #0c2340;">Información del perfil</h5>
+                        <h5 class="fw-bold mb-0" style="color: var(--evai-blue-deep);">Información del perfil</h5>
                         <small class="text-muted">Actualiza tu nombre y correo electrónico.</small>
                     </div>
                 </div>
@@ -81,7 +79,7 @@
                         </div>
 
                         <div class="mt-4 text-end">
-                            <button type="submit" class="btn text-white px-4 shadow-sm hover-scale" style="background-color: #4499bb; border: none;">
+                            <button type="submit" class="btn text-white px-4 shadow-sm hover-scale" style="background-color: var(--evai-blue-main); border: none;">
                                 Guardar
                             </button>
                         </div>
@@ -89,14 +87,13 @@
                 </div>
             </div>
 
-            <!-- ACTUALIZAR CONTRASEÑA -->
             <div class="settings-card">
                 <div class="settings-header d-flex align-items-center">
-                    <div class="section-icon" style="background-color: rgba(140, 198, 63, 0.1); color: #8cc63f;">
+                    <div class="section-icon" style="background-color: rgba(140, 198, 63, 0.1); color: var(--evai-green-accent);">
                         <i class="bi bi-shield-lock fs-5"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0" style="color: #0c2340;">Seguridad</h5>
+                        <h5 class="fw-bold mb-0" style="color: var(--evai-blue-deep);">Seguridad</h5>
                         <small class="text-muted">Asegura tu cuenta con una contraseña fuerte.</small>
                     </div>
                 </div>
@@ -109,7 +106,7 @@
                             <label for="current_password" class="form-label small text-secondary fw-bold">Contraseña actual</label>
                             <div class="input-group">
                                 <input type="password" class="form-control border-end-0" id="current_password" name="current_password" autocomplete="current-password">
-                                <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" onclick="togglePassword('current_password', this)" style='border: 1px solid #ced4da;'>
+                                <button class="btn btn-password-toggle" type="button" onclick="togglePassword('current_password', this)">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -123,7 +120,7 @@
                                 <label for="update_password_password" class="form-label small text-secondary fw-bold">Nueva contraseña</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control border-end-0" id="update_password_password" name="password" autocomplete="new-password">
-                                    <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" onclick="togglePassword('update_password_password', this)" style='border: 1px solid #ced4da;'>
+                                    <button class="btn btn-password-toggle" type="button" onclick="togglePassword('update_password_password', this)">
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
@@ -136,7 +133,7 @@
                                 <label for="update_password_password_confirmation" class="form-label small text-secondary fw-bold">Confirmar nueva contraseña</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control border-end-0" id="update_password_password_confirmation" name="password_confirmation" autocomplete="new-password">
-                                    <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" onclick="togglePassword('update_password_password_confirmation', this)" style='border: 1px solid #ced4da;'>
+                                    <button class="btn btn-password-toggle" type="button" onclick="togglePassword('update_password_password_confirmation', this)">
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
@@ -147,7 +144,7 @@
                         </div>
 
                         <div class="mt-4 text-end">
-                            <button type="submit" class="btn text-white px-4 shadow-sm hover-scale" style="background-color: #8cc63f; border: none; color: #ffffffff !important; font-weight: 600;">
+                            <button type="submit" class="btn text-white px-4 shadow-sm hover-scale" style="background-color: var(--evai-green-accent); border: none; color: var(--evai-blue-deep) !important; font-weight: bold;">
                                 Actualizar
                             </button>
                         </div>
@@ -155,11 +152,10 @@
                 </div>
             </div>
 
-            <!-- ELIMINAR CUENTA -->
             <div class="settings-card border border-danger border-opacity-25">
                 <div class="settings-body d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h5 class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle me-2"></i>Avanzado</h5>
+                        <h5 class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle me-2"></i>Zona de Peligro</h5>
                         <p class="text-muted mb-0 small">Una vez eliminada, tu cuenta no podrá recuperarse.</p>
                     </div>
                     <button class="btn btn-outline-danger hover-scale btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#confirmUserDeletionModal">
@@ -172,8 +168,13 @@
     </div>
 </div>
 
-<!-- CONFIRMAR -->
-<div class="modal fade" id="confirmUserDeletionModal" tabindex="-1" aria-labelledby="confirmUserDeletionModalLabel" aria-hidden="true">
+<div class="modal fade" 
+     id="confirmUserDeletionModal" 
+     tabindex="-1" 
+     aria-labelledby="confirmUserDeletionModalLabel" 
+     aria-hidden="true"
+     data-show-error="{{ $errors->userDeletion->isNotEmpty() ? 'true' : 'false' }}">
+     
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <form method="post" action="{{ route('profile.destroy') }}">
@@ -195,7 +196,7 @@
 
                     <div class="input-group">
                         <input type="password" class="form-control" id="delete_password" name="password" placeholder="Tu contraseña actual">
-                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('delete_password', this)">
+                        <button class="btn btn-password-toggle" type="button" onclick="togglePassword('delete_password', this)">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -213,28 +214,8 @@
     </div>
 </div>
 
-<script>
-    function togglePassword(inputId, btn) {
-        const input = document.getElementById(inputId);
-        const icon = btn.querySelector('i');
-        
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            input.type = "password";
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    }
-
-    @if($errors->userDeletion->isNotEmpty())
-        document.addEventListener('DOMContentLoaded', function() {
-            var myModal = new bootstrap.Modal(document.getElementById('confirmUserDeletionModal'));
-            myModal.show();
-        });
-    @endif
-</script>
-
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/edit-account.js') }}"></script>
+@endpush

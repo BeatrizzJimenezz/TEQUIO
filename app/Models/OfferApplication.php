@@ -19,25 +19,25 @@ class OfferApplication extends Model
         'status',
     ];
 
-    // Relation with component (offer)
+    // Relacion con el componente del evento
     public function component(): BelongsTo
     {
         return $this->belongsTo(EventComponent::class, 'component_id');
     }
 
-    // Relation with professional profile (applicant)
+    // Relacion con el perfil profesional (solicitante)
     public function professionalProfile(): BelongsTo
     {
         return $this->belongsTo(ProfessionalProfile::class, 'professional_profile_id');
     }
 
-    // Scope for pending applications
+    // Scope para aplicaciones pendientes
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
     }
 
-    // Scope for accepted applications
+    // Scope para aplicaciones aceptadas
     public function scopeAccepted($query)
     {
         return $query->where('status', 'accepted');

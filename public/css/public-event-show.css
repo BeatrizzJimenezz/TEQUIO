@@ -1,0 +1,127 @@
+
+:root {
+    --evai-blue-main: #4499BB;
+    --evai-blue-deep: #0C2340;
+    --evai-green-accent: #8CC63F;
+    --evai-white: #FFFFFF;
+    --evai-gray-light: #f8f9fa;
+}
+
+.event-hero {
+    background-color: var(--evai-blue-deep);
+    color: white;
+    padding: 3rem 0 4rem;
+    position: relative;
+    margin-bottom: -3rem; /* Efecto de superposición */
+}
+
+.event-hero-pattern {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.breadcrumb-item a { color: rgba(255,255,255,0.7); text-decoration: none; }
+.breadcrumb-item.active { color: white; }
+.breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+.overlap-container { position: relative; z-index: 2; }
+
+.info-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+    background: white;
+    overflow: hidden;
+}
+
+.sticky-sidebar { position: sticky; top: 2rem; z-index: 10; }
+
+/* Badges */
+.badge-status { background-color: var(--evai-green-accent); }
+.badge-modality { background-color: var(--evai-blue-main); }
+.badge-type { background-color: var(--evai-green-accent); }
+
+/* Textos corporativos */
+.text-brand-deep { color: var(--evai-blue-deep) !important; }
+.text-brand-main { color: var(--evai-blue-main) !important; }
+.text-brand-accent { color: var(--evai-green-accent) !important; }
+
+/* Pestañas (Tabs) */
+.nav-tabs { border-bottom: 2px solid #e9ecef; }
+.nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 600;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    transition: all 0.2s;
+}
+.nav-tabs .nav-link:hover { color: var(--evai-blue-main); }
+.nav-tabs .nav-link.active {
+    color: var(--evai-blue-deep);
+    background: transparent;
+    border-bottom-color: var(--evai-blue-main);
+}
+
+/* Tarjeta de Componente (Actividad) */
+.component-card {
+    transition: all 0.3s ease;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 0.5rem;
+}
+.component-card:hover {
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+/* Botones */
+.btn-evai-green {
+    background-color: var(--evai-green-accent);
+    border: none;
+    color: white; 
+    font-weight: bold;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s;
+}
+.btn-evai-green:hover {
+    background-color: #72a933;
+    color: white;
+    transform: translateY(-1px);
+}
+.btn-evai-green:disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    transform: none;
+}
+
+.btn-outline-evai {
+    border: 1px solid var(--evai-blue-main);
+    color: var(--evai-blue-main);
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+.btn-outline-evai:hover {
+    background-color: var(--evai-blue-main);
+    color: white;
+}
+
+/* Placeholder de imagen */
+.img-placeholder-lg {
+    height: 300px;
+    background-color: var(--evai-gray-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.img-placeholder-sm {
+    height: 200px;
+    background-color: var(--evai-gray-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

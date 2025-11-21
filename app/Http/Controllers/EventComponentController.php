@@ -11,26 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 class EventComponentController extends Controller
 {
+    // Verificar autenticación y roles permitidos
     private function checkPermissions()
     {
         if (!auth()->check()) {
-            abort(401, 'You must be logged in.');
+            abort(401, 'Debes iniciar sesión.');
         }
 
-        // Mantener los nombres de roles en español
         if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
-            abort(403, 'You do not have permission to access this section.');
+            abort(403, 'No tienes permisos para acceder a esta sección.');
         }
     }
 
+    // Verificar si el usuario es dueño del evento
     private function checkOwner(Event $event)
     {
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to manage this event.');
+            abort(403, 'No tienes permiso para gestionar este evento.');
         }
     }
 
-    // Show event details with components
+    // Mostrar detalles del evento y sus componentes
     public function index(Event $event)
     {
         $this->checkPermissions();
@@ -43,7 +44,7 @@ class EventComponentController extends Controller
         return view('components.index', compact('event', 'components'));
     }
 
-    // Form to create a component
+    // Formulario para crear un componente
     public function create(Event $event)
     {
         $this->checkPermissions();
@@ -54,7 +55,7 @@ class EventComponentController extends Controller
         return view('components.create', compact('event', 'speakers'));
     }
 
-    // Store a new component
+    // Guardar un nuevo componente
     public function store(Request $request, Event $event)
     {
         $this->checkPermissions();
@@ -100,12 +101,11 @@ class EventComponentController extends Controller
                 'speaker_id' => $validated['speaker_id'] ?? null,
             ]);
 
-            // Validate and create schedules
+            // Validar conflictos de horario
             $validator = app(ScheduleConflictValidator::class);
             $allErrors = [];
 
             foreach ($request->schedules as $index => $schedule) {
-                // Validate for conflicts before creating
                 $conflictCheck = $validator->validate(
                     $component->id,
                     $schedule['date'],
@@ -120,7 +120,7 @@ class EventComponentController extends Controller
                 }
             }
 
-            // If there are conflicts, rollback and return errors
+            // Si hay conflictos, revertimos y retornamos errores
             if (!empty($allErrors)) {
                 DB::rollBack();
                 return back()->withInput()
@@ -128,7 +128,7 @@ class EventComponentController extends Controller
                     ->with('error', 'No se pudo crear el componente debido a conflictos de horario.');
             }
 
-            // Create schedules (no conflicts)
+            // Creamos los horarios si no hay conflictos
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -141,6 +141,7 @@ class EventComponentController extends Controller
 
             return redirect()->route('components.index', $event)
                 ->with('success', 'Componente creado exitosamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -148,14 +149,14 @@ class EventComponentController extends Controller
         }
     }
 
-    // Form to edit a component
+    // Formulario para editar un componente
     public function edit(Event $event, EventComponent $component)
     {
         $this->checkPermissions();
         $this->checkOwner($event);
 
         if ($component->event_id !== $event->id) {
-            abort(404, 'Component not found.');
+            abort(404, 'Componente no encontrado.');
         }
 
         $component->load('schedules');
@@ -164,14 +165,14 @@ class EventComponentController extends Controller
         return view('components.edit', compact('event', 'component', 'speakers'));
     }
 
-    // Update a component
+    // Actualizar un componente existente
     public function update(Request $request, Event $event, EventComponent $component)
     {
         $this->checkPermissions();
         $this->checkOwner($event);
 
         if ($component->event_id !== $event->id) {
-            abort(404, 'Component not found.');
+            abort(404, 'Componente no encontrado.');
         }
 
         $validated = $request->validate([
@@ -212,15 +213,14 @@ class EventComponentController extends Controller
                 'speaker_id' => $validated['speaker_id'] ?? null,
             ]);
 
-            // Delete old schedules first
+            // Eliminar horarios antiguos primero
             $component->schedules()->delete();
 
-            // Validate new schedules for conflicts
+            // Validar nuevos horarios para conflictos
             $validator = app(ScheduleConflictValidator::class);
             $allErrors = [];
 
             foreach ($request->schedules as $index => $schedule) {
-                // Validate for conflicts
                 $conflictCheck = $validator->validate(
                     $component->id,
                     $schedule['date'],
@@ -235,7 +235,7 @@ class EventComponentController extends Controller
                 }
             }
 
-            // If there are conflicts, rollback and return errors
+            // Si hay conflictos, revertir y retornar errores
             if (!empty($allErrors)) {
                 DB::rollBack();
                 return back()->withInput()
@@ -243,7 +243,7 @@ class EventComponentController extends Controller
                     ->with('error', 'No se pudo actualizar el componente debido a conflictos de horario.');
             }
 
-            // Create new schedules (no conflicts)
+            // Crear nuevos horarios si no hay conflictos
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -256,6 +256,7 @@ class EventComponentController extends Controller
 
             return redirect()->route('components.index', $event)
                 ->with('success', 'Componente actualizado exitosamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -263,23 +264,23 @@ class EventComponentController extends Controller
         }
     }
 
-    // Delete a component
+    // Eliminar un componente
     public function destroy(Event $event, EventComponent $component)
     {
         $this->checkPermissions();
         $this->checkOwner($event);
 
         if ($component->event_id !== $event->id) {
-            abort(404, 'Component not found.');
+            abort(404, 'Componente no encontrado.');
         }
 
         try {
             $component->delete();
             return redirect()->route('components.index', $event)
-                ->with('success', 'Component deleted successfully.');
+                ->with('success', 'Componente eliminado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('components.index', $event)
-                ->with('error', 'Cannot delete component because it has registrations.');
+                ->with('error', 'No se puede eliminar el componente porque tiene registros asociados.');
         }
     }
 }

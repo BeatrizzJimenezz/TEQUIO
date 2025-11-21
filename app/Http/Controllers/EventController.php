@@ -8,59 +8,50 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    // Verifica que el usuario tenga permisos de administrador u organizador
+    // Verificar permisos de administrador u organizador
     private function checkPermissions()
     {
         if (!auth()->check()) {
-            abort(401, 'You must be logged in.');
+            abort(401, 'Debes iniciar sesión.');
         }
 
-        // Mantener los nombres de roles en español
         if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
-            abort(403, 'You do not have permission to access this section.');
+            abort(403, 'No tienes permisos para acceder a esta sección.');
         }
     }
 
+    // Dashboard mostrando todos los eventos públicos activos
     public function dashboard()
     {
-        // Dashboard muestra TODOS los eventos públicos
         $events = Event::where('visibility', 'public')
             ->where('status', 'active')
             ->with(['tags', 'components'])
             ->orderBy('start_date', 'desc')
             ->paginate(12);
-        
+
         $tags = Tag::all();
-        
+
         return view('dashboard', compact('events', 'tags'));
     }
 
-
-    // Listado de eventos con filtros y paginación
+    // Listado de eventos propios con filtros
     public function index(Request $request)
     {
         $user = auth()->user();
-        $professionalProfile = $user->professionalProfile ?? $user->professionalProfile()->create([]);
-
+        $isArchivedView = $request->get('view') === 'archived';
+        
+        // Iniciar consulta con relaciones
         $query = Event::with(['tags', 'components'])
-            ->where('status', 'active') // Ajusta según los valores que uses
-            ->orderBy('start_date', 'desc');
+            ->whereHas('professionalProfile', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
 
-            $query = Event::with(['tags', 'components'])
-        ->whereHas('professionalProfile', function($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
-        ->orderBy('start_date', 'desc');
-
-        $events = $query->paginate(12)->withQueryString();
-        $tags = Tag::orderBy('name')->get();
-
-        // Filtro de búsqueda
+        // Filtro de búsqueda por nombre o descripción
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -86,20 +77,34 @@ class EventController extends Controller
             });
         }
 
+        // Filtrar según la vista (archivados vs activos)
+        if ($isArchivedView) {
+            $query->archived(); 
+        } else {
+            $query->active()
+                ->whereIn('status', ['active', 'planning', 'finished']); 
+        }
+
+        // Ordenar por fecha de inicio (más recientes primero)
+        $query->orderBy('start_date', 'desc');
+
         $events = $query->paginate(12)->withQueryString();
+        
         $tags = Tag::orderBy('name')->get();
 
-         return view('events.index', compact('events', 'tags'));
+        return view('events.index', compact('events', 'tags'));
     }
 
-    // Crear nuevo evento
+    // Vista para crear nuevo evento
     public function create()
     {
         $this->checkPermissions();
         $tags = Tag::orderBy('name')->get();
+        
         return view('events.create', compact('tags'));
     }
 
+    // Guardar nuevo evento
     public function store(Request $request)
     {
         $this->checkPermissions();
@@ -115,7 +120,7 @@ class EventController extends Controller
             'modality' => 'required|in:virtual,in_person,hybrid',
             'location' => 'nullable|string|max:255',
             'visibility' => 'required|in:public,private',
-            'status' => 'required|in:planning,active,fiAdministratornished',
+            'status' => 'required|in:planning,active,finished',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
@@ -130,18 +135,17 @@ class EventController extends Controller
         }
 
         return redirect()->route('events.index')
-            ->with('success', 'Event created successfully.');
+            ->with('success', 'Evento creado exitosamente.');
     }
 
-    
-
-    // Editar evento
+    // Vista para editar evento
     public function edit(Event $event)
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to edit this event.');
+            abort(403, 'No tienes permiso para editar este evento.');
         }
 
         $tags = Tag::orderBy('name')->get();
@@ -150,12 +154,14 @@ class EventController extends Controller
         return view('events.edit', compact('event', 'tags', 'selectedTags'));
     }
 
+    // Actualizar evento existente
     public function update(Request $request, Event $event)
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to edit this event.');
+            abort(403, 'No tienes permiso para editar este evento.');
         }
 
         $validated = $request->validate([
@@ -183,49 +189,63 @@ class EventController extends Controller
         }
 
         return redirect()->route('events.index')
-            ->with('success', 'Event updated successfully.');
+            ->with('success', 'Evento actualizado exitosamente.');
     }
 
+    // Eliminar evento permanentemente
     public function destroy(Event $event)
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to delete this event.');
+            abort(403, 'No tienes permiso para eliminar este evento.');
         }
 
         try {
             $event->delete();
             return redirect()->route('events.index')
-                ->with('success', 'Event deleted successfully.');
+                ->with('success', 'Evento eliminado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('events.index')
-                ->with('error', 'Cannot delete event because it has associated components.');
+                ->with('error', 'No se puede eliminar el evento porque tiene componentes asociados.');
         }
     }
 
+    // Archivar o desarchivar evento
     public function archive(Event $event)
     {
         $this->checkPermissions();
-
+        
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to archive this event.');
+            abort(403, 'No tienes permiso para archivar este evento.');
         }
+        
+        $event->is_archived = !$event->is_archived;
 
-        $event->update(['status' => 'finished']);
-
-        return redirect()->route('events.index')
-            ->with('success', 'Event archived successfully.');
+        if ($event->is_archived && $event->status === 'active') {
+            $event->status = 'finished';
+        }
+        
+        $event->save();
+        
+        // Mensaje de éxito
+        $message = $event->is_archived 
+            ? 'Evento archivado correctamente.' 
+            : 'Evento restaurado correctamente.';
+        
+        return redirect()->back()->with('success', $message);
     }
 
-    // Mostrar evento público
+    // Mostrar detalles públicos del evento
     public function show($id)
     {
-        $event = Event::with(['tags', 'components', 'professionalProfile.user', 'approvedComponents.schedules'])->findOrFail($id);
+        $event = Event::with(['tags', 'components', 'professionalProfile.user', 'approvedComponents.schedules'])
+            ->findOrFail($id);
 
         if ($event->visibility === 'private' &&
             (!auth()->check() || $event->professionalProfile->user_id !== auth()->id())) {
-            abort(403, 'This event is private.');
+            abort(403, 'Este evento es privado.');
         }
 
         $componentsByType = $event->approvedComponents->groupBy('type');

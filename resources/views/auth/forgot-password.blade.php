@@ -9,7 +9,7 @@
 
                 <div class="position-relative text-center px-5" style="z-index: 1;">
                     <div class="mb-4">
-                        <img src="{{ asset('img/10.svg') }}" alt="EVAi Logo" style="height: 200px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));">
+                        <img src="{{ asset('img/10.svg') }}" alt="Tequio Logo" style="height: 200px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));">
                     </div>
                     <div class="mx-auto mb-4 rounded-pill" style="width: 100px; height: 5px; background-color: #4499BB;"></div>
                     <h2 class="fw-bold">Recuperación de cuenta</h2>

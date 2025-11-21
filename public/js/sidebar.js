@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileToggle = document.querySelector('#mobileToggle');
     const sidebarWrapper = document.querySelector('#sidebar-wrapper');
 
+    // Función para alternar la visibilidad del sidebar
     function toggleSidebar(e) {
         if (e) {
             e.preventDefault();

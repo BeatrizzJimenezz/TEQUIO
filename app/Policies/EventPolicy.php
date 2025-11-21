@@ -28,6 +28,13 @@ class EventPolicy
         return false;
     }
 
+    public function manage(User $user, Event $event)
+    {
+        // Check if user is an organizer of this event
+        return $event->organizers()->where('organizer_id', $user->organizer->id ?? null)->exists();
+    }
+
+    // Permite ver el evento si es público o si el usuario es organizador
     public function view(User $user, Event $event)
     {
         if ($event->visibility === 'public') {
@@ -37,16 +44,19 @@ class EventPolicy
         return $this->isOrganizer($user, $event);
     }
 
+    // Permite actualizar el evento solo si el usuario es organizador
     public function update(User $user, Event $event)
     {
         return $this->isOrganizer($user, $event);
     }
 
+    // Permite eliminar el evento solo si el usuario es el organizador principal
     public function delete(User $user, Event $event)
     {
         return $event->professionalProfile && $event->professionalProfile->user_id === $user->id;
     }
 
+    // Permite gestionar el equipo solo si el usuario es organizador
     public function manageTeam(User $user, Event $event)
     {
         return $this->isOrganizer($user, $event);
