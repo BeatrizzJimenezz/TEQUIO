@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User; 
 
 class EventComponent extends Model
 {
@@ -36,6 +37,39 @@ class EventComponent extends Model
         'attendee_price' => 'decimal:2',
         'organizer_cost' => 'decimal:2',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | DETECTOR DE CAMBIO DE ESTADO
+    |--------------------------------------------------------------------------
+    | Cada vez que un componente cambie su estado (proposal_status),
+    | se enviará notificación al usuario que lo propuso.
+    */
+    protected static function booted()
+    {
+        static::updating(function ($component) {
+            // Si el estado NO cambió → no hacemos nada
+            if (!$component->isDirty('proposal_status')) {
+                return;
+            }
+
+            $oldStatus = $component->getOriginal('proposal_status');
+            $newStatus = $component->proposal_status;
+
+            // Usuario que creó/propropuso el componente
+            $proposer = $component->proposedBy;
+
+            if ($proposer) {
+                $proposer->notify(
+                    new \App\Notifications\ProposalStatusChanged(
+                        $component,
+                        $oldStatus,
+                        $newStatus
+                    )
+                );
+            }
+        });
+    }
 
     // Relation with Event
     public function event(): BelongsTo

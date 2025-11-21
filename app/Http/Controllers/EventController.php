@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use App\Notifications\EventUpdatedNotification;
 
 class EventController extends Controller
 {
@@ -29,12 +30,11 @@ class EventController extends Controller
             ->with(['tags', 'components'])
             ->orderBy('start_date', 'desc')
             ->paginate(12);
-        
+
         $tags = Tag::all();
-        
+
         return view('dashboard', compact('events', 'tags'));
     }
-
 
     // Listado de eventos con filtros y paginación
     public function index(Request $request)
@@ -43,19 +43,12 @@ class EventController extends Controller
         $professionalProfile = $user->professionalProfile ?? $user->professionalProfile()->create([]);
 
         $query = Event::with(['tags', 'components'])
-            ->where('status', 'active') // Ajusta según los valores que uses
+            ->whereHas('professionalProfile', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
             ->orderBy('start_date', 'desc');
 
-            $query = Event::with(['tags', 'components'])
-        ->whereHas('professionalProfile', function($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
-        ->orderBy('start_date', 'desc');
-
-        $events = $query->paginate(12)->withQueryString();
-        $tags = Tag::orderBy('name')->get();
-
-        // Filtro de búsqueda
+        // Filtros de búsqueda
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -89,7 +82,7 @@ class EventController extends Controller
         $events = $query->paginate(12)->withQueryString();
         $tags = Tag::orderBy('name')->get();
 
-         return view('events.index', compact('events', 'tags'));
+        return view('events.index', compact('events', 'tags'));
     }
 
     // Crear nuevo evento
@@ -133,8 +126,6 @@ class EventController extends Controller
             ->with('success', 'Event created successfully.');
     }
 
-    
-
     // Editar evento
     public function edit(Event $event)
     {
@@ -158,6 +149,14 @@ class EventController extends Controller
             abort(403, 'You do not have permission to edit this event.');
         }
 
+        // CAPTURAR VALORES ANTES DE EDITAR (ESTO ES NUEVO)
+        $oldValues = $event->only([
+            'name', 'start_date', 'end_date', 'start_time',
+            'description', 'cover_image', 'logo', 'modality',
+            'location', 'visibility', 'status'
+        ]);
+
+        // Validación
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
@@ -174,12 +173,45 @@ class EventController extends Controller
             'tags.*' => 'exists:tags,id',
         ]);
 
+        // Actualizar evento
         $event->update($validated);
 
         if ($request->has('tags')) {
             $event->tags()->sync($request->tags);
         } else {
             $event->tags()->detach();
+        }
+
+        // DETECTAR CAMBIOS (NUEVO MEJORADO)
+        $changes = [];
+        foreach ($validated as $field => $newValue) {
+
+            $old = $this->normalizeValue($oldValues[$field] ?? null, $field);
+            $new = $this->normalizeValue($newValue, $field);
+
+            if ($old !== $new) {
+                $changes[$field] = [
+                    'old' => $old,
+                    'new' => $new
+                ];
+            }
+        }
+
+        // ENVIAR NOTIFICACIÓN A INSCRITOS (NUEVO)
+        if (!empty($changes)) {
+            $registrations = $event->components()
+                ->with('registrations.user')
+                ->get()
+                ->pluck('registrations')
+                ->flatten();
+
+            foreach ($registrations as $registration) {
+                if ($registration->user) {
+                    $registration->user->notify(
+                        new EventUpdatedNotification($event, $changes)
+                    );
+                }
+            }
         }
 
         return redirect()->route('events.index')
@@ -232,4 +264,34 @@ class EventController extends Controller
 
         return view('events.show', compact('event', 'componentsByType'));
     }
+
+    /* =====================================================
+     *  NUEVA FUNCIÓN: Normaliza valores para comparación 
+     * ===================================================== */
+    private function normalizeValue($value, $field)
+    {
+        if ($value instanceof \Carbon\Carbon) {
+            return $value->format('Y-m-d');
+        }
+
+        // Convertir modalidad
+        if ($field === 'modality') {
+            return [
+                'virtual' => 'Virtual',
+                'in_person' => 'Presencial',
+                'hybrid' => 'Híbrido'
+            ][$value] ?? $value;
+        }
+
+        // Convertir visibilidad
+        if ($field === 'visibility') {
+            return [
+                'public' => 'Público',
+                'private' => 'Privado'
+            ][$value] ?? $value;
+        }
+
+        return $value;
+    }
+
 }
