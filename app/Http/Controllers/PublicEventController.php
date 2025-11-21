@@ -8,17 +8,14 @@ use Illuminate\Http\Request;
 
 class PublicEventController extends Controller
 {
-    /**
-     * Public catalog of events
-     * Shows only public and active events
-     */
+    // Listado público de eventos
     public function index(Request $request)
     {
         $query = Event::with(['tags', 'professionalProfile', 'approvedComponents'])
             ->where('visibility', 'public')
             ->where('status', 'active');
 
-        // Search filter (by name or description)
+        // Filtro de búsqueda (por nombre o descripción)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -27,12 +24,12 @@ class PublicEventController extends Controller
             });
         }
 
-        // Modality filter
+        // Filtro de modalidad
         if ($request->filled('modality')) {
             $query->where('modality', $request->modality);
         }
 
-        // Tags filter
+        // Filtro de etiquetas
         if ($request->filled('tags')) {
             $tagIds = $request->tags;
             $query->whereHas('tags', function($q) use ($tagIds) {
@@ -40,7 +37,7 @@ class PublicEventController extends Controller
             });
         }
 
-        // Date range filter
+        // Filtro de rango de fechas
         if ($request->filled('date_from')) {
             $query->where('start_date', '>=', $request->date_from);
         }
@@ -49,21 +46,18 @@ class PublicEventController extends Controller
             $query->where('end_date', '<=', $request->date_to);
         }
 
-        // Order by start date ascending (upcoming first)
+        // Ordenar por fecha de inicio ascendente (próximos primero)
         $events = $query->orderBy('start_date', 'asc')
             ->paginate(12)
             ->withQueryString();
 
-        // Get all tags for filters
+        // Obtener todas las etiquetas para los filtros
         $tags = Tag::orderBy('name')->get();
 
         return view('public.events.index', compact('events', 'tags'));
     }
 
-    /**
-     * Public detail of an event
-     * Shows the event with all its approved components
-     */
+    // Detalle público de un evento
     public function show($id)
     {
         $event = Event::with([
@@ -76,12 +70,12 @@ class PublicEventController extends Controller
         ->where('visibility', 'public')
         ->findOrFail($id);
 
-        // Ensure the event is public
+        // Asegurar que el evento sea público
         if ($event->visibility !== 'public') {
-            abort(404, 'Event not found or not publicly available.');
+            abort(404, 'Evento no encontrado o no disponible públicamente.');
         }
 
-        // Group components by type
+        // Agrupar componentes por tipo
         $componentsByType = $event->approvedComponents->groupBy('type');
 
         return view('public.events.show', compact('event', 'componentsByType'));

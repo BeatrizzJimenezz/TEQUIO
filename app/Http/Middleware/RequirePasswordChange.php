@@ -10,7 +10,7 @@ class RequirePasswordChange
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Cambiar debe_cambiar_password a must_change_password
+        // Verificar si el usuario debe cambiar su contraseña
         if (auth()->check() && auth()->user()->must_change_password) {
             if (!$request->routeIs('password.force-change') && 
                 !$request->routeIs('password.force-update') && 

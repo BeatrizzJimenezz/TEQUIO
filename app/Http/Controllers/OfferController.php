@@ -4,28 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventComponent;
+use App\Models\OfferApplication;
 use App\Services\ScheduleConflictValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OfferController extends Controller
 {
+    // Verificar permisos de dueño del evento
     private function verifyOwner(Event $event)
     {
         if (!auth()->check()) {
-            abort(401, 'You must be logged in.');
+            abort(401, 'Debes iniciar sesión.');
         }
 
         if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
-            abort(403, 'You do not have permission to access this section.');
+            abort(403, 'No tienes permisos para acceder a esta sección.');
         }
 
         if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'You do not have permission to manage this event.');
+            abort(403, 'No tienes permiso para gestionar este evento.');
         }
     }
 
-    // Create an open offer
+    // Formulario para crear una oferta abierta
     public function create(Event $event)
     {
         $this->verifyOwner($event);
@@ -33,7 +35,7 @@ class OfferController extends Controller
         return view('offers.create', compact('event'));
     }
 
-    // Store an offer
+    // Guardar una nueva oferta
     public function store(Request $request, Event $event)
     {
         $this->verifyOwner($event);
@@ -71,7 +73,7 @@ class OfferController extends Controller
                 'attendee_price' => 0,
             ]);
 
-            // Validate schedules for conflicts
+            // Validar conflictos de horario
             $validator = app(ScheduleConflictValidator::class);
             $allErrors = [];
 
@@ -90,7 +92,7 @@ class OfferController extends Controller
                 }
             }
 
-            // If there are conflicts, rollback and return errors
+            // Si hay conflictos, revertir y retornar errores
             if (!empty($allErrors)) {
                 DB::rollBack();
                 return back()->withInput()
@@ -98,7 +100,7 @@ class OfferController extends Controller
                     ->with('error', 'No se pudo publicar la oferta debido a conflictos de horario.');
             }
 
-            // Create schedules (no conflicts)
+            // Crear horarios si no hay conflictos
             foreach ($request->schedules as $schedule) {
                 $component->schedules()->create([
                     'date' => $schedule['date'],
@@ -111,6 +113,7 @@ class OfferController extends Controller
 
             return redirect()->route('offers.index', $event)
                 ->with('success', 'Oferta publicada exitosamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -118,7 +121,7 @@ class OfferController extends Controller
         }
     }
 
-    // View event offers (for organizer)
+    // Ver ofertas del evento (para organizador)
     public function index(Event $event)
     {
         $this->verifyOwner($event);
@@ -132,7 +135,7 @@ class OfferController extends Controller
         return view('offers.index', compact('event', 'offers'));
     }
 
-    // View public offers (for presenters)
+    // Ver ofertas públicas (para ponentes)
     public function publicList()
     {
         $offers = EventComponent::where('proposal_status', 'open-offer')
@@ -147,25 +150,25 @@ class OfferController extends Controller
         return view('offers.public', compact('offers'));
     }
 
-    // Apply to an offer
+    // Aplicar a una oferta
     public function apply(Request $request, EventComponent $offer)
     {
         if ($offer->proposal_status !== 'open-offer') {
-            abort(403, 'This offer is no longer available.');
+            abort(403, 'Esta oferta ya no está disponible.');
         }
 
         $profile = auth()->user()->professionalProfile;
         if (!$profile) {
             return redirect()->route('professional-profile.edit')
-                ->with('error', 'You must complete your professional profile before applying.');
+                ->with('error', 'Debes completar tu perfil profesional antes de aplicar.');
         }
 
-        $alreadyApplied = \App\Models\OfferApplication::where('component_id', $offer->id)
+        $alreadyApplied = OfferApplication::where('component_id', $offer->id)
             ->where('professional_profile_id', $profile->id)
             ->exists();
 
         if ($alreadyApplied) {
-            return back()->with('error', 'You have already applied to this offer.');
+            return back()->with('error', 'Ya has aplicado a esta oferta.');
         }
 
         $validated = $request->validate([
@@ -173,7 +176,7 @@ class OfferController extends Controller
         ]);
 
         try {
-            \App\Models\OfferApplication::create([
+            OfferApplication::create([
                 'component_id' => $offer->id,
                 'professional_profile_id' => $profile->id,
                 'message' => $validated['message'] ?? null,
@@ -181,13 +184,13 @@ class OfferController extends Controller
             ]);
 
             return redirect()->route('offers.public')
-                ->with('success', 'Application submitted successfully. The organizer will review it.');
+                ->with('success', 'Solicitud enviada exitosamente. El organizador la revisará.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error applying: ' . $e->getMessage());
+            return back()->with('error', 'Error al aplicar: ' . $e->getMessage());
         }
     }
 
-    // Evaluation panel (pending proposals and offer applications)
+    // Panel de evaluación (propuestas y solicitudes)
     public function evaluation(Event $event)
     {
         $this->verifyOwner($event);
@@ -212,7 +215,7 @@ class OfferController extends Controller
         return view('offers.evaluation', compact('event', 'proposals', 'offersWithApplications'));
     }
 
-    // Approve proposal
+    // Aprobar propuesta
     public function approve(Event $event, EventComponent $component)
     {
         $this->verifyOwner($event);
@@ -225,13 +228,13 @@ class OfferController extends Controller
             $component->update(['proposal_status' => 'approved']);
 
             return redirect()->route('offers.evaluation', $event)
-                ->with('success', 'Proposal approved successfully.');
+                ->with('success', 'Propuesta aprobada exitosamente.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error approving proposal.');
+            return back()->with('error', 'Error al aprobar la propuesta.');
         }
     }
 
-    // Reject proposal
+    // Rechazar propuesta
     public function reject(Request $request, Event $event, EventComponent $component)
     {
         $this->verifyOwner($event);
@@ -244,13 +247,13 @@ class OfferController extends Controller
             $component->update(['proposal_status' => 'rejected']);
 
             return redirect()->route('offers.evaluation', $event)
-                ->with('success', 'Proposal rejected.');
+                ->with('success', 'Propuesta rechazada.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error rejecting proposal.');
+            return back()->with('error', 'Error al rechazar la propuesta.');
         }
     }
 
-    // Accept an application
+    // Aceptar solicitud de un ponente
     public function acceptApplication(Event $event, EventComponent $offer, $applicationId)
     {
         $this->verifyOwner($event);
@@ -260,13 +263,13 @@ class OfferController extends Controller
         }
 
         try {
-            $application = \App\Models\OfferApplication::findOrFail($applicationId);
+            $application = OfferApplication::findOrFail($applicationId);
 
             DB::beginTransaction();
 
             $application->update(['status' => 'accepted']);
 
-            \App\Models\OfferApplication::where('component_id', $offer->id)
+            OfferApplication::where('component_id', $offer->id)
                 ->where('id', '!=', $applicationId)
                 ->update(['status' => 'rejected']);
 
@@ -278,14 +281,15 @@ class OfferController extends Controller
             DB::commit();
 
             return redirect()->route('offers.evaluation', $event)
-                ->with('success', 'Application accepted. Presenter assigned.');
+                ->with('success', 'Solicitud aceptada. Ponente asignado.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error accepting application: ' . $e->getMessage());
+            return back()->with('error', 'Error al aceptar la solicitud: ' . $e->getMessage());
         }
     }
 
-    // Reject individual application
+    // Rechazar solicitud individual
     public function rejectApplication(Event $event, EventComponent $offer, $applicationId)
     {
         $this->verifyOwner($event);
@@ -295,17 +299,17 @@ class OfferController extends Controller
         }
 
         try {
-            $application = \App\Models\OfferApplication::findOrFail($applicationId);
+            $application = OfferApplication::findOrFail($applicationId);
             $application->update(['status' => 'rejected']);
 
             return redirect()->route('offers.evaluation', $event)
-                ->with('success', 'Application rejected.');
+                ->with('success', 'Solicitud rechazada.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error rejecting application.');
+            return back()->with('error', 'Error al rechazar la solicitud.');
         }
     }
 
-    // Close offer (stop receiving applications)
+    // Cerrar oferta (no recibir más solicitudes)
     public function closeOffer(Event $event, EventComponent $offer)
     {
         $this->verifyOwner($event);
@@ -315,13 +319,13 @@ class OfferController extends Controller
         }
 
         if ($offer->proposal_status !== 'open-offer') {
-            return back()->with('error', 'This offer is no longer open.');
+            return back()->with('error', 'Esta oferta ya no está abierta.');
         }
 
         try {
             DB::beginTransaction();
 
-            \App\Models\OfferApplication::where('component_id', $offer->id)
+            OfferApplication::where('component_id', $offer->id)
                 ->where('status', 'pending')
                 ->update(['status' => 'rejected']);
 
@@ -330,14 +334,15 @@ class OfferController extends Controller
             DB::commit();
 
             return redirect()->route('offers.index', $event)
-                ->with('success', 'Offer closed. No more applications will be accepted.');
+                ->with('success', 'Oferta cerrada. No se aceptarán más solicitudes.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error closing offer: ' . $e->getMessage());
+            return back()->with('error', 'Error al cerrar la oferta: ' . $e->getMessage());
         }
     }
 
-    // Reopen offer
+    // Reabrir oferta
     public function reopenOffer(Event $event, EventComponent $offer)
     {
         $this->verifyOwner($event);
@@ -350,9 +355,9 @@ class OfferController extends Controller
             $offer->update(['proposal_status' => 'open-offer']);
 
             return redirect()->route('offers.index', $event)
-                ->with('success', 'Offer reopened. New applications can be submitted.');
+                ->with('success', 'Oferta reabierta. Se pueden enviar nuevas solicitudes.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error reopening offer.');
+            return back()->with('error', 'Error al reabrir la oferta.');
         }
     }
 }

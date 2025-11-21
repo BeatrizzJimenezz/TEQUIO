@@ -10,37 +10,24 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Los atributos que son asignables en masa
     protected $fillable = [
         'name',
         'email',
         'password',
-        'profile_photo',        // ← AGREGA ESTA LÍNEA
-        'must_change_password', // ← Y esta si no la tienes
+        'profile_photo',      
+        'must_change_password', 
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Los atributos que deben ocultarse para la serialización
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // Los atributos que deben convertirse a otros tipos
     protected function casts(): array
     {
         return [
@@ -49,13 +36,13 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationship with professional profile
+    // Relacion con el perfil profesional
     public function professionalProfile()
     {
         return $this->hasOne(ProfessionalProfile::class);
     }
 
-    // Helper method to get or create profile
+    // Método auxiliar para obtener o crear el perfil
     public function getOrCreateProfessionalProfile()
     {
         if (!$this->professionalProfile) {
@@ -64,14 +51,14 @@ class User extends Authenticatable
         return $this->professionalProfile;
     }
 
-    // Get profile photo URL or default avatar
+    // Obtener URL de la foto de perfil o avatar predeterminado
     public function getProfilePhotoUrlAttribute()
     {
         if ($this->profile_photo) {
             return asset('storage/' . $this->profile_photo);
         }
         
-        // Return default avatar
+        // Retornar avatar predeterminado
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 }

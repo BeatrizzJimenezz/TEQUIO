@@ -12,16 +12,16 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfessionalProfileController extends Controller
 {
-    // View own professional profile
+    // Ver perfil profesional propio
     public function show()
     {
-        $profile = auth()->user()->professionalProfile()->with(['academicTrainings', 'socialNetworks'])->first();
+        $user = auth()->user();
         
-        if (!$profile) {
-            $profile = auth()->user()->professionalProfile()->create([]);
-        }
+        // Obtener o crear perfil si no existe
+        $profile = $user->professionalProfile()->firstOrCreate([]);
+        $profile->load(['academicTrainings', 'socialNetworks']);
         
-        // Get talks/workshops where user has been a speaker
+        // Obtener charlas/talleres donde el usuario es ponente
         $activities = EventComponent::where('speaker_id', $profile->id)
             ->where('proposal_status', 'approved')
             ->with(['event', 'schedules'])
@@ -31,12 +31,12 @@ class ProfessionalProfileController extends Controller
         return view('professional-profile.show', compact('profile', 'activities'));
     }
 
-    // View public profile of another user
+    // Ver perfil público de otro usuario
     public function showPublic($id)
     {
         $profile = ProfessionalProfile::with(['academicTrainings', 'socialNetworks', 'user'])->findOrFail($id);
         
-        // Get approved talks/workshops
+        // Obtener actividades aprobadas
         $activities = EventComponent::where('speaker_id', $profile->id)
             ->where('proposal_status', 'approved')
             ->with(['event', 'schedules'])
@@ -46,21 +46,16 @@ class ProfessionalProfileController extends Controller
         return view('professional-profile.public', compact('profile', 'activities'));
     }
 
-    // Edit professional profile
+    // Editar perfil profesional
     public function edit()
     {
-        $profile = auth()->user()->professionalProfile;
-        
-        if (!$profile) {
-            $profile = auth()->user()->professionalProfile()->create([]);
-        }
-        
+        $profile = auth()->user()->professionalProfile()->firstOrCreate([]);
         $profile->load(['academicTrainings', 'socialNetworks']);
         
         return view('professional-profile.edit', compact('profile'));
     }
 
-    // Update professional profile
+    // Actualizar información del perfil
     public function update(Request $request)
     {
         $validated = $request->validate([
@@ -71,26 +66,21 @@ class ProfessionalProfileController extends Controller
 
         DB::beginTransaction();
         try {
-            $profile = auth()->user()->professionalProfile;
-            
-            if (!$profile) {
-                $profile = auth()->user()->professionalProfile()->create([]);
-            }
-            
+            $profile = auth()->user()->professionalProfile()->firstOrCreate([]);
             $profile->update($validated);
 
             DB::commit();
 
             return redirect()->route('professional-profile.show')
-                ->with('success', 'Professional profile updated successfully.');
+                ->with('success', 'Perfil profesional actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
-                ->with('error', 'Error updating profile: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar perfil: ' . $e->getMessage());
         }
     }
 
-    // Upload profile photo
+    // Subir foto de perfil
     public function uploadPhoto(Request $request)
     {
         $request->validate([
@@ -105,31 +95,27 @@ class ProfessionalProfileController extends Controller
         // Guardar nueva foto
         $path = $request->file('profile_photo')->store('profile_photos', 'public');
 
-        // Actualizar el usuario
         auth()->user()->update([
             'profile_photo' => $path
         ]);
 
-        return back()->with('success', 'Foto de perfil actualizada correctamente');
+        return back()->with('success', 'Foto de perfil actualizada correctamente.');
     }
 
-    // Delete profile photo
+    // Eliminar foto de perfil
     public function deletePhoto(Request $request)
     {
         try {
             $user = auth()->user();
             
             if ($user->profile_photo) {
-                // Eliminar archivo físico si existe
                 if (Storage::disk('public')->exists($user->profile_photo)) {
                     Storage::disk('public')->delete($user->profile_photo);
                 }
 
-                // Actualizar base de datos
                 $user->profile_photo = null;
                 $user->save();
 
-                // Si es una petición AJAX, devolver JSON
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json([
                         'success' => true,
@@ -140,7 +126,6 @@ class ProfessionalProfileController extends Controller
                 return redirect()->back()->with('success', 'Foto de perfil eliminada correctamente.');
             }
 
-            // Si es AJAX
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -151,7 +136,6 @@ class ProfessionalProfileController extends Controller
             return redirect()->back()->with('error', 'No hay foto para eliminar.');
             
         } catch (\Exception $e) {
-            // Si es AJAX
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -163,7 +147,7 @@ class ProfessionalProfileController extends Controller
         }
     }
 
-    // Save academic training
+    // Guardar formación académica
     public function storeAcademicTraining(Request $request)
     {
         $validated = $request->validate([
@@ -173,25 +157,26 @@ class ProfessionalProfileController extends Controller
             'end_date' => 'nullable|date|after:start_date',
             'description' => 'nullable|string|max:1000',
         ], [
-            'institution.required' => 'Institution is required.',
-            'degree.required' => 'Degree is required.',
-            'start_date.required' => 'Start date is required.',
-            'end_date.after' => 'End date must be after start date.',
+            'institution.required' => 'La institución es obligatoria.',
+            'degree.required' => 'El título es obligatorio.',
+            'start_date.required' => 'La fecha de inicio es obligatoria.',
+            'end_date.after' => 'La fecha de fin debe ser posterior a la de inicio.',
         ]);
 
         try {
-            $profile = auth()->user()->getOrCreateProfessionalProfile();
+            // Usamos firstOrCreate para asegurar consistencia
+            $profile = auth()->user()->professionalProfile()->firstOrCreate([]);
             $profile->academicTrainings()->create($validated);
 
             return redirect()->route('professional-profile.edit')
-                ->with('success', 'Academic training added successfully.');
+                ->with('success', 'Formación académica agregada exitosamente.');
         } catch (\Exception $e) {
             return back()->withInput()
-                ->with('error', 'Error adding training: ' . $e->getMessage());
+                ->with('error', 'Error al agregar formación: ' . $e->getMessage());
         }
     }
 
-    // Delete academic training
+    // Eliminar formación académica
     public function destroyAcademicTraining($id)
     {
         try {
@@ -201,37 +186,37 @@ class ProfessionalProfileController extends Controller
             $training->delete();
 
             return redirect()->route('professional-profile.edit')
-                ->with('success', 'Academic training deleted successfully.');
+                ->with('success', 'Formación académica eliminada exitosamente.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error deleting training.');
+            return back()->with('error', 'Error al eliminar la formación académica.');
         }
     }
 
-    // Save social network
+    // Guardar red social
     public function storeSocialNetwork(Request $request)
     {
         $validated = $request->validate([
             'platform' => 'required|string|max:255',
             'link' => 'required|url|max:500',
         ], [
-            'platform.required' => 'Platform is required.',
-            'link.required' => 'Link is required.',
-            'link.url' => 'Must be a valid URL.',
+            'platform.required' => 'La plataforma es obligatoria.',
+            'link.required' => 'El enlace es obligatorio.',
+            'link.url' => 'Debe ser una URL válida.',
         ]);
 
         try {
-            $profile = auth()->user()->getOrCreateProfessionalProfile();
+            $profile = auth()->user()->professionalProfile()->firstOrCreate([]);
             $profile->socialNetworks()->create($validated);
 
             return redirect()->route('professional-profile.edit')
-                ->with('success', 'Social network added successfully.');
+                ->with('success', 'Red social agregada exitosamente.');
         } catch (\Exception $e) {
             return back()->withInput()
-                ->with('error', 'Error adding social network: ' . $e->getMessage());
+                ->with('error', 'Error al agregar red social: ' . $e->getMessage());
         }
     }
 
-    // Delete social network
+    // Eliminar red social
     public function destroySocialNetwork($id)
     {
         try {
@@ -241,9 +226,9 @@ class ProfessionalProfileController extends Controller
             $socialNetwork->delete();
 
             return redirect()->route('professional-profile.edit')
-                ->with('success', 'Social network deleted successfully.');
+                ->with('success', 'Red social eliminada exitosamente.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error deleting social network.');
+            return back()->with('error', 'Error al eliminar la red social.');
         }
     }
 }

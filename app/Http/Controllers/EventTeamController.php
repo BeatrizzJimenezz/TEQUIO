@@ -9,15 +9,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Spatie\Permission\Models\Role;
 
 class EventTeamController extends Controller
 {
     use AuthorizesRequests;
 
-    /**
-     * Show the event organizers team
-     */
+    // Mostrar el equipo de organizadores del evento
     public function index(Event $event)
     {
         $this->authorize('isOrganizer', $event);
@@ -32,9 +29,7 @@ class EventTeamController extends Controller
         return view('events.team.index', compact('event', 'leadOrganizer', 'collaborators'));
     }
 
-    /**
-     * Show form to add an organizer
-     */
+    // Formulario para agregar un organizador
     public function create(Event $event)
     {
         $this->authorize('isOrganizer', $event);
@@ -55,9 +50,7 @@ class EventTeamController extends Controller
         return view('events.team.create', compact('event', 'availableUsers'));
     }
 
-    /**
-     * Add an existing or new organizer to the event
-     */
+    // Agregar un organizador nuevo o existente al evento
     public function store(Request $request, Event $event)
     {
         $this->authorize('isOrganizer', $event);
@@ -73,14 +66,14 @@ class EventTeamController extends Controller
         }
 
         $request->validate($rules, [
-            'user_id.required' => 'You must select a user.',
-            'user_id.exists' => 'The selected user does not exist.',
-            'name.required' => 'Name is required.',
-            'email.required' => 'Email is required.',
-            'email.email' => 'Must be a valid email.',
-            'email.unique' => 'This email is already registered.',
-            'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
+            'user_id.required' => 'Debes seleccionar un usuario.',
+            'user_id.exists' => 'El usuario seleccionado no existe.',
+            'name.required' => 'El nombre es obligatorio.',
+            'email.required' => 'El correo es obligatorio.',
+            'email.email' => 'Debe ser un correo válido.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ]);
 
         DB::beginTransaction();
@@ -94,7 +87,6 @@ class EventTeamController extends Controller
                 ]);
 
                 $user->assignRole('Organizador');
-
                 $professionalProfile = $user->professionalProfile()->create([]);
             } else {
                 $user = User::findOrFail($request->user_id);
@@ -113,7 +105,7 @@ class EventTeamController extends Controller
 
             if ($alreadyOrganizer) {
                 DB::rollBack();
-                return back()->with('error', 'This user is already an organizer of the event.');
+                return back()->with('error', 'Este usuario ya es organizador del evento.');
             }
 
             $event->collaborators()->attach($professionalProfile->id, [
@@ -126,19 +118,17 @@ class EventTeamController extends Controller
 
             return redirect()->route('events.team.index', $event)
                 ->with('success', $request->type === 'new' 
-                    ? 'New organizer created and added successfully.' 
-                    : 'Organizador added successfully.');
+                    ? 'Nuevo organizador creado y agregado exitosamente.' 
+                    : 'Organizador agregado exitosamente.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
-                ->with('error', 'Error adding organizer: ' . $e->getMessage());
+                ->with('error', 'Error al agregar organizador: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Remove organizer from the team
-     */
+    // Eliminar organizador del equipo
     public function destroy(Event $event, $professionalProfileId)
     {
         $this->authorize('isOrganizer', $event);
@@ -147,7 +137,7 @@ class EventTeamController extends Controller
         try {
             if ($event->professional_profile_id == $professionalProfileId) {
                 DB::rollBack();
-                return back()->with('error', 'You cannot remove the main organizer of the event.');
+                return back()->with('error', 'No puedes eliminar al organizador principal del evento.');
             }
 
             $professionalProfile = ProfessionalProfile::findOrFail($professionalProfileId);
@@ -156,10 +146,10 @@ class EventTeamController extends Controller
             // Remover de este evento
             $event->collaborators()->detach($professionalProfileId);
 
-            // Verificar si es organizador principal de algún evento
+            // Verificar si es organizador principal de algún otro evento
             $isMainOrganizer = Event::where('professional_profile_id', $professionalProfileId)->exists();
 
-            // Verificar si es colaborador organizador en otros eventos usando la relación
+            // Verificar si es colaborador organizador en otros eventos
             $isCollaboratorElsewhere = $professionalProfile->events()
                 ->wherePivot('role', 'Organizador')
                 ->exists();
@@ -168,7 +158,6 @@ class EventTeamController extends Controller
             if (!$isMainOrganizer && !$isCollaboratorElsewhere) {
                 $user->removeRole('Organizador');
                 
-                // Asignar rol de Participante si no lo tiene
                 if (!$user->hasRole('Participante')) {
                     $user->assignRole('Participante');
                 }
@@ -177,11 +166,11 @@ class EventTeamController extends Controller
             DB::commit();
 
             return redirect()->route('events.team.index', $event)
-                ->with('success', 'Organizador removed from the team successfully.');
+                ->with('success', 'Organizador eliminado del equipo exitosamente.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error removing organizer: ' . $e->getMessage());
+            return back()->with('error', 'Error al eliminar organizador: ' . $e->getMessage());
         }
     }
 }

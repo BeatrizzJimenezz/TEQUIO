@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- LÓGICA DEL BANNER RANDOM ---
+    // logica para el banner dinamico
     const banner = document.getElementById('dynamicBanner');
     
     if (banner) {
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         banner.style.background = `linear-gradient(${angle}, ${color1} 0%, ${color2} 100%)`;
     }
 
+    // Inicializar tooltips de Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

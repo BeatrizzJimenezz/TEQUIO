@@ -2,22 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\ComponentSchedule;
 use App\Models\EventComponent;
+use App\Models\ComponentSchedule;
 use Illuminate\Support\Collection;
 
 class ScheduleConflictValidator
 {
-    /**
-     * Validate if a schedule can be created without conflicts
-     *
-     * @param int $componentId The component ID for the new schedule
-     * @param string $date The date of the schedule
-     * @param string $startTime The start time of the schedule
-     * @param string $endTime The end time of the schedule
-     * @param int|null $excludeScheduleId Optional schedule ID to exclude from validation (for updates)
-     * @return array ['valid' => bool, 'errors' => array]
-     */
+    // Validar si un horario puede crearse sin conflictos
     public function validate(
         int $componentId,
         string $date,
@@ -27,17 +18,17 @@ class ScheduleConflictValidator
     ): array {
         $errors = [];
 
-        // Get the component for this schedule
-        $component = EventComponent::with('speaker.user')->find($componentId);
+        // Obtener el componente para este horario
+        $component = EventComponent::with(['speaker.user', 'event'])->find($componentId);
 
         if (!$component) {
             return [
                 'valid' => false,
-                'errors' => ['Component not found']
+                'errors' => ['Componente no encontrado']
             ];
         }
 
-        // Create a temporary schedule object for overlap checking
+        // Crear horario temporal para verificar superposiciones
         $newSchedule = new ComponentSchedule([
             'component_id' => $componentId,
             'date' => $date,
@@ -45,13 +36,19 @@ class ScheduleConflictValidator
             'end_time' => $endTime,
         ]);
 
-        // Check for location conflicts
+        // NUEVA VALIDACIÓN: Verificar que la fecha esté dentro del rango del evento
+        $dateRangeError = $this->checkDateRange($component, $newSchedule);
+        if ($dateRangeError) {
+            $errors[] = $dateRangeError;
+        }
+
+        // Verificar conflictos de ubicación
         $locationConflict = $this->checkLocationConflict($component, $newSchedule, $excludeScheduleId);
         if ($locationConflict) {
             $errors[] = $locationConflict;
         }
 
-        // Check for speaker conflicts
+        // Verificar conflictos de ponente
         $speakerConflict = $this->checkSpeakerConflict($component, $newSchedule, $excludeScheduleId);
         if ($speakerConflict) {
             $errors[] = $speakerConflict;
@@ -63,25 +60,43 @@ class ScheduleConflictValidator
         ];
     }
 
-    /**
-     * Check if the schedule conflicts with another component in the same location
-     */
+    // NUEVO MÉTODO: Verificar que la fecha esté dentro del rango del evento
+    protected function checkDateRange(
+        EventComponent $component,
+        ComponentSchedule $newSchedule
+    ): ?string {
+        $event = $component->event;
+        
+        if (!$event) {
+            return null;
+        }
+
+        $scheduleDate = \Carbon\Carbon::parse($newSchedule->date);
+        
+        if ($scheduleDate->lt($event->start_date) || $scheduleDate->gt($event->end_date)) {
+            return "La fecha está fuera del rango del evento ({$event->start_date->format('d/m/Y')} - {$event->end_date->format('d/m/Y')})";
+        }
+
+        return null;
+    }
+
+    // Verificar conflicto con otro componente en la misma ubicación
     protected function checkLocationConflict(
         EventComponent $component,
         ComponentSchedule $newSchedule,
         ?int $excludeScheduleId = null
     ): ?string {
-        // Only check location conflicts for in_person or hybrid modalities
+        // Solo verificar ubicación para presencial o híbrido
         if (!in_array($component->modality, ['in_person', 'hybrid'])) {
             return null;
         }
 
-        // Location is required for in-person/hybrid components
+        // Ubicación requerida para verificar
         if (empty($component->location)) {
             return null;
         }
 
-        // Find all schedules on the same date
+        // Buscar horarios en la misma fecha excluyendo el actual
         $conflictingSchedules = ComponentSchedule::where('date', $newSchedule->date)
             ->when($excludeScheduleId, function ($query) use ($excludeScheduleId) {
                 $query->where('id', '!=', $excludeScheduleId);
@@ -89,22 +104,22 @@ class ScheduleConflictValidator
             ->with('component')
             ->get()
             ->filter(function ($schedule) use ($component, $newSchedule) {
-                // Skip if it's the same component
+                // Omitir si es el mismo componente
                 if ($schedule->component_id === $component->id) {
                     return false;
                 }
 
-                // Only check components with same location
+                // Solo verificar componentes con la misma ubicación
                 if ($schedule->component->location !== $component->location) {
                     return false;
                 }
 
-                // Only check in_person or hybrid components
+                // Solo verificar componentes presenciales o híbridos
                 if (!in_array($schedule->component->modality, ['in_person', 'hybrid'])) {
                     return false;
                 }
 
-                // Check if times overlap
+                // Verificar superposición de horas
                 return $newSchedule->overlapsWith($schedule);
             });
 
@@ -116,20 +131,18 @@ class ScheduleConflictValidator
         return null;
     }
 
-    /**
-     * Check if the schedule conflicts with another component by the same speaker
-     */
+    // Verificar conflicto con otro componente del mismo ponente
     protected function checkSpeakerConflict(
         EventComponent $component,
         ComponentSchedule $newSchedule,
         ?int $excludeScheduleId = null
     ): ?string {
-        // Skip if component has no speaker assigned
+        // Omitir si no hay ponente asignado
         if (!$component->speaker_id) {
             return null;
         }
 
-        // Find all schedules on the same date for components with the same speaker
+        // Buscar horarios en la misma fecha
         $conflictingSchedules = ComponentSchedule::where('date', $newSchedule->date)
             ->when($excludeScheduleId, function ($query) use ($excludeScheduleId) {
                 $query->where('id', '!=', $excludeScheduleId);
@@ -137,17 +150,17 @@ class ScheduleConflictValidator
             ->with('component')
             ->get()
             ->filter(function ($schedule) use ($component, $newSchedule) {
-                // Skip if it's the same component
+                // Omitir si es el mismo componente
                 if ($schedule->component_id === $component->id) {
                     return false;
                 }
 
-                // Only check components with the same speaker
+                // Solo verificar componentes del mismo ponente
                 if ($schedule->component->speaker_id !== $component->speaker_id) {
                     return false;
                 }
 
-                // Check if times overlap
+                // Verificar superposición de horas
                 return $newSchedule->overlapsWith($schedule);
             });
 
@@ -160,19 +173,15 @@ class ScheduleConflictValidator
         return null;
     }
 
-    /**
-     * Get all conflicts for a given event (for visualization)
-     */
+    // Obtener todos los conflictos de un evento (para visualización)
     public function getEventConflicts(int $eventId): Collection
     {
         $conflicts = collect();
 
-        // Get all components for the event
         $components = EventComponent::where('event_id', $eventId)
-            ->with(['schedules', 'speaker.user'])
+            ->with(['schedules', 'speaker.user', 'event'])
             ->get();
 
-        // Check each schedule for conflicts
         foreach ($components as $component) {
             foreach ($component->schedules as $schedule) {
                 $validation = $this->validate(
@@ -196,9 +205,7 @@ class ScheduleConflictValidator
         return $conflicts;
     }
 
-    /**
-     * Get schedules grouped by date for an event
-     */
+    // Obtener horarios agrupados por fecha para un evento
     public function getSchedulesByDate(int $eventId): Collection
     {
         $schedulesByDate = collect();
@@ -224,7 +231,7 @@ class ScheduleConflictValidator
             }
         }
 
-        // Sort schedules within each date by start time
+        // Ordenar horarios dentro de cada fecha por hora de inicio
         return $schedulesByDate->map(function ($schedules) {
             return $schedules->sortBy(function ($item) {
                 return $item['schedule']->start_time;

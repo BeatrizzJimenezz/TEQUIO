@@ -6,21 +6,13 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
+
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
+    
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    // Definimos el nombre del modelo asociado a esta fábrica
     public function definition(): array
     {
         return [
@@ -31,10 +23,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
         ];
     }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
+    // Definimos un estado para usuarios no verificados
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [

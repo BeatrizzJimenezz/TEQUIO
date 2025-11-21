@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
 {
-    // List user's registrations
+    // Listar inscripciones del usuario autenticado
     public function index()
     {
         if (!auth()->check()) {
@@ -27,7 +27,7 @@ class RegistrationController extends Controller
         return view('registrations.index', compact('registrations'));
     }
 
-    // Register for a component
+    // Inscribirse en un componente
     public function store(Request $request)
     {
         if (!auth()->check()) {
@@ -49,7 +49,7 @@ class RegistrationController extends Controller
 
         $component = EventComponent::with(['schedules', 'event'])->findOrFail($componentId);
 
-        // VALIDATION 1: Already registered
+        // VALIDACIÓN 1: Ya inscrito
         $alreadyRegistered = Registration::where('user_id', $userId)
             ->where('component_id', $componentId)
             ->exists();
@@ -64,7 +64,7 @@ class RegistrationController extends Controller
             return redirect()->back()->with('error', 'Ya estás inscrito en este componente.');
         }
 
-        // VALIDATION 2: Capacity check
+        // VALIDACIÓN 2: Verificación de capacidad
         if ($component->capacity) {
             $registeredCount = Registration::where('component_id', $componentId)->count();
             if ($registeredCount >= $component->capacity) {
@@ -78,7 +78,7 @@ class RegistrationController extends Controller
             }
         }
 
-        // VALIDATION 3: Schedule conflict
+        // VALIDACIÓN 3: Conflicto de horarios
         $newSchedules = $component->schedules;
 
         $registeredSchedules = DB::table('component_schedules as s')
@@ -141,7 +141,7 @@ class RegistrationController extends Controller
         }
     }
 
-    // Cancel registration
+    // Cancelar inscripción
     public function destroy(Request $request, $id)
     {
         if (!auth()->check()) {
@@ -170,7 +170,7 @@ class RegistrationController extends Controller
                 ->with('error', 'Inscripción no encontrada.');
         }
 
-        // VALIDATION: Can only cancel 2 days before activity starts
+        // VALIDACIÓN: Solo se puede cancelar 2 días antes de que inicie la actividad
         if (!$registration->canBeCancelled()) {
             $daysUntil = $registration->daysUntilStart();
             $message = 'No puedes cancelar tu inscripción. Solo es posible cancelar hasta 2 días antes del inicio de la actividad.';
@@ -213,7 +213,7 @@ class RegistrationController extends Controller
         }
     }
 
-    // Check if user is registered for a component
+    // Verificar si el usuario está inscrito en un componente
     public function checkStatus($componentId)
     {
         if (!auth()->check()) {

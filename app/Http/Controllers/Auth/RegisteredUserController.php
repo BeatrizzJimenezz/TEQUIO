@@ -14,16 +14,14 @@ use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
+    // Abrir vista de registro
     public function create()
     {
         return view('auth.register');
     }
 
     /**
-     * Handle an incoming registration request.
+     * Maneja una solicitud entrante de registro de usuario.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -37,10 +35,12 @@ class RegisteredUserController extends Controller
             'password' => [
                 'required', 
                 'confirmed', 
-                Rules\Password::min(8) // Mínimo 8 caracteres
-                    ->mixedCase()      // Al menos 1 mayúscula y 1 minúscula
-                    ->numbers()        // Al menos 1 número
-                    ->symbols()        // Al menos 1 símbolo
+                // Reglas de contraseña personalizada
+                // Al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo
+                Rules\Password::min(8)
+                    ->mixedCase()    
+                    ->numbers()   
+                    ->symbols()      
             ],
         ], [
             'name.regex' => 'El nombre solo puede contener letras.',

@@ -11,13 +11,13 @@ class Tag extends Model
 
     protected $fillable = ['name'];
 
-    // Relation with events
+    // Relacion con eventos
     public function events()
     {
         return $this->belongsToMany(Event::class, 'event_tag');
     }
 
-    // Relation with users
+    // Relacion con usuarios
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_interests')

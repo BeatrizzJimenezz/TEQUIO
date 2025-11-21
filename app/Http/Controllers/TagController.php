@@ -7,19 +7,19 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    // Helper method to check permissions
+    // Verificar permisos de usuario
     private function checkPermissions()
     {
         if (!auth()->check()) {
-            abort(401, 'You must be logged in.');
+            abort(401, 'Debes iniciar sesión.');
         }
         
         if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
-            abort(403, 'You do not have permission to access this section.');
+            abort(403, 'No tienes permiso para acceder a esta sección.');
         }
     }
 
-    // List all tags
+    // Listar todas las etiquetas
     public function index()
     {
         $this->checkPermissions();
@@ -28,7 +28,7 @@ class TagController extends Controller
         return view('tags.index', compact('tags'));
     }
 
-    // Store a new tag
+    // Almacenar una nueva etiqueta
     public function store(Request $request)
     {
         $this->checkPermissions();
@@ -36,17 +36,17 @@ class TagController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:tags,name'
         ], [
-            'name.required' => 'The name is required.',
-            'name.unique' => 'This tag already exists.'
+            'name.required' => 'El nombre es obligatorio.',
+            'name.unique' => 'Esta etiqueta ya existe.'
         ]);
 
         Tag::create(['name' => $request->name]);
 
         return redirect()->route('tags.index')
-            ->with('success', 'Tag created successfully.');
+            ->with('success', 'Etiqueta creada exitosamente.');
     }
 
-    // Update an existing tag
+    // Actualizar una etiqueta existente
     public function update(Request $request, Tag $tag)
     {
         $this->checkPermissions();
@@ -54,17 +54,17 @@ class TagController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:tags,name,' . $tag->id
         ], [
-            'name.required' => 'The name is required.',
-            'name.unique' => 'This tag already exists.'
+            'name.required' => 'El nombre es obligatorio.',
+            'name.unique' => 'Esta etiqueta ya existe.'
         ]);
 
         $tag->update(['name' => $request->name]);
 
         return redirect()->route('tags.index')
-            ->with('success', 'Tag updated successfully.');
+            ->with('success', 'Etiqueta actualizada exitosamente.');
     }
 
-    // Delete a tag
+    // Eliminar una etiqueta
     public function destroy(Tag $tag)
     {
         $this->checkPermissions();
@@ -72,10 +72,10 @@ class TagController extends Controller
         try {
             $tag->delete();
             return redirect()->route('tags.index')
-                ->with('success', 'Tag deleted successfully.');
+                ->with('success', 'Etiqueta eliminada exitosamente.');
         } catch (\Exception $e) {
             return redirect()->route('tags.index')
-                ->with('error', 'Cannot delete the tag because it is in use.');
+                ->with('error', 'No se puede eliminar la etiqueta porque está en uso.');
         }
     }
 }
