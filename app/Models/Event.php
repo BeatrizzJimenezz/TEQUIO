@@ -24,7 +24,8 @@ class Event extends Model
         'modality',   // Valores esperados: 'virtual', 'in_person', 'hybrid'
         'location',
         'visibility', // Valores esperados: 'public', 'private'
-        'status',     // Valores esperados: 'planning', 'active', 'finished'
+        'status',
+        'is_archived'
     ];
 
     protected $casts = [
@@ -37,6 +38,8 @@ class Event extends Model
     {
         return $this->belongsTo(ProfessionalProfile::class);
     }
+
+    
 
     // Etiquetas asociadas al evento
     public function tags(): BelongsToMany
@@ -84,4 +87,14 @@ class Event extends Model
         ->withTimestamps();
     }
 
+        // Scopes útiles
+    public function scopeActive($query)
+    {
+        return $query->where('is_archived', false);
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->where('is_archived', true);
+    }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventComponentController;
+use App\Http\Controllers\EventManagementController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ProposalController;
@@ -71,7 +72,9 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::put('/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::patch('/{event}/archive', [EventController::class, 'archive'])->name('events.archive');
-    
+
+    Route::get('/{event}/manage', [EventManagementController::class, 'index'])->name('events.manage');
+
     // Component Routes
     Route::get('/{event}/components', [EventComponentController::class, 'index'])->name('components.index');
     Route::get('/{event}/components/create', [EventComponentController::class, 'create'])->name('components.create');
@@ -88,6 +91,13 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::get('/{event}/components/{component}/schedules/{schedule}/edit', [ComponentScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/{event}/components/{component}/schedules/{schedule}', [ComponentScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/{event}/components/{component}/schedules/{schedule}', [ComponentScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    // Team Management
+    Route::get('/{event}/team', [EventTeamController::class, 'index'])->name('events.team.index');
+    Route::get('/{event}/team/add', [EventTeamController::class, 'create'])->name('events.team.create');
+    Route::post('/{event}/team/add', [EventTeamController::class, 'store'])->name('events.team.store');
+    Route::delete('/{event}/team/{user}', [EventTeamController::class, 'destroy'])->name('events.team.destroy');
+    
 
     // Offers Management & Evaluation (For Organizers)
     Route::get('/{event}/offers', [OfferController::class, 'index'])->name('offers.index'); 
@@ -109,11 +119,6 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::patch('/{event}/offers/{offer}/close', [OfferController::class, 'closeOffer'])->name('offers.close');
     Route::patch('/{event}/offers/{offer}/reopen', [OfferController::class, 'reopenOffer'])->name('offers.reopen');
 
-    // Team Management
-    Route::get('/{event}/team', [EventTeamController::class, 'index'])->name('events.team.index');
-    Route::get('/{event}/team/add', [EventTeamController::class, 'create'])->name('events.team.create');
-    Route::post('/{event}/team/add', [EventTeamController::class, 'store'])->name('events.team.store');
-    Route::delete('/{event}/team/{user}', [EventTeamController::class, 'destroy'])->name('events.team.destroy');
 });
 
 // ============ Registration Routes ============

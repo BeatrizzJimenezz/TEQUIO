@@ -28,6 +28,12 @@ class EventPolicy
         return false;
     }
 
+    public function manage(User $user, Event $event)
+    {
+        // Check if user is an organizer of this event
+        return $event->organizers()->where('organizer_id', $user->organizer->id ?? null)->exists();
+    }
+
     // Permite ver el evento si es público o si el usuario es organizador
     public function view(User $user, Event $event)
     {

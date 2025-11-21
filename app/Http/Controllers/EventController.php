@@ -38,20 +38,20 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $isArchivedView = $request->get('view') === 'archived';
         
-        // Iniciar consulta filtrando por el perfil del usuario actual
+        // Iniciar consulta con relaciones
         $query = Event::with(['tags', 'components'])
             ->whereHas('professionalProfile', function($q) use ($user) {
                 $q->where('user_id', $user->id);
-            })
-            ->orderBy('start_date', 'desc');
+            });
 
         // Filtro de búsqueda por nombre o descripción
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -77,7 +77,19 @@ class EventController extends Controller
             });
         }
 
+        // Filtrar según la vista (archivados vs activos)
+        if ($isArchivedView) {
+            $query->archived(); 
+        } else {
+            $query->active()
+                ->whereIn('status', ['active', 'planning', 'finished']); 
+        }
+
+        // Ordenar por fecha de inicio (más recientes primero)
+        $query->orderBy('start_date', 'desc');
+
         $events = $query->paginate(12)->withQueryString();
+        
         $tags = Tag::orderBy('name')->get();
 
         return view('events.index', compact('events', 'tags'));
@@ -131,6 +143,7 @@ class EventController extends Controller
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para editar este evento.');
         }
@@ -146,6 +159,7 @@ class EventController extends Controller
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para editar este evento.');
         }
@@ -178,11 +192,12 @@ class EventController extends Controller
             ->with('success', 'Evento actualizado exitosamente.');
     }
 
-    // Eliminar evento
+    // Eliminar evento permanentemente
     public function destroy(Event $event)
     {
         $this->checkPermissions();
 
+        // Verificar permisos
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para eliminar este evento.');
         }
@@ -197,19 +212,29 @@ class EventController extends Controller
         }
     }
 
-    // Archivar evento (cambiar estado a finalizado)
+    // Archivar o desarchivar evento
     public function archive(Event $event)
     {
         $this->checkPermissions();
-
+        
         if ($event->professionalProfile->user_id !== auth()->id()) {
             abort(403, 'No tienes permiso para archivar este evento.');
         }
+        
+        $event->is_archived = !$event->is_archived;
 
-        $event->update(['status' => 'finished']);
-
-        return redirect()->route('events.index')
-            ->with('success', 'Evento archivado exitosamente.');
+        if ($event->is_archived && $event->status === 'active') {
+            $event->status = 'finished';
+        }
+        
+        $event->save();
+        
+        // Mensaje de éxito
+        $message = $event->is_archived 
+            ? 'Evento archivado correctamente.' 
+            : 'Evento restaurado correctamente.';
+        
+        return redirect()->back()->with('success', $message);
     }
 
     // Mostrar detalles públicos del evento

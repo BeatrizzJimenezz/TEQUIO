@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\ComponentSchedule;
 use App\Models\EventComponent;
+use App\Models\ComponentSchedule;
 use Illuminate\Support\Collection;
 
 class ScheduleConflictValidator
@@ -19,7 +19,7 @@ class ScheduleConflictValidator
         $errors = [];
 
         // Obtener el componente para este horario
-        $component = EventComponent::with('speaker.user')->find($componentId);
+        $component = EventComponent::with(['speaker.user', 'event'])->find($componentId);
 
         if (!$component) {
             return [
@@ -35,6 +35,12 @@ class ScheduleConflictValidator
             'start_time' => $startTime,
             'end_time' => $endTime,
         ]);
+
+        // NUEVA VALIDACIÓN: Verificar que la fecha esté dentro del rango del evento
+        $dateRangeError = $this->checkDateRange($component, $newSchedule);
+        if ($dateRangeError) {
+            $errors[] = $dateRangeError;
+        }
 
         // Verificar conflictos de ubicación
         $locationConflict = $this->checkLocationConflict($component, $newSchedule, $excludeScheduleId);
@@ -52,6 +58,26 @@ class ScheduleConflictValidator
             'valid' => empty($errors),
             'errors' => $errors
         ];
+    }
+
+    // NUEVO MÉTODO: Verificar que la fecha esté dentro del rango del evento
+    protected function checkDateRange(
+        EventComponent $component,
+        ComponentSchedule $newSchedule
+    ): ?string {
+        $event = $component->event;
+        
+        if (!$event) {
+            return null;
+        }
+
+        $scheduleDate = \Carbon\Carbon::parse($newSchedule->date);
+        
+        if ($scheduleDate->lt($event->start_date) || $scheduleDate->gt($event->end_date)) {
+            return "La fecha está fuera del rango del evento ({$event->start_date->format('d/m/Y')} - {$event->end_date->format('d/m/Y')})";
+        }
+
+        return null;
     }
 
     // Verificar conflicto con otro componente en la misma ubicación
@@ -153,7 +179,7 @@ class ScheduleConflictValidator
         $conflicts = collect();
 
         $components = EventComponent::where('event_id', $eventId)
-            ->with(['schedules', 'speaker.user'])
+            ->with(['schedules', 'speaker.user', 'event'])
             ->get();
 
         foreach ($components as $component) {

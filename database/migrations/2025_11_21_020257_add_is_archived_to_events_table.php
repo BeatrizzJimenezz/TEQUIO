@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('profile_photo')->nullable()->after('email');
+        Schema::table('events', function (Blueprint $table) {
+            $table->boolean('is_archived')->default(false)->after('status');
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('profile_photo');
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('is_archived');
         });
     }
 };

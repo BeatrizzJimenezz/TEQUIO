@@ -19,15 +19,45 @@ class ComponentScheduleController extends Controller
         $this->validator = $validator;
     }
     // Muestra el horario general de un evento
-    public function eventSchedule(Event $event): View
-    {
-        $this->authorize('update', $event);
+public function eventSchedule(Event $event): View
+{
+    $this->authorize('update', $event);
 
-        $schedulesByDate = $this->validator->getSchedulesByDate($event->id);
-        $conflicts = $this->validator->getEventConflicts($event->id);
+    $schedulesByDate = $this->validator->getSchedulesByDate($event->id);
+    $conflicts = $this->validator->getEventConflicts($event->id);
 
-        return view('schedules.event-overview', compact('event', 'schedulesByDate', 'conflicts'));
+    // ====== DEBUG TEMPORAL ======
+    \Log::info('=== VISTA INDIVIDUAL (EVENT SCHEDULE) ===');
+    \Log::info('Event ID: ' . $event->id);
+    \Log::info('Event Dates: ' . $event->start_date->format('Y-m-d') . ' to ' . $event->end_date->format('Y-m-d'));
+    \Log::info('Total Conflicts Found: ' . $conflicts->count());
+    
+    foreach ($conflicts as $index => $conflict) {
+        \Log::info("Conflict #{$index}:", [
+            'component_id' => $conflict['component']->id,
+            'component_name' => $conflict['component']->name,
+            'schedule_id' => $conflict['schedule']->id,
+            'schedule_date' => $conflict['schedule']->date->format('Y-m-d'),
+            'schedule_time' => $conflict['schedule']->start_time . ' - ' . $conflict['schedule']->end_time,
+            'errors' => $conflict['errors'],
+        ]);
     }
+
+    $components = EventComponent::where('event_id', $event->id)
+        ->with(['schedules', 'speaker.user', 'event'])
+        ->get();
+        
+    \Log::info('All Components with Schedules:');
+    foreach ($components as $component) {
+        \Log::info("Component: {$component->name} (ID: {$component->id})");
+        foreach ($component->schedules as $schedule) {
+            \Log::info("  - Schedule ID {$schedule->id}: {$schedule->date->format('Y-m-d')} {$schedule->start_time}-{$schedule->end_time}");
+        }
+    }
+    // ====== FIN DEBUG ======
+
+    return view('schedules.event-overview', compact('event', 'schedulesByDate', 'conflicts'));
+}
 
     // Muestra la lista de horarios para un componente específico
     public function index(Event $event, EventComponent $component): View
