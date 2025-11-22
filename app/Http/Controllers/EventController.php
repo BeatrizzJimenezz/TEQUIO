@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Tag;
+use App\Models\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Notifications\EventUpdatedNotification;
 
 class EventController extends Controller
@@ -317,6 +319,121 @@ class EventController extends Controller
         }
 
         return $value;
+    }
+
+    // Lista de reportes de todos los eventos del organizador
+    public function reportsIndex()
+    {
+        $this->checkPermissions();
+
+        $user = auth()->user();
+
+        // Obtener todos los eventos del organizador con estadísticas
+        $events = Event::with(['components.registrations', 'tags'])
+            ->whereHas('professionalProfile', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderBy('start_date', 'desc')
+            ->get()
+            ->map(function ($event) {
+                $event->stats = [
+                    'totalComponents' => $event->components->count(),
+                    'totalRegistrations' => $event->components->sum(fn($c) => $c->registrations->count()),
+                    'talks' => $event->components->where('type', 'talk')->count(),
+                    'workshops' => $event->components->where('type', 'workshop')->count(),
+                    'activities' => $event->components->where('type', 'activity')->count(),
+                ];
+                return $event;
+            });
+
+        return view('events.reports-index', compact('events'));
+    }
+
+    // Reportes del evento
+    public function reports(Event $event)
+    {
+        $this->checkPermissions();
+
+        if ($event->professionalProfile->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para ver los reportes de este evento.');
+        }
+
+        // Cargar relaciones necesarias
+        $event->load(['components.schedules', 'components.registrations.user', 'tags']);
+
+        // Estadísticas generales del evento
+        $stats = [
+            'totalComponents' => $event->components->count(),
+            'totalRegistrations' => $event->components->sum(fn($c) => $c->registrations->count()),
+            'componentsByType' => [
+                'talk' => $event->components->where('type', 'talk')->count(),
+                'workshop' => $event->components->where('type', 'workshop')->count(),
+                'activity' => $event->components->where('type', 'activity')->count(),
+            ],
+            'componentsByStatus' => [
+                'approved' => $event->components->where('proposal_status', 'approved')->count(),
+                'proposed' => $event->components->where('proposal_status', 'proposed')->count(),
+                'rejected' => $event->components->where('proposal_status', 'rejected')->count(),
+                'offer_open' => $event->components->where('proposal_status', 'offer_open')->count(),
+            ],
+        ];
+
+        // Componentes con más inscripciones
+        $topComponents = $event->components
+            ->map(function ($component) {
+                $component->registrations_count = $component->registrations->count();
+                return $component;
+            })
+            ->sortByDesc('registrations_count')
+            ->take(5);
+
+        // Inscripciones por día
+        $registrationsByDay = Registration::whereIn('component_id', $event->components->pluck('id'))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Inscripciones por componente para gráfico
+        $registrationsByComponent = $event->components
+            ->map(function ($component) {
+                return [
+                    'name' => \Str::limit($component->name, 20),
+                    'count' => $component->registrations->count(),
+                ];
+            })
+            ->sortByDesc('count')
+            ->take(10)
+            ->values();
+
+        // Lista de inscritos
+        $allRegistrations = Registration::whereIn('component_id', $event->components->pluck('id'))
+            ->with(['user', 'component'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Capacidad vs inscripciones
+        $capacityData = $event->components
+            ->filter(fn($c) => $c->capacity > 0)
+            ->map(function ($component) {
+                return [
+                    'name' => \Str::limit($component->name, 15),
+                    'capacity' => $component->capacity,
+                    'registered' => $component->registrations->count(),
+                    'percentage' => round(($component->registrations->count() / $component->capacity) * 100, 1),
+                ];
+            })
+            ->values();
+
+        return view('events.reports', compact(
+            'event',
+            'stats',
+            'topComponents',
+            'registrationsByDay',
+            'registrationsByComponent',
+            'allRegistrations',
+            'capacityData'
+        ));
     }
 
 }

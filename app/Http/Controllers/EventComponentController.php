@@ -50,7 +50,24 @@ class EventComponentController extends Controller
         $this->checkPermissions();
         $this->checkOwner($event);
 
-        $speakers = ProfessionalProfile::all();
+        // Obtener perfiles profesionales que tengan datos relevantes (about_me, skills)
+        // o cuyos usuarios sean Organizadores, o sean temporales
+        $speakers = ProfessionalProfile::with('user')
+            ->where(function ($query) {
+                $query->where('is_temporary', true) // Incluir perfiles temporales
+                      ->orWhere(function ($q) {
+                          $q->whereNotNull('about_me')
+                            ->where('about_me', '!=', '');
+                      })
+                      ->orWhere(function ($q) {
+                          $q->whereNotNull('skills')
+                            ->where('skills', '!=', '');
+                      })
+                      ->orWhereHas('user', function ($q) {
+                          $q->role('Organizador');
+                      });
+            })
+            ->get();
 
         return view('components.create', compact('event', 'speakers'));
     }
@@ -78,11 +95,33 @@ class EventComponentController extends Controller
             'schedules.*.date' => 'required|date',
             'schedules.*.start_time' => 'required',
             'schedules.*.end_time' => 'required|after:schedules.*.start_time',
-            'speaker_id' => 'nullable|exists:professional_profiles,id',
+            'speaker_type' => 'required|in:existing,new,none',
+            'speaker_id' => 'nullable|required_if:speaker_type,existing|exists:professional_profiles,id',
+            'temp_name' => 'nullable|required_if:speaker_type,new|string|max:255',
+            'temp_email' => 'nullable|required_if:speaker_type,new|email|max:255',
+            'temp_profession' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
         try {
+            // Determinar el speaker_id basado en el tipo de selección
+            $speakerId = null;
+
+            if ($validated['speaker_type'] === 'existing') {
+                $speakerId = $validated['speaker_id'] ?? null;
+            } elseif ($validated['speaker_type'] === 'new') {
+                // Crear perfil temporal de ponente
+                $tempProfile = ProfessionalProfile::create([
+                    'user_id' => null,
+                    'is_temporary' => true,
+                    'temp_email' => $validated['temp_email'],
+                    'temp_name' => $validated['temp_name'],
+                    'temp_profession' => $validated['temp_profession'] ?? null,
+                    'created_by_user_id' => auth()->id(),
+                ]);
+                $speakerId = $tempProfile->id;
+            }
+
             $component = $event->components()->create([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -98,7 +137,7 @@ class EventComponentController extends Controller
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,
                 'proposal_status' => 'approved',
                 'proposed_by_user_id' => auth()->id(),
-                'speaker_id' => $validated['speaker_id'] ?? null,
+                'speaker_id' => $speakerId,
             ]);
 
             // Validar conflictos de horario
@@ -160,7 +199,25 @@ class EventComponentController extends Controller
         }
 
         $component->load('schedules');
-        $speakers = ProfessionalProfile::all();
+
+        // Obtener perfiles profesionales que tengan datos relevantes (about_me, skills)
+        // o cuyos usuarios sean Organizadores, o sean temporales
+        $speakers = ProfessionalProfile::with('user')
+            ->where(function ($query) {
+                $query->where('is_temporary', true) // Incluir perfiles temporales
+                      ->orWhere(function ($q) {
+                          $q->whereNotNull('about_me')
+                            ->where('about_me', '!=', '');
+                      })
+                      ->orWhere(function ($q) {
+                          $q->whereNotNull('skills')
+                            ->where('skills', '!=', '');
+                      })
+                      ->orWhereHas('user', function ($q) {
+                          $q->role('Organizador');
+                      });
+            })
+            ->get();
 
         return view('components.edit', compact('event', 'component', 'speakers'));
     }
@@ -192,11 +249,33 @@ class EventComponentController extends Controller
             'schedules.*.date' => 'required|date',
             'schedules.*.start_time' => 'required',
             'schedules.*.end_time' => 'required',
-            'speaker_id' => 'nullable|exists:professional_profiles,id',
+            'speaker_type' => 'required|in:existing,new,none',
+            'speaker_id' => 'nullable|required_if:speaker_type,existing|exists:professional_profiles,id',
+            'temp_name' => 'nullable|required_if:speaker_type,new|string|max:255',
+            'temp_email' => 'nullable|required_if:speaker_type,new|email|max:255',
+            'temp_profession' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
         try {
+            // Determinar el speaker_id basado en el tipo de selección
+            $speakerId = null;
+
+            if ($validated['speaker_type'] === 'existing') {
+                $speakerId = $validated['speaker_id'] ?? null;
+            } elseif ($validated['speaker_type'] === 'new') {
+                // Crear perfil temporal de ponente
+                $tempProfile = ProfessionalProfile::create([
+                    'user_id' => null,
+                    'is_temporary' => true,
+                    'temp_email' => $validated['temp_email'],
+                    'temp_name' => $validated['temp_name'],
+                    'temp_profession' => $validated['temp_profession'] ?? null,
+                    'created_by_user_id' => auth()->id(),
+                ]);
+                $speakerId = $tempProfile->id;
+            }
+
             $component->update([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -210,7 +289,7 @@ class EventComponentController extends Controller
                 'organizer_cost' => $validated['organizer_cost'] ?? null,
                 'participant_requirements' => $validated['participant_requirements'] ?? null,
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,
-                'speaker_id' => $validated['speaker_id'] ?? null,
+                'speaker_id' => $speakerId,
             ]);
 
             // Eliminar horarios antiguos primero

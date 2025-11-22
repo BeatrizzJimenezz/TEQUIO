@@ -49,7 +49,7 @@
                     </a>
                     <!-- ORGANIZADOR / ADMIN -->
                     @if(auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
-                        
+
                         <div class="sidebar-category">Organizar</div>
 
                             <a class="sidebar-link" href="{{ route('events.index') }}" class="sidebar-link {{ request()->routeIs('events.index') ? 'active' : '' }}">
@@ -57,23 +57,69 @@
                                 <span class="link-text ms-6">Mis Eventos</span>
                             </a>
 
-                            <a class="sidebar-link" href="#">
-                                <i class="bi bi-grid-fill"></i>
+                            <a href="{{ route('events.reports.index') }}" class="sidebar-link {{ request()->routeIs('events.reports.*') ? 'active' : '' }}">
+                                <i class="bi bi-bar-chart-fill"></i>
                                 <span class="link-text ms-6">Reportes</span>
-                            </a>             
+                            </a>
+                    @endif
+
+                    <!-- SOLO ADMIN -->
+                    @if(auth()->user()->hasRole('Administrador'))
+                        <div class="sidebar-category">Administración</div>
+
+                        <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <i class="bi bi-people-fill"></i>
+                            <span class="link-text ms-6">Usuarios</span>
+                        </a>
+
+                        <a href="{{ route('tags.index') }}" class="sidebar-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">
+                            <i class="bi bi-tags-fill"></i>
+                            <span class="link-text ms-6">Etiquetas</span>
+                        </a>
+
+                        @php
+                            $pendingRoleRequests = \App\Models\RoleRequest::where('status', 'pending')->count();
+                        @endphp
+                        <a href="{{ route('role-requests.index') }}" class="sidebar-link {{ request()->routeIs('role-requests.index') ? 'active' : '' }}">
+                            <i class="bi bi-person-check-fill"></i>
+                            <span class="link-text ms-6">Solicitudes de Rol</span>
+                            @if($pendingRoleRequests > 0)
+                                <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingRoleRequests }}</span>
+                            @endif
+                        </a>
+
+                        <a href="{{ route('admin.reports.index') }}" class="sidebar-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-bar-chart-fill"></i>
+                            <span class="link-text ms-6">Reportes</span>
+                        </a>
+                    @endif
+
+                    <!-- Solicitar ser Organizador (solo para participantes) -->
+                    @if(!auth()->user()->hasAnyRole(['Administrador', 'Organizador']))
+                        <div class="sidebar-category">Oportunidades</div>
+
+                        <a href="{{ route('role-requests.create') }}" class="sidebar-link {{ request()->routeIs('role-requests.create') ? 'active' : '' }}">
+                            <i class="bi bi-person-plus-fill"></i>
+                            <span class="link-text ms-6">Ser Organizador</span>
+                        </a>
+
+                        <a href="{{ route('role-requests.my-requests') }}" class="sidebar-link {{ request()->routeIs('role-requests.my-requests') ? 'active' : '' }}">
+                            <i class="bi bi-clock-history"></i>
+                            <span class="link-text ms-6">Mis Solicitudes</span>
+                        </a>
                     @endif
 
                     <!-- CONTRIBUCIONES -->
                     <div class="sidebar-category">Contribuciones</div>
 
-                    <a class="sidebar-link" href="#">
+                    <a href="{{ route('offers.public') }}" class="sidebar-link {{ request()->routeIs('offers.public') ? 'active' : '' }}">
                         <i class="bi bi-search"></i>
                         <span class="link-text ms-6">Ofertas</span>
                     </a>
 
-                    <a class="sidebar-link" href="#">
+                    <a href="{{ route('proposals.my_proposals') }}" class="sidebar-link {{ request()->routeIs('proposals.my_proposals') ? 'active' : '' }}">
                         <i class="bi bi-send"></i>
-                        <span class="link-text ms-6">Propuestas</span>
+                        <span class="link-text ms-6">Mis Propuestas</span>
                     </a>
 
                     <!-- MI CUENTA -->

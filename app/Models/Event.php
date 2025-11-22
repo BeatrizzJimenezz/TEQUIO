@@ -42,11 +42,11 @@ class Event extends Model
 
     /**
      * Relación con etiquetas
-     * Tabla pivote: 'event_tags'
-     */    
+     * Tabla pivote: 'event_tag'
+     */
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'event_tags');
+        return $this->belongsToMany(Tag::class);
     }
 
     /**

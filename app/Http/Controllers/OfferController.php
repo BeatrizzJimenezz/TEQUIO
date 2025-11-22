@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventComponent;
 use App\Models\OfferApplication;
+use App\Notifications\ProposalStatusChanged;
 use App\Services\ScheduleConflictValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +70,7 @@ class OfferController extends Controller
                 'capacity' => $validated['capacity'] ?? null,
                 'organizer_cost' => $validated['organizer_cost'] ?? null,
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,
-                'proposal_status' => 'open-offer',
+                'proposal_status' => 'offer_open',
                 'attendee_price' => 0,
             ]);
 
@@ -127,7 +128,7 @@ class OfferController extends Controller
         $this->verifyOwner($event);
 
         $offers = $event->components()
-            ->where('proposal_status', 'open-offer')
+            ->where('proposal_status', 'offer_open')
             ->with('schedules')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -138,7 +139,7 @@ class OfferController extends Controller
     // Ver ofertas públicas (para ponentes)
     public function publicList()
     {
-        $offers = EventComponent::where('proposal_status', 'open-offer')
+        $offers = EventComponent::where('proposal_status', 'offer_open')
             ->whereHas('event', function ($q) {
                 $q->where('visibility', 'public')
                   ->where('status', '!=', 'finished');
@@ -153,7 +154,7 @@ class OfferController extends Controller
     // Aplicar a una oferta
     public function apply(Request $request, EventComponent $offer)
     {
-        if ($offer->proposal_status !== 'open-offer') {
+        if ($offer->proposal_status !== 'offer_open') {
             abort(403, 'Esta oferta ya no está disponible.');
         }
 
@@ -176,12 +177,18 @@ class OfferController extends Controller
         ]);
 
         try {
-            OfferApplication::create([
+            $application = OfferApplication::create([
                 'component_id' => $offer->id,
                 'professional_profile_id' => $profile->id,
                 'message' => $validated['message'] ?? null,
                 'status' => 'pending',
             ]);
+
+            // Notificar al organizador del evento
+            $organizer = $offer->event->professionalProfile->user;
+            if ($organizer) {
+                $organizer->notify(new \App\Notifications\NewOfferApplication($offer, $application, auth()->user()));
+            }
 
             return redirect()->route('offers.public')
                 ->with('success', 'Solicitud enviada exitosamente. El organizador la revisará.');
@@ -202,7 +209,7 @@ class OfferController extends Controller
             ->get();
 
         $offersWithApplications = $event->components()
-            ->where('proposal_status', 'open-offer')
+            ->where('proposal_status', 'offer_open')
             ->whereHas('applications', function ($q) {
                 $q->where('status', 'pending');
             })
@@ -227,6 +234,11 @@ class OfferController extends Controller
         try {
             $component->update(['proposal_status' => 'approved']);
 
+            // Notificar al proponente
+            if ($component->proposedBy) {
+                $component->proposedBy->notify(new ProposalStatusChanged($component, 'approved'));
+            }
+
             return redirect()->route('offers.evaluation', $event)
                 ->with('success', 'Propuesta aprobada exitosamente.');
         } catch (\Exception $e) {
@@ -245,6 +257,11 @@ class OfferController extends Controller
 
         try {
             $component->update(['proposal_status' => 'rejected']);
+
+            // Notificar al proponente
+            if ($component->proposedBy) {
+                $component->proposedBy->notify(new ProposalStatusChanged($component, 'rejected'));
+            }
 
             return redirect()->route('offers.evaluation', $event)
                 ->with('success', 'Propuesta rechazada.');
@@ -318,7 +335,7 @@ class OfferController extends Controller
             abort(404);
         }
 
-        if ($offer->proposal_status !== 'open-offer') {
+        if ($offer->proposal_status !== 'offer_open') {
             return back()->with('error', 'Esta oferta ya no está abierta.');
         }
 
@@ -352,7 +369,7 @@ class OfferController extends Controller
         }
 
         try {
-            $offer->update(['proposal_status' => 'open-offer']);
+            $offer->update(['proposal_status' => 'offer_open']);
 
             return redirect()->route('offers.index', $event)
                 ->with('success', 'Oferta reabierta. Se pueden enviar nuevas solicitudes.');

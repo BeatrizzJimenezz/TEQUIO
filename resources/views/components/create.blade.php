@@ -137,24 +137,108 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <div class="col-md-6 mb-3">
-                            <label for="speaker_id" class="form-label fw-semibold" style="color: #0C2340;">
-                                Seleccionar Ponente
+                        {{-- Tipo de selección de ponente --}}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #0C2340;">
+                                ¿Cómo deseas asignar el ponente?
                             </label>
-                            <select class="form-select @error('speaker_id') is-invalid @enderror"
-                                    id="speaker_id" name="speaker_id">
-                                <option value="">-- Seleccionar --</option>
-                                @foreach($speakers as $profile)
-                                    <option value="{{ $profile->id }}"
-                                        {{ old('speaker_id') == $profile->id ? 'selected' : '' }}>
-                                        {{ $profile->user->name }} ({{ $profile->skills ?? 'Sin habilidades registradas' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('speaker_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Si no se selecciona, quedará sin asignar.</small>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="speaker_type" id="speakerExisting"
+                                           value="existing" {{ old('speaker_type', 'existing') == 'existing' ? 'checked' : '' }}
+                                           onchange="toggleSpeakerSection()">
+                                    <label class="form-check-label" for="speakerExisting">
+                                        Seleccionar existente
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="speaker_type" id="speakerNew"
+                                           value="new" {{ old('speaker_type') == 'new' ? 'checked' : '' }}
+                                           onchange="toggleSpeakerSection()">
+                                    <label class="form-check-label" for="speakerNew">
+                                        Crear perfil temporal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="speaker_type" id="speakerNone"
+                                           value="none" {{ old('speaker_type') == 'none' ? 'checked' : '' }}
+                                           onchange="toggleSpeakerSection()">
+                                    <label class="form-check-label" for="speakerNone">
+                                        Sin asignar
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Sección de ponente existente --}}
+                        <div id="existingSpeakerSection" class="{{ old('speaker_type', 'existing') == 'existing' ? '' : 'd-none' }}">
+                            <div class="col-md-8 mb-3">
+                                <label for="speaker_id" class="form-label fw-semibold" style="color: #0C2340;">
+                                    Seleccionar Ponente
+                                </label>
+                                <select class="form-select @error('speaker_id') is-invalid @enderror"
+                                        id="speaker_id" name="speaker_id">
+                                    <option value="">-- Seleccionar --</option>
+                                    @foreach($speakers as $profile)
+                                        <option value="{{ $profile->id }}"
+                                            {{ old('speaker_id') == $profile->id ? 'selected' : '' }}>
+                                            @if($profile->is_temporary)
+                                                {{ $profile->temp_name }} (Temporal - {{ $profile->temp_profession ?? 'Sin profesión' }})
+                                            @else
+                                                {{ $profile->user->name }} ({{ $profile->skills ?? 'Sin habilidades registradas' }})
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('speaker_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Sección de nuevo ponente temporal --}}
+                        <div id="newSpeakerSection" class="{{ old('speaker_type') == 'new' ? '' : 'd-none' }}">
+                            <div class="alert border-0 mb-3" style="background-color: #e8f4f8; border-left: 4px solid #4499BB !important;">
+                                <i class="bi bi-info-circle me-2" style="color: #4499BB;"></i>
+                                <small>Crea un perfil temporal para un ponente que aún no está registrado en el sistema.
+                                Cuando el ponente se registre con el mismo email, podrá vincular este perfil a su cuenta.</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="temp_name" class="form-label fw-semibold" style="color: #0C2340;">
+                                        Nombre completo <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('temp_name') is-invalid @enderror"
+                                           id="temp_name" name="temp_name" value="{{ old('temp_name') }}"
+                                           placeholder="Ej: Dr. Juan Pérez García">
+                                    @error('temp_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="temp_email" class="form-label fw-semibold" style="color: #0C2340;">
+                                        Correo electrónico <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="email" class="form-control @error('temp_email') is-invalid @enderror"
+                                           id="temp_email" name="temp_email" value="{{ old('temp_email') }}"
+                                           placeholder="Ej: ponente@email.com">
+                                    @error('temp_email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label for="temp_profession" class="form-label fw-semibold" style="color: #0C2340;">
+                                        Profesión / Ocupación
+                                    </label>
+                                    <input type="text" class="form-control @error('temp_profession') is-invalid @enderror"
+                                           id="temp_profession" name="temp_profession" value="{{ old('temp_profession') }}"
+                                           placeholder="Ej: Ingeniero en Sistemas, Investigador en IA, Docente universitario">
+                                    @error('temp_profession')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Opcional. Ayuda a identificar al ponente.</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -371,9 +455,44 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 let scheduleIndex = 1;
+
+// Toggle entre secciones de ponente
+function toggleSpeakerSection() {
+    const speakerType = document.querySelector('input[name="speaker_type"]:checked').value;
+    const existingSection = document.getElementById('existingSpeakerSection');
+    const newSection = document.getElementById('newSpeakerSection');
+
+    // Ocultar ambas secciones primero
+    existingSection.classList.add('d-none');
+    newSection.classList.add('d-none');
+
+    // Limpiar campos según la selección
+    if (speakerType === 'existing') {
+        existingSection.classList.remove('d-none');
+        // Limpiar campos de nuevo ponente
+        document.getElementById('temp_name').value = '';
+        document.getElementById('temp_email').value = '';
+        document.getElementById('temp_profession').value = '';
+    } else if (speakerType === 'new') {
+        newSection.classList.remove('d-none');
+        // Limpiar selector de ponente existente
+        document.getElementById('speaker_id').value = '';
+    } else {
+        // Sin asignar - limpiar ambos
+        document.getElementById('speaker_id').value = '';
+        document.getElementById('temp_name').value = '';
+        document.getElementById('temp_email').value = '';
+        document.getElementById('temp_profession').value = '';
+    }
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    toggleSpeakerSection();
+});
 
 function addSchedule() {
     const container = document.getElementById('schedulesContainer');
@@ -446,4 +565,4 @@ document.getElementById('componentForm')?.addEventListener('submit', function(e)
     }
 });
 </script>
-@endsection
+@endpush

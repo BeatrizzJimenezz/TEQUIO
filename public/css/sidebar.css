@@ -10,7 +10,7 @@ body {
 }
 
 #sidebar-wrapper {
-    min-height: 100vh;
+    height: 100vh;
     background-color: #0c2340;
     color: #fff;
     transition: all 0.3s ease;
@@ -19,6 +19,33 @@ body {
     left: 0;
     z-index: 9999;
     border-right: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#sidebar-wrapper .list-group {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
+}
+
+#sidebar-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar-wrapper::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+
+#sidebar-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+#sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
 }
 
 #page-content-wrapper {
