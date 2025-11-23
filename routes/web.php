@@ -93,10 +93,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin/users')->group(function (
 // ============ Admin Reports Routes ============
 Route::middleware(['auth', 'verified'])->prefix('admin/reports')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('/export', [ReportController::class, 'export'])->name('admin.reports.export');
 });
 
 // ============ Event Management Routes (Admin/Organizer) ============
 Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () {
+    // Event Reports Index
     // Event Reports Index
     Route::get('/reports', [EventController::class, 'reportsIndex'])->name('events.reports.index');
 
@@ -110,6 +112,8 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::patch('/{event}/archive', [EventController::class, 'archive'])->name('events.archive');
 
     Route::get('/{event}/manage', [EventManagementController::class, 'index'])->name('events.manage');
+    
+    Route::get('/{event}/reports/export', [EventController::class, 'exportReport'])->name('events.reports.export');
     Route::get('/{event}/reports', [EventController::class, 'reports'])->name('events.reports');
 
     // Component Routes

@@ -65,6 +65,55 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('stats', 'charts', 'recentEvents', 'recentUsers', 'topEvents'));
     }
 
+    public function export(Request $request)
+    {
+        // Verificar que sea administrador
+        if (!auth()->user()->hasRole('Administrador')) {
+            abort(403, 'Solo los administradores pueden exportar reportes.');
+        }
+
+        $format = $request->query('format', 'pdf');
+        $section = $request->query('section', 'all');
+
+        // Recopilar estadísticas usando los métodos existentes
+        $stats = [
+            'users' => $this->getUserStats(),
+            'events' => $this->getEventStats(),
+            'registrations' => $this->getRegistrationStats(),
+            'components' => $this->getComponentStats(),
+            'applications' => $this->getApplicationStats(),
+        ];
+
+        // Top eventos por registros (reutilizando lógica del index)
+        $topEvents = Event::select('events.*')
+            ->selectSub(function ($query) {
+                $query->from('registrations')
+                    ->join('event_components', 'registrations.component_id', '=', 'event_components.id')
+                    ->whereColumn('event_components.event_id', 'events.id')
+                    ->selectRaw('count(*)');
+            }, 'registrations_count')
+            ->orderBy('registrations_count', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Usuarios recientes
+        $recentUsers = User::orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        if ($format === 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\ReportExport($stats, $topEvents, $recentUsers, $section),
+                'reporte-' . $section . '-' . now()->format('Y-m-d') . '.xlsx'
+            );
+        }
+
+        // PDF
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('admin.reports.pdf', compact('stats', 'topEvents', 'recentUsers', 'section'));
+        return $pdf->download('reporte-' . $section . '-' . now()->format('Y-m-d') . '.pdf');
+    }
+
     private function getUserStats()
     {
         $total = User::count();

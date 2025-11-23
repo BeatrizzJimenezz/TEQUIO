@@ -13,6 +13,7 @@
 
     <!-- Custom -->
     <link href="{{ asset('css/sidebar.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
 
     @stack('styles')
 </head>

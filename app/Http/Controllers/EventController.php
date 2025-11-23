@@ -436,4 +436,50 @@ class EventController extends Controller
         ));
     }
 
+    public function exportReport(Request $request, Event $event)
+    {
+        $this->checkPermissions();
+
+        if ($event->professionalProfile->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para exportar el reporte de este evento.');
+        }
+
+        $format = $request->query('format', 'pdf');
+
+        // Cargar datos
+        $event->load(['components.schedules', 'components.registrations.user', 'tags']);
+
+        $stats = [
+            'totalComponents' => $event->components->count(),
+            'totalRegistrations' => $event->components->sum(fn($c) => $c->registrations->count()),
+            'componentsByType' => [
+                'talk' => $event->components->where('type', 'talk')->count(),
+                'workshop' => $event->components->where('type', 'workshop')->count(),
+                'activity' => $event->components->where('type', 'activity')->count(),
+            ],
+            'componentsByStatus' => [
+                'approved' => $event->components->where('proposal_status', 'approved')->count(),
+                'proposed' => $event->components->where('proposal_status', 'proposed')->count(),
+                'rejected' => $event->components->where('proposal_status', 'rejected')->count(),
+                'offer_open' => $event->components->where('proposal_status', 'offer_open')->count(),
+            ],
+        ];
+
+        $allRegistrations = Registration::whereIn('component_id', $event->components->pluck('id'))
+            ->with(['user', 'component'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($format === 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\EventReportExport($event, $stats, $allRegistrations),
+                'reporte-' . \Str::slug($event->name) . '-' . now()->format('Y-m-d') . '.xlsx'
+            );
+        }
+
+        // PDF
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('events.reports-pdf', compact('event', 'stats', 'allRegistrations'));
+        return $pdf->download('reporte-' . \Str::slug($event->name) . '-' . now()->format('Y-m-d') . '.pdf');
+    }
 }

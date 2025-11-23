@@ -3,148 +3,173 @@
 @section('header', 'Mis Propuestas')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="row mb-4 align-items-center">
         <div class="col">
-            <h2 class="fw-bold" style="color: #0C2340;">
+            <h2 class="fw-bold text-brand-deep mb-1">
                 <i class="bi bi-send-fill me-2"></i>Mis Propuestas
             </h2>
-            <p class="text-muted">Historial de propuestas que has enviado a diferentes eventos.</p>
+            <p class="text-muted mb-0">Historial de propuestas que has enviado a diferentes eventos.</p>
         </div>
         <div class="col-auto">
-            <a href="{{ route('proposals.index') }}" class="btn" style="background-color: #8CC63F; color: white;">
+            <a href="{{ route('proposals.index') }}" class="btn btn-brand-accent shadow-sm">
                 <i class="bi bi-plus-lg me-2"></i>Nueva Propuesta
             </a>
         </div>
     </div>
 
+    {{-- Alerts --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     {{-- Filtros --}}
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary active" onclick="filterBy('all', this)">
+    <div class="card-admin mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex gap-2 flex-wrap" role="group">
+                <button type="button" class="btn btn-white active px-3" onclick="filterBy('all', this)">
                     Todas
                 </button>
-                <button type="button" class="btn btn-outline-warning" onclick="filterBy('proposed', this)">
-                    <i class="bi bi-clock me-1"></i>Pendientes
+                <button type="button" class="btn btn-white text-warning px-3" onclick="filterBy('proposed', this)">
+                    <i class="bi bi-clock-fill me-1"></i>Pendientes
                 </button>
-                <button type="button" class="btn btn-outline-success" onclick="filterBy('approved', this)">
-                    <i class="bi bi-check-circle me-1"></i>Aprobadas
+                <button type="button" class="btn btn-white text-success px-3" onclick="filterBy('approved', this)">
+                    <i class="bi bi-check-circle-fill me-1"></i>Aprobadas
                 </button>
-                <button type="button" class="btn btn-outline-danger" onclick="filterBy('rejected', this)">
-                    <i class="bi bi-x-circle me-1"></i>Rechazadas
+                <button type="button" class="btn btn-white text-danger px-3" onclick="filterBy('rejected', this)">
+                    <i class="bi bi-x-circle-fill me-1"></i>Rechazadas
                 </button>
             </div>
         </div>
     </div>
 
-    @forelse($proposals as $proposal)
-        <div class="card shadow-sm border-0 mb-3 proposal-card" data-status="{{ $proposal->proposal_status }}">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center mb-2">
-                            <h5 class="mb-0 me-3 fw-bold">{{ $proposal->name }}</h5>
-                            @if($proposal->proposal_status == 'proposed')
-                                <span class="badge bg-warning text-dark">
-                                    <i class="bi bi-clock me-1"></i>En revisión
-                                </span>
-                            @elseif($proposal->proposal_status == 'approved')
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle me-1"></i>Aprobada
-                                </span>
-                            @elseif($proposal->proposal_status == 'rejected')
-                                <span class="badge bg-danger">
-                                    <i class="bi bi-x-circle me-1"></i>Rechazada
-                                </span>
-                            @endif
-                        </div>
+    {{-- Lista de Propuestas --}}
+    <div class="row g-4">
+        @forelse($proposals as $proposal)
+            <div class="col-12 proposal-card" data-status="{{ $proposal->proposal_status }}">
+                <div class="card-admin h-100">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h5 class="mb-0 fw-bold text-brand-deep me-3">{{ $proposal->name }}</h5>
+                                    @if($proposal->proposal_status == 'proposed')
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">
+                                            <i class="bi bi-clock-fill me-1"></i>En revisión
+                                        </span>
+                                    @elseif($proposal->proposal_status == 'approved')
+                                        <span class="badge bg-success rounded-pill px-3">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Aprobada
+                                        </span>
+                                    @elseif($proposal->proposal_status == 'rejected')
+                                        <span class="badge bg-danger rounded-pill px-3">
+                                            <i class="bi bi-x-circle-fill me-1"></i>Rechazada
+                                        </span>
+                                    @endif
+                                </div>
 
-                        <p class="mb-2">
-                            <i class="bi bi-calendar-event me-1" style="color: #4499BB;"></i>
-                            <strong>Evento:</strong> {{ $proposal->event->name }}
-                        </p>
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="bi bi-calendar-event-fill text-brand-main me-2"></i>
+                                        Evento: <span class="fw-bold text-dark">{{ $proposal->event->name }}</span>
+                                    </h6>
+                                </div>
 
-                        <div class="mb-2">
-                            @php
-                                $typeLabels = ['activity' => 'Actividad', 'talk' => 'Charla', 'workshop' => 'Taller'];
-                                $modalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
-                                $levelLabels = ['beginner' => 'Principiante', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado'];
-                            @endphp
-                            <span class="badge" style="background-color: #0C2340;">
-                                {{ $typeLabels[$proposal->type] ?? ucfirst($proposal->type) }}
-                            </span>
-                            <span class="badge" style="background-color: #4499BB;">
-                                {{ $modalityLabels[$proposal->modality] ?? ucfirst($proposal->modality) }}
-                            </span>
-                            @if($proposal->level)
-                                <span class="badge bg-secondary">
-                                    {{ $levelLabels[$proposal->level] ?? ucfirst($proposal->level) }}
-                                </span>
-                            @endif
-                            @if($proposal->capacity)
-                                <span class="badge bg-info">
-                                    <i class="bi bi-people me-1"></i>{{ $proposal->capacity }} cupos
-                                </span>
-                            @endif
-                        </div>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @php
+                                        $typeLabels = ['activity' => 'Actividad', 'talk' => 'Charla', 'workshop' => 'Taller'];
+                                        $modalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
+                                        $levelLabels = ['beginner' => 'Principiante', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado'];
+                                    @endphp
+                                    
+                                    <span class="badge bg-brand-deep text-white px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-tag-fill me-1"></i>{{ $typeLabels[$proposal->type] ?? ucfirst($proposal->type) }}
+                                    </span>
+                                    
+                                    <span class="badge bg-brand-main text-white px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-laptop me-1"></i>{{ $modalityLabels[$proposal->modality] ?? ucfirst($proposal->modality) }}
+                                    </span>
 
-                        <p class="card-text mb-2 text-muted">{{ Str::limit($proposal->description, 200) }}</p>
+                                    @if($proposal->level)
+                                        <span class="badge bg-secondary text-white px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="bi bi-bar-chart-fill me-1"></i>{{ $levelLabels[$proposal->level] ?? ucfirst($proposal->level) }}
+                                        </span>
+                                    @endif
 
-                        @if($proposal->schedules->count() > 0)
-                            <div class="mt-3">
-                                <strong class="small" style="color: #0C2340;">
-                                    <i class="bi bi-calendar-week me-1"></i>Horarios propuestos:
-                                </strong>
-                                <ul class="list-unstyled ms-3 mb-0 mt-1">
-                                    @foreach($proposal->schedules as $schedule)
-                                        <li class="small text-muted">
-                                            <i class="bi bi-clock me-1"></i>
-                                            {{ $schedule->date->format('d/m/Y') }} -
-                                            {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} a
-                                            {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                        </li>
-                                    @endforeach
-                                </ul>
+                                    @if($proposal->capacity)
+                                        <span class="badge bg-info text-white px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="bi bi-people-fill me-1"></i>{{ $proposal->capacity }} cupos
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <div class="bg-light p-3 rounded-3 mb-3">
+                                    <p class="text-secondary mb-0 small">{{ Str::limit($proposal->description, 200) }}</p>
+                                </div>
                             </div>
-                        @endif
 
-                        <p class="text-muted mb-0 mt-3">
-                            <small>
-                                <i class="bi bi-send me-1"></i>
-                                Enviada el {{ $proposal->created_at->format('d/m/Y') }} a las {{ $proposal->created_at->format('H:i') }}
-                            </small>
-                        </p>
+                            <div class="col-lg-4 border-start-lg ps-lg-4 mt-4 mt-lg-0">
+                                @if($proposal->schedules->count() > 0)
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold text-brand-deep mb-3">
+                                            <i class="bi bi-clock-fill me-2"></i>Horarios Propuestos
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach($proposal->schedules as $schedule)
+                                                <li class="mb-2 d-flex align-items-center text-muted small">
+                                                    <i class="bi bi-calendar-check me-2 text-brand-main"></i>
+                                                    <span>
+                                                        {{ $schedule->date->format('d/m/Y') }} <br>
+                                                        <span class="fw-bold">{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}</span>
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <div class="text-end mt-auto">
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-send-fill me-1"></i>
+                                        Enviada el {{ $proposal->created_at->format('d/m/Y') }}
+                                    </small>
+                                    <small class="text-muted">
+                                        a las {{ $proposal->created_at->format('H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    @empty
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                <h5 class="mt-3 mb-2" style="color: #0C2340;">No has enviado propuestas</h5>
-                <p class="text-muted mb-3">Envía tu primera propuesta a un evento público.</p>
-                <a href="{{ route('proposals.index') }}" class="btn" style="background-color: #8CC63F; color: white;">
-                    <i class="bi bi-plus-lg me-2"></i>Enviar Propuesta
-                </a>
+        @empty
+            <div class="col-12">
+                <div class="card-admin">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-inbox-fill text-muted opacity-25 display-1"></i>
+                        </div>
+                        <h4 class="fw-bold text-brand-deep">No has enviado propuestas</h4>
+                        <p class="text-muted mb-4">Envía tu primera propuesta a un evento público.</p>
+                        <a href="{{ route('proposals.index') }}" class="btn btn-brand-accent text-white fw-bold px-4 py-2 shadow-sm">
+                            <i class="bi bi-plus-lg me-2"></i>Enviar Propuesta
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-    @endforelse
+        @endforelse
+    </div>
 </div>
 @endsection
 
@@ -152,7 +177,7 @@
 <script>
 function filterBy(status, btn) {
     // Actualizar botones activos
-    document.querySelectorAll('.btn-group button').forEach(b => {
+    document.querySelectorAll('.d-flex button').forEach(b => {
         b.classList.remove('active');
     });
     btn.classList.add('active');
