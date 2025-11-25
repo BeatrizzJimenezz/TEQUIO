@@ -1,141 +1,190 @@
 @extends('layouts.app')
 
+@section('header', 'Mis Propuestas')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>My Proposals</h2>
-                {{-- Route updated to proposals.index (or the event selection page) --}}
-                <a href="{{ route('proposals.index') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> New Proposal
-                </a>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="fw-bold text-brand-deep mb-1">
+                <i class="bi bi-send-fill me-2"></i>Mis Propuestas
+            </h2>
+            <p class="text-muted mb-0">Historial de propuestas que has enviado a diferentes eventos.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ route('proposals.index') }}" class="btn btn-brand-accent shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Nueva Propuesta
+            </a>
+        </div>
+    </div>
+
+    {{-- Alerts --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- Filtros --}}
+    <div class="card-admin mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex gap-2 flex-wrap" role="group">
+                <button type="button" class="btn btn-white active px-3" onclick="filterBy('all', this)">
+                    Todas
+                </button>
+                <button type="button" class="btn btn-white text-warning px-3" onclick="filterBy('proposed', this)">
+                    <i class="bi bi-clock-fill me-1"></i>Pendientes
+                </button>
+                <button type="button" class="btn btn-white text-success px-3" onclick="filterBy('approved', this)">
+                    <i class="bi bi-check-circle-fill me-1"></i>Aprobadas
+                </button>
+                <button type="button" class="btn btn-white text-danger px-3" onclick="filterBy('rejected', this)">
+                    <i class="bi bi-x-circle-fill me-1"></i>Rechazadas
+                </button>
             </div>
+        </div>
+    </div>
 
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="btn-group" role="group">
-                        {{-- Filter values updated to English logic --}}
-                        <button type="button" class="btn btn-outline-secondary active" onclick="filterBy('all')">
-                            All
-                        </button>
-                        <button type="button" class="btn btn-outline-warning" onclick="filterBy('proposed')">
-                            Pending
-                        </button>
-                        <button type="button" class="btn btn-outline-success" onclick="filterBy('approved')">
-                            Approved
-                        </button>
-                        <button type="button" class="btn btn-outline-danger" onclick="filterBy('rejected')">
-                            Rejected
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Variable updated to $proposals --}}
-            @forelse($proposals as $proposal)
-                {{-- data-status attribute updated --}}
-                <div class="card mb-3 proposal-card" data-status="{{ $proposal->proposal_status }}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center mb-2">
-                                    <h5 class="mb-0 me-2">{{ $proposal->name }}</h5>
-                                    {{-- Logic updated to English status values --}}
+    {{-- Lista de Propuestas --}}
+    <div class="row g-4">
+        @forelse($proposals as $proposal)
+            <div class="col-12 proposal-card" data-status="{{ $proposal->proposal_status }}">
+                <div class="card-admin h-100">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h5 class="mb-0 fw-bold text-brand-deep me-3">{{ $proposal->name }}</h5>
                                     @if($proposal->proposal_status == 'proposed')
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-clock"></i> Pending Review
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">
+                                            <i class="bi bi-clock-fill me-1"></i>En revisión
                                         </span>
                                     @elseif($proposal->proposal_status == 'approved')
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> Approved
+                                        <span class="badge bg-success rounded-pill px-3">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Aprobada
                                         </span>
                                     @elseif($proposal->proposal_status == 'rejected')
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle"></i> Rejected
+                                        <span class="badge bg-danger rounded-pill px-3">
+                                            <i class="bi bi-x-circle-fill me-1"></i>Rechazada
                                         </span>
                                     @endif
                                 </div>
-                                
-                                <p class="text-muted mb-2">
-                                    <i class="bi bi-calendar-event"></i> Event: <strong>{{ $proposal->event->name }}</strong>
-                                </p>
-                                
-                                <div class="mb-2">
-                                    <span class="badge bg-primary">{{ ucfirst($proposal->type) }}</span>
-                                    <span class="badge bg-info">{{ ucfirst($proposal->modality) }}</span>
+
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="bi bi-calendar-event-fill text-brand-main me-2"></i>
+                                        Evento: <span class="fw-bold text-dark">{{ $proposal->event->name }}</span>
+                                    </h6>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @php
+                                        $typeLabels = ['activity' => 'Actividad', 'talk' => 'Charla', 'workshop' => 'Taller'];
+                                        $modalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
+                                        $levelLabels = ['beginner' => 'Principiante', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado'];
+                                    @endphp
+                                    
+                                    <span class="badge bg-brand-deep text-white px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-tag-fill me-1"></i>{{ $typeLabels[$proposal->type] ?? ucfirst($proposal->type) }}
+                                    </span>
+                                    
+                                    <span class="badge bg-brand-main text-white px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-laptop me-1"></i>{{ $modalityLabels[$proposal->modality] ?? ucfirst($proposal->modality) }}
+                                    </span>
+
                                     @if($proposal->level)
-                                        <span class="badge bg-secondary">{{ ucfirst($proposal->level) }}</span>
+                                        <span class="badge bg-secondary text-white px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="bi bi-bar-chart-fill me-1"></i>{{ $levelLabels[$proposal->level] ?? ucfirst($proposal->level) }}
+                                        </span>
                                     @endif
-                                    @if($proposal->slots)
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-people"></i> {{ $proposal->slots }} slots
+
+                                    @if($proposal->capacity)
+                                        <span class="badge bg-info text-white px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="bi bi-people-fill me-1"></i>{{ $proposal->capacity }} cupos
                                         </span>
                                     @endif
                                 </div>
-                                
-                                <p class="card-text mb-2">{{ Str::limit($proposal->description, 150) }}</p>
-                                
-                                <div class="mt-2">
-                                    <strong class="text-muted">Proposed schedules:</strong>
-                                    <ul class="list-unstyled ms-3 mb-0">
-                                        {{-- Relationship updated to schedules --}}
-                                        @foreach($proposal->schedules as $schedule)
-                                            <li>
-                                                <small>
-                                                    <i class="bi bi-clock"></i>
-                                                    {{ $schedule->date->format('m/d/Y') }} 
-                                                    from {{ $schedule->start_time }} to {{ $schedule->end_time }}
-                                                </small>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+
+                                <div class="bg-light p-3 rounded-3 mb-3">
+                                    <p class="text-secondary mb-0 small">{{ Str::limit($proposal->description, 200) }}</p>
                                 </div>
-                                
-                                <p class="text-muted mb-0 mt-2">
-                                    <small>Submitted on {{ $proposal->created_at->format('m/d/Y H:i') }}</small>
-                                </p>
+                            </div>
+
+                            <div class="col-lg-4 border-start-lg ps-lg-4 mt-4 mt-lg-0">
+                                @if($proposal->schedules->count() > 0)
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold text-brand-deep mb-3">
+                                            <i class="bi bi-clock-fill me-2"></i>Horarios Propuestos
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach($proposal->schedules as $schedule)
+                                                <li class="mb-2 d-flex align-items-center text-muted small">
+                                                    <i class="bi bi-calendar-check me-2 text-brand-main"></i>
+                                                    <span>
+                                                        {{ $schedule->date->format('d/m/Y') }} <br>
+                                                        <span class="fw-bold">{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}</span>
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <div class="text-end mt-auto">
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-send-fill me-1"></i>
+                                        Enviada el {{ $proposal->created_at->format('d/m/Y') }}
+                                    </small>
+                                    <small class="text-muted">
+                                        a las {{ $proposal->created_at->format('H:i') }}
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="card">
+            </div>
+        @empty
+            <div class="col-12">
+                <div class="card-admin">
                     <div class="card-body text-center py-5">
-                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                        <h5 class="mt-3 mb-2">You haven't submitted any proposals</h5>
-                        <p class="text-muted mb-3">Submit your first proposal to a public event.</p>
-                        <a href="{{ route('proposals.index') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Submit Proposal
+                        <div class="mb-3">
+                            <i class="bi bi-inbox-fill text-muted opacity-25 display-1"></i>
+                        </div>
+                        <h4 class="fw-bold text-brand-deep">No has enviado propuestas</h4>
+                        <p class="text-muted mb-4">Envía tu primera propuesta a un evento público.</p>
+                        <a href="{{ route('proposals.index') }}" class="btn btn-brand-accent text-white fw-bold px-4 py-2 shadow-sm">
+                            <i class="bi bi-plus-lg me-2"></i>Enviar Propuesta
                         </a>
                     </div>
                 </div>
-            @endforelse
-        </div>
+            </div>
+        @endforelse
     </div>
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-function filterBy(status) {
-    // Update active buttons
-    document.querySelectorAll('.btn-group button').forEach(btn => {
-        btn.classList.remove('active');
+function filterBy(status, btn) {
+    // Actualizar botones activos
+    document.querySelectorAll('.d-flex button').forEach(b => {
+        b.classList.remove('active');
     });
-    event.target.classList.add('active');
-    
-    // Filter cards
+    btn.classList.add('active');
+
+    // Filtrar tarjetas
     const cards = document.querySelectorAll('.proposal-card');
     cards.forEach(card => {
-        // Logic updated to check dataset.status and 'all'
         if (status === 'all' || card.dataset.status === status) {
             card.style.display = 'block';
         } else {
@@ -144,4 +193,4 @@ function filterBy(status) {
     });
 }
 </script>
-@endsection
+@endpush

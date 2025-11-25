@@ -1,236 +1,260 @@
 @extends('layouts.app')
 
+@section('header', 'Nueva Propuesta')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <!-- Event Information -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ $event->name }}</h5>
-                            <p class="text-muted mb-0">
-                                <i class="bi bi-calendar"></i> {{ $event->start_date->format('m/d/Y') }} - {{ $event->end_date->format('m/d/Y') }}
-                            </p>
-                        </div>
-                        {{-- Route updated to proposals.index or wherever the list of events is --}}
-                        <a href="{{ route('proposals.index') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Back
-                        </a>
-                    </div>
+<div class="container-fluid py-4">
+    {{-- Información del evento --}}
+    <div class="card-admin mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Evento Seleccionado</h6>
+                    <h4 class="fw-bold text-brand-deep mb-1">{{ $event->name }}</h4>
+                    <p class="text-brand-main mb-0 fw-bold">
+                        <i class="bi bi-calendar-event-fill me-2"></i>
+                        {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
+                    </p>
                 </div>
+                <a href="{{ route('proposals.index') }}" class="btn btn-white shadow-sm">
+                    <i class="bi bi-arrow-left me-2"></i>Volver a Eventos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- Formulario de propuesta --}}
+    <div class="card-admin">
+        <div class="card-header-admin">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-file-earmark-text-fill me-2"></i>Formulario de Propuesta
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <div class="alert alert-info border-0 bg-brand-main bg-opacity-10 text-brand-deep mb-4">
+                <i class="bi bi-info-circle-fill me-2 text-brand-main"></i>
+                Tu propuesta será revisada por el organizador del evento. Recibirás una notificación cuando sea evaluada.
             </div>
 
-            <!-- Proposal Form -->
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Submit Presentation/Workshop Proposal</h4>
-                </div>
-                <div class="card-body">
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
+            <form action="{{ route('proposals.store', $event) }}" method="POST" id="proposalForm">
+                @csrf
 
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> 
-                        Your proposal will be reviewed by the event organizer. You will be notified when it is evaluated.
+                {{-- Información básica --}}
+                <div class="mb-5">
+                    <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-4">
+                        <i class="bi bi-info-circle-fill me-2 text-brand-main"></i>Información de la Propuesta
+                    </h6>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="name" class="form-label-admin">
+                                Título de la propuesta <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control-admin @error('name') is-invalid @enderror"
+                                   id="name" name="name" value="{{ old('name') }}"
+                                   placeholder="Ej: Introducción a Laravel" required>
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="type" class="form-label-admin">
+                                Tipo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-control-admin @error('type') is-invalid @enderror"
+                                    id="type" name="type" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="talk" {{ old('type') == 'talk' ? 'selected' : '' }}>Charla</option>
+                                <option value="workshop" {{ old('type') == 'workshop' ? 'selected' : '' }}>Taller</option>
+                                <option value="activity" {{ old('type') == 'activity' ? 'selected' : '' }}>Actividad</option>
+                            </select>
+                            @error('type')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description" class="form-label-admin">
+                                Descripción detallada <span class="text-danger">*</span>
+                            </label>
+                            <div class="form-text text-muted mb-2">
+                                Explica detalladamente el contenido de tu propuesta. Incluye objetivos, metodología y cualquier información relevante.
+                            </div>
+                            <textarea class="form-control-admin @error('description') is-invalid @enderror"
+                                      id="description" name="description" rows="12" required
+                                      placeholder="Escribe aquí la descripción completa...">{{ old('description') }}</textarea>
+                            @error('description')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="level" class="form-label-admin">Nivel de dificultad</label>
+                            <select class="form-select form-control-admin @error('level') is-invalid @enderror"
+                                    id="level" name="level">
+                                <option value="">Seleccionar nivel...</option>
+                                <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Principiante</option>
+                                <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Intermedio</option>
+                                <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Avanzado</option>
+                            </select>
+                            @error('level')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="capacity" class="form-label-admin">Cupos sugeridos</label>
+                            <input type="number" class="form-control-admin @error('capacity') is-invalid @enderror"
+                                   id="capacity" name="capacity" value="{{ old('capacity') }}" min="1"
+                                   placeholder="Ej: 30">
+                            <div class="form-text text-muted small">Opcional - el organizador puede ajustarlo</div>
+                            @error('capacity')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
+                </div>
 
-                    {{-- Route updated to proposals.store --}}
-                    <form action="{{ route('proposals.store', $event) }}" method="POST" id="proposalForm">
-                        @csrf
+                {{-- Modalidad y ubicación --}}
+                <div class="mb-5">
+                    <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-4">
+                        <i class="bi bi-geo-alt-fill me-2 text-brand-main"></i>Modalidad y Ubicación
+                    </h6>
 
-                        <!-- Basic Information -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Proposal Information</h5>
-                            </div>
-
-                            <div class="col-md-8 mb-3">
-                                <label for="name" class="form-label">Title of Presentation/Workshop *</label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                       id="name" name="name" value="{{ old('name') }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label for="type" class="form-label">Type *</label>
-                                <select class="form-select @error('type') is-invalid @enderror" 
-                                        id="type" name="type" required>
-                                    <option value="">Select...</option>
-                                    {{-- Values updated to English Enums --}}
-                                    <option value="presentation" {{ old('type') == 'presentation' ? 'selected' : '' }}>Presentation</option>
-                                    <option value="workshop" {{ old('type') == 'workshop' ? 'selected' : '' }}>Workshop</option>
-                                    <option value="activity" {{ old('type') == 'activity' ? 'selected' : '' }}>Activity</option>
-                                </select>
-                                @error('type')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="description" class="form-label">Description *</label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" 
-                                          id="description" name="description" rows="5" required 
-                                          placeholder="Describe what your presentation/workshop is about, what participants will learn, etc.">{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="level" class="form-label">Level</label>
-                                <select class="form-select @error('level') is-invalid @enderror" 
-                                        id="level" name="level">
-                                    <option value="">Select...</option>
-                                    {{-- Values updated to English Enums --}}
-                                    <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Beginner</option>
-                                    <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
-                                    <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Advanced</option>
-                                </select>
-                                @error('level')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="slots" class="form-label">Suggested Number of Slots</label>
-                                <input type="number" class="form-control @error('slots') is-invalid @enderror" 
-                                       id="slots" name="slots" value="{{ old('slots') }}" min="1"
-                                       placeholder="Ex: 30">
-                                <small class="text-muted">Optional - the organizer can adjust this</small>
-                                @error('slots')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="modality" class="form-label-admin">
+                                Modalidad <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-control-admin @error('modality') is-invalid @enderror"
+                                    id="modality" name="modality" required>
+                                <option value="">Seleccionar modalidad...</option>
+                                <option value="virtual" {{ old('modality') == 'virtual' ? 'selected' : '' }}>Virtual</option>
+                                <option value="in_person" {{ old('modality') == 'in_person' ? 'selected' : '' }}>Presencial</option>
+                                <option value="hybrid" {{ old('modality') == 'hybrid' ? 'selected' : '' }}>Híbrido</option>
+                            </select>
+                            @error('modality')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <!-- Modality and Location -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Modality</h5>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="modality" class="form-label">Modality *</label>
-                                <select class="form-select @error('modality') is-invalid @enderror" 
-                                        id="modality" name="modality" required>
-                                    <option value="">Select...</option>
-                                    {{-- Values updated to English Enums --}}
-                                    <option value="virtual" {{ old('modality') == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                                    <option value="in_person" {{ old('modality') == 'in_person' ? 'selected' : '' }}>In-Person</option>
-                                    <option value="hybrid" {{ old('modality') == 'hybrid' ? 'selected' : '' }}>Hybrid</option>
-                                </select>
-                                @error('modality')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="location" class="form-label">Preferred Location</label>
-                                <input type="text" class="form-control @error('location') is-invalid @enderror" 
-                                       id="location" name="location" value="{{ old('location') }}"
-                                       placeholder="Ex: Main Auditorium, Zoom, etc.">
-                                @error('location')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <div class="col-md-6">
+                            <label for="location" class="form-label-admin">Ubicación preferida</label>
+                            <input type="text" class="form-control-admin @error('location') is-invalid @enderror"
+                                   id="location" name="location" value="{{ old('location') }}"
+                                   placeholder="Ej: Auditorio principal, Zoom, etc.">
+                            @error('location')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Requirements -->
-                        <div class="row mb-4">
+                {{-- Requisitos --}}
+                <div class="mb-5">
+                    <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-4">
+                        <i class="bi bi-list-check me-2 text-brand-main"></i>Requisitos y Necesidades
+                    </h6>
+
+                    <div class="bg-light p-4 rounded-3 border border-light">
+                        <div class="row g-3">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Requirements</h5>
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="participant_requirements" class="form-label">Participant Requirements</label>
-                                <textarea class="form-control @error('participant_requirements') is-invalid @enderror" 
-                                          id="participant_requirements" name="participant_requirements" rows="3"
-                                          placeholder="Ex: Laptop, basic programming knowledge, etc.">{{ old('participant_requirements') }}</textarea>
+                                <label for="participant_requirements" class="form-label-admin">
+                                    Requisitos para participantes
+                                </label>
+                                <div class="form-text text-muted mb-2">
+                                    Indica qué necesitan los participantes para aprovechar tu sesión (ej: laptop, software específico, conocimientos previos).
+                                </div>
+                                <textarea class="form-control-admin @error('participant_requirements') is-invalid @enderror"
+                                          id="participant_requirements" name="participant_requirements" rows="5"
+                                          placeholder="Ej: Laptop con Node.js instalado, conocimientos básicos de HTML...">{{ old('participant_requirements') }}</textarea>
                                 @error('participant_requirements')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Proposed Schedules -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Proposed Schedules *</h5>
-                                <p class="text-muted">Propose the times when you could teach your presentation/workshop</p>
-                            </div>
+                {{-- Horarios propuestos --}}
+                <div class="mb-5">
+                    <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-4">
+                        <i class="bi bi-calendar-week-fill me-2 text-brand-main"></i>Horarios Propuestos <span class="text-danger">*</span>
+                    </h6>
+                    <p class="text-muted small mb-3">Propón los horarios en los que podrías impartir tu charla/taller</p>
 
-                            <div class="col-12">
-                                <div id="schedulesContainer">
-                                    <!-- Initial Schedule -->
-                                    <div class="schedule-item card mb-3">
-                                        <div class="card-body">
-                                            <div class="row align-items-end">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label">Date *</label>
-                                                    <input type="date" class="form-control" 
-                                                           name="schedules[0][date]" 
-                                                           min="{{ $event->start_date->format('Y-m-d') }}"
-                                                           max="{{ $event->end_date->format('Y-m-d') }}"
-                                                           required>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label">Start Time *</label>
-                                                    <input type="time" class="form-control" 
-                                                           name="schedules[0][start_time]" required>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label">End Time *</label>
-                                                    <input type="time" class="form-control" 
-                                                           name="schedules[0][end_time]" required>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeSchedule(this)" disabled>
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                    <div id="schedulesContainer">
+                        {{-- Horario inicial --}}
+                        <div class="schedule-item bg-light rounded-3 p-3 mb-3 border border-light">
+                            <div class="row align-items-end g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label-admin small">Fecha <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control-admin"
+                                           name="schedules[0][date]"
+                                           min="{{ $event->start_date->format('Y-m-d') }}"
+                                           max="{{ $event->end_date->format('Y-m-d') }}"
+                                           required>
                                 </div>
-
-                                <button type="button" class="btn btn-outline-primary" onclick="addSchedule()">
-                                    <i class="bi bi-plus-circle"></i> Add Another Schedule
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Buttons -->
-                        <div class="row">
-                            <div class="col-12">
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    {{-- Route updated to proposals.index --}}
-                                    <a href="{{ route('proposals.index') }}" class="btn btn-secondary">
-                                        <i class="bi bi-x-circle"></i> Cancel
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-send"></i> Submit Proposal
+                                <div class="col-md-3">
+                                    <label class="form-label-admin small">Hora inicio <span class="text-danger">*</span></label>
+                                    <input type="time" class="form-control-admin"
+                                           name="schedules[0][start_time]" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-admin small">Hora fin <span class="text-danger">*</span></label>
+                                    <input type="time" class="form-control-admin"
+                                           name="schedules[0][end_time]" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-white text-danger w-100" onclick="removeSchedule(this)" disabled>
+                                        <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <button type="button" class="btn btn-evai-outline btn-sm fw-bold" onclick="addSchedule()">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Agregar otro horario
+                    </button>
                 </div>
-            </div>
+
+                {{-- Botones --}}
+                <div class="d-flex justify-content-end gap-3 pt-4 border-top">
+                    <a href="{{ route('proposals.index') }}" class="btn btn-white px-4">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-brand-accent px-4 fw-bold shadow-sm">
+                        <i class="bi bi-send-fill me-2"></i>Enviar Propuesta
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 let scheduleIndex = 1;
 
@@ -238,39 +262,37 @@ function addSchedule() {
     const container = document.getElementById('schedulesContainer');
     const minDate = '{{ $event->start_date->format("Y-m-d") }}';
     const maxDate = '{{ $event->end_date->format("Y-m-d") }}';
-    
+
     const newSchedule = `
-        <div class="schedule-item card mb-3">
-            <div class="card-body">
-                <div class="row align-items-end">
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">Date *</label>
-                        <input type="date" class="form-control" 
-                               name="schedules[${scheduleIndex}][date]"
-                               min="${minDate}"
-                               max="${maxDate}"
-                               required>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">Start Time *</label>
-                        <input type="time" class="form-control" 
-                               name="schedules[${scheduleIndex}][start_time]" required>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">End Time *</label>
-                        <input type="time" class="form-control" 
-                               name="schedules[${scheduleIndex}][end_time]" required>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeSchedule(this)">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
+        <div class="schedule-item bg-light rounded-3 p-3 mb-3 border border-light">
+            <div class="row align-items-end g-3">
+                <div class="col-md-4">
+                    <label class="form-label-admin small">Fecha <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control-admin"
+                           name="schedules[${scheduleIndex}][date]"
+                           min="${minDate}"
+                           max="${maxDate}"
+                           required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label-admin small">Hora inicio <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control-admin"
+                           name="schedules[${scheduleIndex}][start_time]" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label-admin small">Hora fin <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control-admin"
+                           name="schedules[${scheduleIndex}][end_time]" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-white text-danger w-100" onclick="removeSchedule(this)">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
     `;
-    
+
     container.insertAdjacentHTML('beforeend', newSchedule);
     scheduleIndex++;
     updateRemoveButtons();
@@ -289,4 +311,4 @@ function updateRemoveButtons() {
     });
 }
 </script>
-@endsection
+@endpush

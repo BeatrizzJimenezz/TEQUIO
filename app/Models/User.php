@@ -42,6 +42,12 @@ class User extends Authenticatable
         return $this->hasOne(ProfessionalProfile::class);
     }
 
+    // Relación con inscripciones
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
     // Método auxiliar para obtener o crear el perfil
     public function getOrCreateProfessionalProfile()
     {

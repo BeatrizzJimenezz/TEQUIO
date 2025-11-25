@@ -88,6 +88,14 @@ class EventComponent extends Model
     }
 
     /**
+     * Alias de speaker para compatibilidad (presenter)
+     */
+    public function presenter(): BelongsTo
+    {
+        return $this->belongsTo(ProfessionalProfile::class, 'speaker_id');
+    }
+
+    /**
      * Relación con usuario que propuso el componente
      */
     public function proposedBy(): BelongsTo

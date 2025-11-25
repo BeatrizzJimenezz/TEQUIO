@@ -11,6 +11,9 @@ use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\EventTeamController;
 use App\Http\Controllers\ComponentScheduleController;
+use App\Http\Controllers\RoleRequestController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -62,8 +65,43 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 });
 
+// ============ Role Request Routes ============
+Route::middleware(['auth', 'verified'])->prefix('role-requests')->group(function () {
+    // Participante: crear y ver solicitudes
+    Route::get('/create', [RoleRequestController::class, 'create'])->name('role-requests.create');
+    Route::post('/', [RoleRequestController::class, 'store'])->name('role-requests.store');
+    Route::get('/my-requests', [RoleRequestController::class, 'myRequests'])->name('role-requests.my-requests');
+
+    // Admin: gestionar solicitudes
+    Route::get('/', [RoleRequestController::class, 'index'])->name('role-requests.index');
+    Route::put('/{roleRequest}/approve', [RoleRequestController::class, 'approve'])->name('role-requests.approve');
+    Route::put('/{roleRequest}/reject', [RoleRequestController::class, 'reject'])->name('role-requests.reject');
+});
+
+// ============ Admin User Management Routes ============
+Route::middleware(['auth', 'verified'])->prefix('admin/users')->group(function () {
+    Route::get('/', [UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::get('/create', [UserManagementController::class, 'create'])->name('admin.users.create');
+    Route::post('/', [UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::get('/{user}', [UserManagementController::class, 'show'])->name('admin.users.show');
+    Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
+    Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+    Route::post('/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
+});
+
+// ============ Admin Reports Routes ============
+Route::middleware(['auth', 'verified'])->prefix('admin/reports')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('/export', [ReportController::class, 'export'])->name('admin.reports.export');
+});
+
 // ============ Event Management Routes (Admin/Organizer) ============
 Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () {
+    // Event Reports Index
+    // Event Reports Index
+    Route::get('/reports', [EventController::class, 'reportsIndex'])->name('events.reports.index');
+
     // Event CRUD
     Route::get('/', [EventController::class, 'index'])->name('events.index');
     Route::get('/create', [EventController::class, 'create'])->name('events.create');
@@ -74,6 +112,9 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::patch('/{event}/archive', [EventController::class, 'archive'])->name('events.archive');
 
     Route::get('/{event}/manage', [EventManagementController::class, 'index'])->name('events.manage');
+    
+    Route::get('/{event}/reports/export', [EventController::class, 'exportReport'])->name('events.reports.export');
+    Route::get('/{event}/reports', [EventController::class, 'reports'])->name('events.reports');
 
     // Component Routes
     Route::get('/{event}/components', [EventComponentController::class, 'index'])->name('components.index');

@@ -140,7 +140,12 @@
                                             <p class="mb-2">
                                                 <i class="bi bi-person me-1" style="color: #4499BB;"></i>
                                                 <span class="text-muted">Ponente:</span>
-                                                <strong>{{ $component->speaker->user->name }}</strong>
+                                                @if($component->speaker->is_temporary)
+                                                    <strong>{{ $component->speaker->temp_name }}</strong>
+                                                    <span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;">Temporal</span>
+                                                @else
+                                                    <strong>{{ $component->speaker->user->name }}</strong>
+                                                @endif
                                             </p>
                                         @endif
 

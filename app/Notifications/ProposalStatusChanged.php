@@ -2,25 +2,25 @@
 
 namespace App\Notifications;
 
-use App\Models\Event;
+use App\Models\EventComponent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class EventUpdatedNotification extends Notification
+class ProposalStatusChanged extends Notification
 {
     use Queueable;
 
-    protected $event;
-    protected $changes;
+    protected $component;
+    protected $newStatus;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Event $event, array $changes)
+    public function __construct(EventComponent $component, string $newStatus)
     {
-        $this->event = $event;
-        $this->changes = $changes;
+        $this->component = $component;
+        $this->newStatus = $newStatus;
     }
 
     /**
@@ -36,95 +36,41 @@ class EventUpdatedNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        // Traducciones de campos
-        $fieldNames = [
-            'name'        => 'Nombre',
-            'start_date'  => 'Fecha de inicio',
-            'end_date'    => 'Fecha de finalización',
-            'start_time'  => 'Hora de inicio',
-            'description' => 'Descripción',
-            'modality'    => 'Modalidad',
-            'location'    => 'Ubicación',
-            'visibility'  => 'Visibilidad',
-            'status'      => 'Estado',
-            'cover_image' => 'Imagen de portada',
-            'logo'        => 'Logo',
+        $statusLabels = [
+            'approved' => 'Aprobada',
+            'rejected' => 'Rechazada',
+            'proposed' => 'En revisión',
+            'offer_open' => 'Oferta abierta',
         ];
 
-        // Traducciones de valores
-        $valueTranslate = [
-            'virtual'    => 'Virtual',
-            'in_person'  => 'Presencial',
-            'hybrid'     => 'Híbrido',
-            'public'     => 'Público',
-            'private'    => 'Privado',
-            'planning'   => 'Planificación',
-            'active'     => 'Activo',
-            'finished'   => 'Finalizado',
-        ];
+        $statusLabel = $statusLabels[$this->newStatus] ?? ucfirst($this->newStatus);
+        $eventName = $this->component->event->name ?? 'Evento';
 
         $mail = (new MailMessage)
-            ->subject('Actualización del evento: ' . $this->event->name)
-            ->greeting('Hola ' . $notifiable->name . ',')
-            ->line('El evento en el que participas ha sido actualizado.')
-            ->line('Evento: **' . $this->event->name . '**')
-            ->line('Cambios realizados:');
+            ->subject('Tu propuesta ha sido ' . strtolower($statusLabel))
+            ->greeting('Hola ' . $notifiable->name . ',');
 
-        // Procesar cada cambio detectado
-        foreach ($this->changes as $field => $change) {
-
-            $old = $change['old'];
-            $new = $change['new'];
-
-            /* -------------------------
-             * Normalización de valores
-             * ------------------------- */
-
-            // Convertir fechas Carbon → texto
-            if ($old instanceof \Carbon\Carbon) {
-                $old = $old->format('Y-m-d H:i');
-            }
-            if ($new instanceof \Carbon\Carbon) {
-                $new = $new->format('Y-m-d H:i');
-            }
-
-            // Si vienen en formato ISO (2025-11-21T00:00:00Z)
-            if (is_string($old) && str_contains($old, 'T')) {
-                $old = date('Y-m-d', strtotime($old));
-            }
-            if (is_string($new) && str_contains($new, 'T')) {
-                $new = date('Y-m-d', strtotime($new));
-            }
-
-            // Arrays → JSON
-            if (is_array($old)) {
-                $old = json_encode($old, JSON_UNESCAPED_UNICODE);
-            }
-            if (is_array($new)) {
-                $new = json_encode($new, JSON_UNESCAPED_UNICODE);
-            }
-
-            // Objetos raros → string
-            if (is_object($old)) {
-                $old = (string) $old;
-            }
-            if (is_object($new)) {
-                $new = (string) $new;
-            }
-
-            // Aplicar traducciones si existen
-            $old = $valueTranslate[$old] ?? $old;
-            $new = $valueTranslate[$new] ?? $new;
-
-            // Nombre amigable del campo
-            $label = $fieldNames[$field] ?? ucfirst(str_replace('_', ' ', $field));
-
-            $mail->line("• **{$label}** cambió de **{$old}** a **{$new}**");
+        if ($this->newStatus === 'approved') {
+            $mail->line('¡Felicidades! Tu propuesta ha sido **aprobada**.')
+                 ->line('**Componente:** ' . $this->component->name)
+                 ->line('**Evento:** ' . $eventName)
+                 ->line('Pronto recibirás más información sobre los próximos pasos.')
+                 ->action('Ver mis propuestas', url('/proposals/my-proposals'));
+        } elseif ($this->newStatus === 'rejected') {
+            $mail->line('Lamentamos informarte que tu propuesta ha sido **rechazada**.')
+                 ->line('**Componente:** ' . $this->component->name)
+                 ->line('**Evento:** ' . $eventName)
+                 ->line('Te animamos a seguir participando en futuros eventos.')
+                 ->action('Ver otros eventos', url('/events'));
+        } else {
+            $mail->line('El estado de tu propuesta ha cambiado.')
+                 ->line('**Componente:** ' . $this->component->name)
+                 ->line('**Evento:** ' . $eventName)
+                 ->line('**Nuevo estado:** ' . $statusLabel)
+                 ->action('Ver mis propuestas', url('/proposals/my-proposals'));
         }
 
-        return $mail
-            ->action('Ver evento', url('/events/' . $this->event->id))
-            ->line('Revisa los detalles actualizados del evento.');
+        return $mail->line('Gracias por tu participación.');
     }
 
     /**
@@ -133,8 +79,9 @@ class EventUpdatedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'event_id' => $this->event->id,
-            'changes' => $this->changes,
+            'component_id' => $this->component->id,
+            'event_id' => $this->component->event_id,
+            'new_status' => $this->newStatus,
         ];
     }
 }

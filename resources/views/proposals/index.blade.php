@@ -1,76 +1,106 @@
 @extends('layouts.app')
 
+@section('header', 'Enviar Propuesta')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>Submit Proposal</h2>
-                    <p class="text-muted">Select an event to submit your presentation or workshop proposal</p>
-                </div>
-                {{-- Route updated to proposals.my_proposals --}}
-                <a href="{{ route('proposals.my_proposals') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-list-check"></i> My Proposals
-                </a>
-            </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="fw-bold text-brand-deep mb-1">
+                <i class="bi bi-send-fill me-2"></i>Enviar Propuesta
+            </h2>
+            <p class="text-muted mb-0">Selecciona un evento para enviar tu propuesta de charla, taller o actividad.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ route('proposals.my_proposals') }}" class="btn btn-brand-main shadow-sm">
+                <i class="bi bi-list-check me-2"></i>Mis Propuestas
+            </a>
+        </div>
+    </div>
 
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+    {{-- Alerts --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-            {{-- Variable updated to $events --}}
-            @forelse($events as $event)
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h5 class="card-title">{{ $event->name }}</h5>
-                                <p class="text-muted mb-2">
-                                    <i class="bi bi-calendar"></i> 
-                                    {{-- Properties updated to start_date/end_date --}}
-                                    {{ $event->start_date->format('m/d/Y') }} - {{ $event->end_date->format('m/d/Y') }}
-                                </p>
-                                <p class="text-muted mb-2">
-                                    <i class="bi bi-person"></i> 
-                                    {{-- Relationship updated to professionalProfile --}}
-                                    Organized by: {{ $event->professionalProfile->user->name }}
-                                </p>
-                                <div class="mb-2">
-                                    {{-- Properties updated to English --}}
-                                    <span class="badge bg-info">{{ ucfirst($event->modality) }}</span>
-                                    <span class="badge bg-success">{{ ucfirst($event->status) }}</span>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- Lista de Eventos --}}
+    <div class="row g-4">
+        @forelse($events as $event)
+            <div class="col-12">
+                <div class="card-admin h-100">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h4 class="fw-bold text-brand-deep mb-2">{{ $event->name }}</h4>
+                                
+                                <div class="d-flex flex-wrap gap-3 mb-3 text-muted">
+                                    <span class="d-flex align-items-center">
+                                        <i class="bi bi-calendar-event text-brand-main me-2"></i>
+                                        {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
+                                    </span>
+                                    <span class="d-flex align-items-center">
+                                        <i class="bi bi-person-fill text-brand-main me-2"></i>
+                                        Organizador: <strong class="ms-1">{{ $event->professionalProfile->user->name }}</strong>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    @php
+                                        $modalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
+                                        $statusLabels = ['draft' => 'Borrador', 'published' => 'Publicado', 'active' => 'Activo', 'finished' => 'Finalizado'];
+                                    @endphp
                                     
+                                    <span class="badge bg-brand-main text-white px-3 py-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-laptop me-1"></i>{{ $modalityLabels[$event->modality] ?? ucfirst($event->modality) }}
+                                    </span>
+                                    
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                                        <i class="bi bi-check-circle-fill me-1"></i>{{ $statusLabels[$event->status] ?? ucfirst($event->status) }}
+                                    </span>
+
                                     @if($event->location)
-                                        <span class="badge bg-secondary">
-                                            <i class="bi bi-geo-alt"></i> {{ $event->location }}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                            <i class="bi bi-geo-alt-fill me-1"></i>{{ $event->location }}
                                         </span>
                                     @endif
                                 </div>
-                                <p class="card-text">{{ Str::limit($event->description, 200) }}</p>
+
+                                <p class="text-secondary mb-0">{{ Str::limit($event->description, 200) }}</p>
                             </div>
-                            <div class="ms-3">
-                                {{-- Route updated to proposals.create --}}
-                                <a href="{{ route('proposals.create', $event) }}" class="btn btn-primary">
-                                    <i class="bi bi-send"></i> Submit Proposal
+                            
+                            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                                <a href="{{ route('proposals.create', $event) }}" class="btn btn-brand-accent shadow-sm px-4 py-2 fw-bold">
+                                    <i class="bi bi-send-fill me-2"></i>Enviar Propuesta
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="card">
+            </div>
+        @empty
+            <div class="col-12">
+                <div class="card-admin">
                     <div class="card-body text-center py-5">
-                        <i class="bi bi-calendar-x" style="font-size: 3rem; color: #ccc;"></i>
-                        <h5 class="mt-3 mb-2">No events available</h5>
-                        <p class="text-muted">Currently there are no public events accepting proposals.</p>
+                        <div class="mb-3">
+                            <i class="bi bi-calendar-x text-muted opacity-25 display-1"></i>
+                        </div>
+                        <h4 class="fw-bold text-brand-deep">No hay eventos disponibles</h4>
+                        <p class="text-muted mb-0">Actualmente no hay eventos públicos aceptando propuestas.</p>
                     </div>
                 </div>
-            @endforelse
-        </div>
+            </div>
+        @endforelse
     </div>
 </div>
 @endsection

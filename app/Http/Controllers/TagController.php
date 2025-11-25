@@ -7,15 +7,15 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    // Verificar permisos de usuario
+    // Verificar permisos de usuario (solo Administrador)
     private function checkPermissions()
     {
         if (!auth()->check()) {
             abort(401, 'Debes iniciar sesión.');
         }
-        
-        if (!auth()->user()->hasAnyRole(['Administrador', 'Organizador'])) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+
+        if (!auth()->user()->hasRole('Administrador')) {
+            abort(403, 'Solo el administrador puede gestionar etiquetas.');
         }
     }
 

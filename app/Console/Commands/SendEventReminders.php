@@ -15,23 +15,29 @@ class SendEventReminders extends Command
     {
         $tomorrow = Carbon::tomorrow()->toDateString();
 
-        // Buscar componentes donde el EVENTO ocurre mañana
-        $components = EventComponent::whereHas('event', function ($q) use ($tomorrow) {
-            $q->whereDate('start_date', $tomorrow);
+        // Buscar componentes que tienen un HORARIO programado para mañana
+        $components = EventComponent::whereHas('schedules', function ($q) use ($tomorrow) {
+            $q->whereDate('date', $tomorrow);
         })
-        ->with(['event', 'registrations.user'])
+        ->with(['event', 'schedules', 'registrations.user'])
         ->get();
 
         if ($components->isEmpty()) {
-            $this->info("No components scheduled for tomorrow.");
+            $this->info("No hay componentes programados para mañana.");
             return;
         }
 
-        $this->info("Components found: " . $components->count());
+        $this->info("Componentes encontrados: " . $components->count());
+
+        $remindersSent = 0;
 
         foreach ($components as $component) {
-            foreach ($component->registrations as $registration) {
+            // Obtener los horarios de mañana para este componente
+            $tomorrowSchedules = $component->schedules->filter(function ($schedule) use ($tomorrow) {
+                return $schedule->date->toDateString() === $tomorrow;
+            });
 
+            foreach ($component->registrations as $registration) {
                 $user = $registration->user;
                 if (!$user) continue;
 
@@ -42,10 +48,11 @@ class SendEventReminders extends Command
                     )
                 );
 
-                $this->info("Reminder sent to {$user->email} for component '{$component->name}'.");
+                $this->info("Recordatorio enviado a {$user->email} para '{$component->name}'.");
+                $remindersSent++;
             }
         }
 
-        $this->info("All reminders sent successfully.");
+        $this->info("Total de recordatorios enviados: {$remindersSent}");
     }
 }

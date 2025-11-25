@@ -131,10 +131,17 @@ class ProposalController extends Controller
                 ]);
             }
 
+            // Notificar al organizador del evento
+            $organizer = $event->professionalProfile->user;
+            if ($organizer) {
+                $component->load('schedules'); // Cargar horarios para la notificación
+                $organizer->notify(new \App\Notifications\NewProposalReceived($component, auth()->user()));
+            }
+
             DB::commit();
 
-            return redirect()->route('proposals.my-proposals')
-                ->with('success', 'Propuesta enviada exitosamente. El organizador la revisará pronto.');
+            return redirect()->route('proposals.my_proposals')
+                ->with('success', 'Propuesta enviada exitosamente. El organizador ha sido notificado y la revisará pronto.');
 
         } catch (\Exception $e) {
             DB::rollBack();

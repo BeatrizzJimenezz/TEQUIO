@@ -1,0 +1,230 @@
+/* Variables Globales (Heredadas de welcome.css pero reforzadas aquí) */
+:root {
+    --evai-blue-main: #4499BB;
+    --evai-blue-deep: #0C2340;
+    --evai-green-accent: #8CC63F;
+    --evai-gray-light: #C8CCC9;
+    --evai-white: #FFFFFF;
+    --evai-bg-light: #f8f9fa;
+}
+
+/* Utilidades de Texto y Color */
+.text-brand-deep {
+    color: var(--evai-blue-deep) !important;
+}
+
+.text-brand-main {
+    color: var(--evai-blue-main) !important;
+}
+
+.text-brand-accent {
+    color: var(--evai-green-accent) !important;
+}
+
+.bg-brand-deep {
+    background-color: var(--evai-blue-deep) !important;
+}
+
+.bg-brand-main {
+    background-color: var(--evai-blue-main) !important;
+}
+
+.bg-brand-accent {
+    background-color: var(--evai-green-accent) !important;
+}
+
+/* Tarjetas */
+.card-admin {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: var(--evai-white);
+    overflow: hidden;
+}
+
+.card-admin:hover {
+    box-shadow: 0 1rem 2rem rgba(12, 35, 64, 0.1);
+}
+
+.card-header-admin {
+    background-color: var(--evai-blue-deep);
+    color: var(--evai-white);
+    padding: 1rem 1.5rem;
+    border-bottom: none;
+}
+
+.card-header-admin.accent {
+    background-color: var(--evai-blue-main);
+}
+
+/* Botones */
+.btn-evai {
+    background-color: var(--evai-green-accent);
+    color: var(--evai-white);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-evai:hover {
+    background-color: #7ab32e;
+    color: var(--evai-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-evai-outline {
+    background-color: transparent;
+    border: 2px solid var(--evai-blue-main);
+    color: var(--evai-blue-main);
+    border-radius: 0.5rem;
+    padding: 0.4rem 1.4rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-evai-outline:hover {
+    background-color: var(--evai-blue-main);
+    color: var(--evai-white);
+}
+
+.btn-brand-accent {
+    background-color: var(--evai-green-accent);
+    color: var(--evai-white);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-brand-accent:hover {
+    background-color: #7ab32e;
+    color: var(--evai-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-brand-main {
+    background-color: var(--evai-blue-main);
+    color: var(--evai-white);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-brand-main:hover {
+    background-color: #367a96;
+    color: var(--evai-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-white {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    color: var(--evai-blue-deep);
+    font-weight: 600;
+}
+
+.btn-white:hover {
+    background-color: #f8fafc;
+    color: var(--evai-blue-main);
+}
+
+/* Tablas */
+.table-admin {
+    margin-bottom: 0;
+}
+
+.table-admin thead th {
+    background-color: #f1f5f9;
+    color: var(--evai-blue-deep);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
+}
+
+.table-admin tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-admin tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Badges */
+.badge-role {
+    padding: 0.5em 0.8em;
+    border-radius: 50rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.badge-role.admin {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-role.organizer {
+    background-color: #e0f2fe;
+    color: #075985;
+}
+
+.badge-role.user {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.badge-role.speaker {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+/* Formularios */
+.form-label-admin {
+    font-weight: 600;
+    color: var(--evai-blue-deep);
+    margin-bottom: 0.5rem;
+}
+
+.form-control-admin {
+    display: block;
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control-admin:focus {
+    border-color: var(--evai-blue-main);
+    box-shadow: 0 0 0 3px rgba(68, 153, 187, 0.1);
+}
+
+/* Breadcrumbs */
+.breadcrumb-item a {
+    color: var(--evai-blue-main);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #64748b;
+}
+
+/* Avatares */
+.avatar-circle {
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--evai-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
