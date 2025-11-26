@@ -119,6 +119,9 @@ class UserManagementController extends Controller
         return view('admin.users.show', compact('user'));
     }
 
+
+
+
     /**
      * Formulario para editar usuario
      */
