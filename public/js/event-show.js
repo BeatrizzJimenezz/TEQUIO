@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Verificar estado de inscripción al cargar la página
-    const checkContainer = document.querySelector('[data-check-url-base]');
+    /* const checkContainer = document.querySelector('[data-check-url-base]');
     
     if (checkContainer && registerButtons.length > 0) {
         const checkUrlBase = checkContainer.dataset.checkUrlBase;
@@ -120,5 +120,5 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             } catch (error) { console.error(error); }
         }
-    }
+    } */
 });

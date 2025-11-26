@@ -107,15 +107,16 @@
                                         @endif
 
                                         <div class="{{ $component->cover_image ? 'col-md-8' : 'col-12' }}">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex flex-column mb-2">
+                                            <div class="d-flex justify-content-between align-items-start">
                                                 <h5 class="fw-bold text-dark mb-0">{{ $component->name }}</h5>
+                                                
                                                 @php
                                                     $typeLabels = ['workshop' => 'Taller', 'talk' => 'Ponencia', 'activity' => 'Actividad'];
                                                     $compModalityLabels = ['virtual' => 'Virtual', 'in_person' => 'Presencial', 'hybrid' => 'Híbrido'];
-                                                    $compDificultyLabels = ['beginner' => 'Principiante', 'intermediate' => 'Intermedio', 'advanced' => 'Avanzado', '' => 'Avanzado'];
                                                 @endphp
-                                                <div>
-                                                     <span class="badge badge-type">
+                                                <div class="ms-2 text-end" style="min-width: fit-content;">
+                                                    <span class="badge badge-type">
                                                         {{ $typeLabels[$component->type] ?? ucfirst($component->type) }}
                                                     </span>
                                                     <span class="badge badge-modality">
@@ -123,6 +124,20 @@
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            @if($component->speaker)
+                                                <div class="d-flex align-items-center mt-2">
+                                                    <img src="{{ $component->speaker->user ? $component->speaker->user->profile_photo_url : 'https://ui-avatars.com/api/?name='.urlencode($component->speaker->display_name) }}" 
+                                                        class="rounded-circle me-2 border border-white shadow-sm" 
+                                                        width="28" height="28" 
+                                                        style="object-fit: cover;"
+                                                        alt="Ponente">
+                                                    <span class="text-muted small fw-medium">
+                                                        Por: <span class="text-dark">{{ $component->speaker->display_name }}</span>
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        </div>
 
                                             <div class="d-flex flex-wrap gap-3 text-muted small mb-3">
                                                 <span><i class="bi bi-bar-chart-fill me-1 text-brand-main"></i> 
@@ -182,11 +197,18 @@
                                                             <i class="bi bi-x-circle me-2"></i>Agotado
                                                         </button>
                                                     @else
-                                                        <button class="btn btn-evai-green w-100 fw-bold text-white btn-register-action"
-                                                                data-component-id="{{ $component->id }}"
-                                                                data-register-url="{{ route('registrations.store') }}">
-                                                            Inscribirme ahora
-                                                        </button>
+                                                        @if (in_array($component->id, $registeredComponentIds ?? []))
+                                                            <a href="{{ route('public.components.show', ['event' => $component->event_id, 'component' => $component->id]) }}" 
+                                                            class="btn btn-outline-evai w-100 fw-bold">
+                                                                <i class="bi bi-eye me-1"></i> Ver detalles
+                                                            </a>
+                                                        @else
+                                                            <button class="btn btn-evai-green w-100 fw-bold text-white btn-register-action"
+                                                                    data-component-id="{{ $component->id }}"
+                                                                    data-register-url="{{ route('registrations.store') }}">
+                                                                Inscribirme ahora
+                                                            </button>
+                                                        @endif
                                                     @endif
                                                 @else
                                                     <a href="{{ route('login') }}" class="btn btn-outline-evai w-100 text-center text-decoration-none d-block">
