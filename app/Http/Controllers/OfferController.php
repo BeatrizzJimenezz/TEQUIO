@@ -215,7 +215,7 @@ class OfferController extends Controller
             })
             ->with(['schedules', 'applications' => function ($q) {
                 $q->where('status', 'pending')
-                  ->with('professionalProfile.user', 'professionalProfile.academicFormation');
+                  ->with('professionalProfile.user', 'professionalProfile.academicTrainings');
             }])
             ->get();
 
