@@ -203,9 +203,11 @@ class OfferController extends Controller
     {
         $this->verifyOwner($event);
 
+        // CORREGIDO: Cargamos 'proposedBy' para ver quién creó la propuesta
+        // y quitamos el 'whereHas' estricto para que aparezcan todas.
         $proposals = $event->components()
             ->where('proposal_status', 'proposed')
-            ->with(['presenter.user', 'schedules'])
+            ->with(['proposedBy', 'presenter.user', 'schedules']) 
             ->orderBy('created_at', 'asc')
             ->get();
 
