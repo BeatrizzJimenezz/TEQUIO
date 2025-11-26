@@ -123,10 +123,10 @@
                                                 @endif
 
                                                 {{-- Relationship updated to academicBackground (or education) --}}
-                                                @if($application->professionalProfile->academicBackground->count() > 0)
+                                                @if($application->professionalProfile->academicTrainings?->count() > 0)
                                                     <div class="mt-2">
                                                         <small class="fw-bold text-brand-deep d-block mb-1">Education:</small>
-                                                        @foreach($application->professionalProfile->academicBackground->take(2) as $education)
+                                                        @foreach($application->professionalProfile->academicTrainings->take(2) as $education)
                                                             <div class="mt-1 small text-muted">
                                                                 <strong>{{ $education->degree }}</strong><br>
                                                                 {{ $education->institution }}

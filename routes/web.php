@@ -149,8 +149,8 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
     Route::get('/{event}/evaluation', [OfferController::class, 'evaluation'])->name('offers.evaluation');
     
     // Proposal Actions (Spontaneous)
-    Route::patch('/{event}/proposals/{component}/approve', [OfferController::class, 'approveProposal'])->name('proposals.approve');
-    Route::patch('/{event}/proposals/{component}/reject', [OfferController::class, 'rejectProposal'])->name('proposals.reject');
+    Route::patch('/{event}/proposals/{component}/approve', [OfferController::class, 'approve'])->name('proposals.approve');
+    Route::patch('/{event}/proposals/{component}/reject', [OfferController::class, 'reject'])->name('proposals.reject');
     
     // Application Actions (To Offers)
     Route::patch('/{event}/offers/{offer}/applications/{application}/accept', [OfferController::class, 'acceptApplication'])->name('offers.applications.accept');
