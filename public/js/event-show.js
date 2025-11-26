@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const data = await response.json();
 
                 if (response.ok && data.success) {
+                    // If payment is required, redirect to checkout
+                    if (data.redirect_to_checkout && data.data && data.data.checkout_url) {
+                        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Redirigiendo al pago...';
+                        window.location.href = data.data.checkout_url;
+                        return;
+                    }
+
+                    // Free registration - show success message
                     showMessage(data.message, 'success');
                     if (btnContainer) {
                         btnContainer.innerHTML = `

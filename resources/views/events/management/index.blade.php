@@ -69,6 +69,15 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold rounded-3 py-2" id="participants-tab" data-bs-toggle="tab" data-bs-target="#participants" type="button" role="tab">
+                            <i class="bi bi-person-check-fill me-2"></i>Participantes
+                            @php
+                                $totalRegistrations = $event->components()->withCount('registrations')->get()->sum('registrations_count');
+                            @endphp
+                            <span class="badge bg-white text-brand-deep ms-1 shadow-sm">{{ $totalRegistrations }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold rounded-3 py-2" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab">
                             <i class="bi bi-people-fill me-2"></i>Equipo
                             <span class="badge bg-white text-brand-deep ms-1 shadow-sm">{{ $collaborators->count() + 1 }}</span>
@@ -171,9 +180,9 @@
                                                                 </span>
                                                             @endif
 
-                                                            @if($component->attendee_price > 0)
+                                                            @if($component->price > 0)
                                                                 <span class="badge bg-brand-accent text-white rounded-pill px-3 py-2">
-                                                                    ${{ number_format($component->attendee_price, 2) }}
+                                                                    ${{ number_format($component->price, 2) }}
                                                                 </span>
                                                             @else
                                                                 <span class="badge bg-brand-accent text-white rounded-pill px-3 py-2">Gratis</span>
@@ -442,6 +451,110 @@
                                         </table>
                                     </div>
                                 @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PARTICIPANTS TAB --}}
+                <div class="tab-pane fade" id="participants" role="tabpanel">
+                    <div class="card-admin">
+                        <div class="card-header-admin">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="bi bi-person-check-fill me-2"></i>
+                                Participantes Inscritos
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            @php
+                                $allRegistrations = $event->components()
+                                    ->with(['registrations.user', 'registrations.component'])
+                                    ->get()
+                                    ->pluck('registrations')
+                                    ->flatten()
+                                    ->sortByDesc('registered_at');
+                            @endphp
+
+                            @if($allRegistrations->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light text-uppercase small">
+                                            <tr>
+                                                <th class="ps-4">Participante</th>
+                                                <th>Componente</th>
+                                                <th>Fecha Inscripción</th>
+                                                <th class="text-center">Método de Pago</th>
+                                                <th class="text-center">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($allRegistrations as $registration)
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle me-2 bg-brand-main text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px;">
+                                                            {{ strtoupper(substr($registration->user->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <strong class="text-brand-deep">{{ $registration->user->name }}</strong>
+                                                            <br><small class="text-muted">{{ $registration->user->email }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <strong>{{ $registration->component->name }}</strong>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-calendar3 me-1"></i>
+                                                        {{ $registration->registered_at->format('d/m/Y H:i') }}
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($registration->payment_method === 'in_person')
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-cash-coin me-1"></i> Pago en Persona
+                                                        </span>
+                                                    @elseif($registration->payment_method === 'online')
+                                                        <span class="badge bg-primary">
+                                                            <i class="bi bi-credit-card me-1"></i> Pago en Línea
+                                                        </span>
+                                                    @elseif($registration->payment_status === 'free')
+                                                        <span class="badge bg-info">
+                                                            <i class="bi bi-gift me-1"></i> Gratis
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-secondary">-</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if($registration->payment_status === 'paid')
+                                                        <span class="badge bg-success rounded-pill">
+                                                            <i class="bi bi-check-circle-fill me-1"></i> Pagado
+                                                        </span>
+                                                    @elseif($registration->payment_status === 'pending')
+                                                        <span class="badge bg-warning text-dark rounded-pill">
+                                                            <i class="bi bi-clock-fill me-1"></i> Pendiente
+                                                        </span>
+                                                    @elseif($registration->payment_status === 'free')
+                                                        <span class="badge bg-success rounded-pill">
+                                                            <i class="bi bi-check-circle-fill me-1"></i> Confirmado
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-secondary rounded-pill">{{ ucfirst($registration->payment_status) }}</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-5">
+                                    <i class="bi bi-person-x-fill text-muted opacity-25 display-1"></i>
+                                    <h5 class="mt-3 text-brand-deep fw-bold">No hay participantes registrados</h5>
+                                    <p class="text-muted">Los participantes aparecerán aquí cuando se inscriban en los componentes de tu evento.</p>
+                                </div>
                             @endif
                         </div>
                     </div>

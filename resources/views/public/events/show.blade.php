@@ -129,8 +129,8 @@
                                                     {{ $compDificultyLabels[$component->level] ?? ucfirst($component->level) }}
                                                 </span>
                                                 
-                                                @if($component->attendee_price > 0)
-                                                    <span><i class="bi bi-tag-fill me-1 text-brand-accent"></i> ${{ number_format($component->attendee_price, 2) }}</span>
+                                                @if($component->price > 0)
+                                                    <span><i class="bi bi-tag-fill me-1 text-brand-accent"></i> ${{ number_format($component->price, 2) }}</span>
                                                 @else
                                                     <span><i class="bi bi-gift-fill me-1 text-brand-accent"></i> Gratis</span>
                                                 @endif

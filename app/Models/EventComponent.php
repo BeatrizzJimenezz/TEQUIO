@@ -27,15 +27,21 @@ class EventComponent extends Model
         'cover_image',
         'level',
         'capacity',
-        'attendee_price',
         'organizer_cost',
         'participant_requirements',
         'instructor_requirements',
+        'payment_required',
+        'price',
+        'payment_methods',
+        'allow_multiple_payment_methods',
     ];
 
     protected $casts = [
-        'attendee_price' => 'decimal:2',
         'organizer_cost' => 'decimal:2',
+        'price' => 'decimal:2',
+        'payment_required' => 'boolean',
+        'payment_methods' => 'array',
+        'allow_multiple_payment_methods' => 'boolean',
     ];
 
     /*
@@ -137,6 +143,14 @@ class EventComponent extends Model
     }
 
     /**
+     * Relación con pagos
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'component_id');
+    }
+
+    /**
      * Calcular asientos disponibles
      */
     public function getAvailableSeatsAttribute()
@@ -146,5 +160,25 @@ class EventComponent extends Model
         }
 
         return $this->capacity - $this->registrations()->count();
+    }
+
+    /**
+     * Verifica si el componente requiere pago
+     */
+    public function requiresPayment(): bool
+    {
+        return $this->payment_required && $this->price > 0;
+    }
+
+    /**
+     * Verifica si el componente acepta un método de pago específico
+     */
+    public function acceptsPaymentMethod(string $method): bool
+    {
+        if (!$this->payment_required || !$this->payment_methods) {
+            return false;
+        }
+
+        return in_array($method, $this->payment_methods);
     }
 }

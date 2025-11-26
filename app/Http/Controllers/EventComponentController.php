@@ -87,8 +87,10 @@ class EventComponentController extends Controller
             'cover_image' => 'nullable|url|max:500',
             'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
-            'attendee_price' => 'nullable|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'organizer_cost' => 'nullable|numeric|min:0',
+            'payment_methods' => 'nullable|array|required_if:price,>0',
+            'payment_methods.*' => 'in:online,in_person',
             'participant_requirements' => 'nullable|string',
             'instructor_requirements' => 'nullable|string',
             'schedules' => 'required|array|min:1',
@@ -122,6 +124,8 @@ class EventComponentController extends Controller
                 $speakerId = $tempProfile->id;
             }
 
+            $price = $validated['price'] ?? 0;
+
             $component = $event->components()->create([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -131,7 +135,9 @@ class EventComponentController extends Controller
                 'cover_image' => $validated['cover_image'] ?? null,
                 'level' => $validated['level'] ?? null,
                 'capacity' => $validated['capacity'] ?? null,
-                'attendee_price' => $validated['attendee_price'] ?? 0,
+                'price' => $price,
+                'payment_required' => $price > 0,
+                'payment_methods' => isset($validated['payment_methods']) ? $validated['payment_methods'] : null,
                 'organizer_cost' => $validated['organizer_cost'] ?? null,
                 'participant_requirements' => $validated['participant_requirements'] ?? null,
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,
@@ -241,8 +247,10 @@ class EventComponentController extends Controller
             'cover_image' => 'nullable|url|max:500',
             'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
-            'attendee_price' => 'nullable|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'organizer_cost' => 'nullable|numeric|min:0',
+            'payment_methods' => 'nullable|array|required_if:price,>0',
+            'payment_methods.*' => 'in:online,in_person',
             'participant_requirements' => 'nullable|string',
             'instructor_requirements' => 'nullable|string',
             'schedules' => 'required|array|min:1',
@@ -276,6 +284,8 @@ class EventComponentController extends Controller
                 $speakerId = $tempProfile->id;
             }
 
+            $price = $validated['price'] ?? 0;
+
             $component->update([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -285,7 +295,9 @@ class EventComponentController extends Controller
                 'cover_image' => $validated['cover_image'] ?? null,
                 'level' => $validated['level'] ?? null,
                 'capacity' => $validated['capacity'] ?? null,
-                'attendee_price' => $validated['attendee_price'] ?? 0,
+                'price' => $price,
+                'payment_required' => $price > 0,
+                'payment_methods' => isset($validated['payment_methods']) ? $validated['payment_methods'] : null,
                 'organizer_cost' => $validated['organizer_cost'] ?? null,
                 'participant_requirements' => $validated['participant_requirements'] ?? null,
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,

@@ -62,6 +62,19 @@
                                 <i class="bi bi-bar-chart-fill"></i>
                                 <span class="link-text ms-6">Reportes</span>
                             </a>
+
+                            <!-- Gestión de Fondos para Organizadores y Administradores -->
+                            <a href="{{ route('organizer.funds.index') }}" class="sidebar-link {{ request()->routeIs('organizer.funds.*') ? 'active' : '' }}">
+                                <i class="bi bi-wallet2"></i>
+                                <span class="link-text ms-6">Mis Fondos</span>
+                                @php
+                                    $balance = auth()->user()->organizerBalance;
+                                    $availableBalance = $balance ? $balance->available_balance : 0;
+                                @endphp
+                                @if($availableBalance > 0)
+                                    <span class="badge bg-success rounded-pill ms-auto">${{ number_format($availableBalance, 0) }}</span>
+                                @endif
+                            </a>
                     @endif
 
                     <!-- SOLO ADMIN -->
@@ -86,6 +99,17 @@
                             <span class="link-text ms-6">Solicitudes de Rol</span>
                             @if($pendingRoleRequests > 0)
                                 <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingRoleRequests }}</span>
+                            @endif
+                        </a>
+
+                        @php
+                            $pendingWithdrawals = \App\Models\Withdrawal::where('status', 'pending')->count();
+                        @endphp
+                        <a href="{{ route('admin.withdrawals.index') }}" class="sidebar-link {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">
+                            <i class="bi bi-cash-stack"></i>
+                            <span class="link-text ms-6">Retiros</span>
+                            @if($pendingWithdrawals > 0)
+                                <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingWithdrawals }}</span>
                             @endif
                         </a>
 
@@ -134,7 +158,25 @@
                     </a>
 
                     <!-- Editar perfil profesional -->
-                
+
+
+                    <!-- Suscripción (solo para Organizadores) -->
+                    @if(auth()->user()->hasRole('Organizador'))
+                        <a href="{{ route('paypal.index') }}"
+                        class="sidebar-link {{ request()->routeIs('paypal.*') ? 'active' : '' }}">
+                            <i class="bi bi-star-fill"></i>
+                            <span class="link-text ms-6">
+                                @if(auth()->user()->hasActiveSubscription())
+                                    Mi Suscripción
+                                @else
+                                    Suscríbete
+                                @endif
+                            </span>
+                            @if(!auth()->user()->hasActiveSubscription())
+                                <span class="badge bg-warning rounded-pill ms-auto">Pro</span>
+                            @endif
+                        </a>
+                    @endif
 
                     <!-- Configuración de Laravel -->
                     <a href="{{ route('profile.edit') }}"

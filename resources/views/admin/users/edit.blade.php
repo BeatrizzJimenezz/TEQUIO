@@ -131,6 +131,87 @@
                 </div>
             </div>
 
+            {{-- Tarjeta de Suscripción --}}
+            @if($user->hasRole('Organizador'))
+            <div class="card-admin mb-4">
+                <div class="card-header-admin bg-success bg-opacity-10">
+                    <h6 class="mb-0 fw-bold text-success">
+                        <i class="bi bi-star-fill me-2"></i>Gestionar Suscripción
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    @if($user->hasActiveSubscription())
+                        {{-- Suscripción Activa --}}
+                        <div class="alert alert-success border-0 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <strong>Suscripción Activa</strong>
+                                    <p class="mb-0 small">
+                                        Plan: <strong>{{ ucfirst($user->subscription->plan_id) }}</strong><br>
+                                        Vence: <strong>{{ $user->subscription->ends_at->format('d/m/Y') }}</strong>
+                                        @if($user->subscription->ends_at->isFuture())
+                                            ({{ $user->subscription->ends_at->diffForHumans() }})
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Extender Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.extend', $user) }}" method="POST" class="mb-2">
+                            @csrf
+                            <label class="form-label small fw-bold">Extender Suscripción</label>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <input type="number" name="amount" class="form-control form-control-sm" placeholder="Cantidad" min="1" max="120" value="1" required>
+                                </div>
+                                <div class="col-6">
+                                    <select name="unit" class="form-select form-select-sm" required>
+                                        <option value="months">Mes(es)</option>
+                                        <option value="years">Año(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Extender Suscripción
+                            </button>
+                        </form>
+
+                        {{-- Cancelar Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.cancel', $user) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                    onclick="return confirm('¿Cancelar la suscripción de este usuario?')">
+                                <i class="bi bi-x-circle me-1"></i>Cancelar Suscripción
+                            </button>
+                        </form>
+                    @else
+                        {{-- Sin Suscripción --}}
+                        <div class="alert alert-warning border-0 mb-3">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            <strong>Sin suscripción activa</strong>
+                        </div>
+
+                        {{-- Activar Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.activate', $user) }}" method="POST">
+                            @csrf
+                            <label class="form-label small fw-bold">Activar Suscripción</label>
+                            <select name="plan" class="form-select form-select-sm mb-2" required>
+                                <option value="monthly">Mensual (1 mes)</option>
+                                <option value="annual">Anual (1 año)</option>
+                                <option value="lifetime">Vitalicia (100 años)</option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-star-fill me-1"></i>Activar Suscripción
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             {{-- Tarjeta de Metadatos --}}
             <div class="card-admin">
                 <div class="card-body p-4">
