@@ -28,6 +28,8 @@ Route::get('/', function () {
 // ============ Public Event Routes ============
 Route::get('/dashboard', [PublicEventController::class, 'index'])->name('dashboard');
 Route::get('/event/{id}', [PublicEventController::class, 'show'])->name('event.show');
+Route::get('/events/{event}/components/{component}', [PublicEventController::class, 'showComponent'])
+    ->name('public.components.show');
 
 // ============ Force Password Change Routes ============
 Route::middleware(['auth'])->group(function () {
