@@ -8,9 +8,12 @@ use App\Models\ProfessionalProfile;
 use App\Services\ScheduleConflictValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class EventComponentController extends Controller
 {
+    use AuthorizesRequests; // ✅ AGREGADO: Trait para usar policies
+
     // Verificar autenticación y roles permitidos
     private function checkPermissions()
     {
@@ -23,19 +26,14 @@ class EventComponentController extends Controller
         }
     }
 
-    // Verificar si el usuario es dueño del evento
-    private function checkOwner(Event $event)
-    {
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para gestionar este evento.');
-        }
-    }
+    // ❌ MÉTODO ELIMINADO - Ya no se usa checkOwner()
+    // Ahora usamos $this->authorize('isOrganizer', $event) en su lugar
 
     // Mostrar detalles del evento y sus componentes
     public function index(Event $event)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         $components = $event->components()->with('schedules', 'speaker')
             ->orderBy('created_at', 'desc')
@@ -48,7 +46,7 @@ class EventComponentController extends Controller
     public function create(Event $event)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         // Obtener perfiles profesionales que tengan datos relevantes (about_me, skills)
         // o cuyos usuarios sean Organizadores, o sean temporales
@@ -76,7 +74,7 @@ class EventComponentController extends Controller
     public function store(Request $request, Event $event)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -198,7 +196,7 @@ class EventComponentController extends Controller
     public function edit(Event $event, EventComponent $component)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         if ($component->event_id !== $event->id) {
             abort(404, 'Componente no encontrado.');
@@ -232,7 +230,7 @@ class EventComponentController extends Controller
     public function update(Request $request, Event $event, EventComponent $component)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         if ($component->event_id !== $event->id) {
             abort(404, 'Componente no encontrado.');
@@ -359,7 +357,7 @@ class EventComponentController extends Controller
     public function destroy(Event $event, EventComponent $component)
     {
         $this->checkPermissions();
-        $this->checkOwner($event);
+        $this->authorize('isOrganizer', $event); // ✅ CAMBIADO: Usa policy
 
         if ($component->event_id !== $event->id) {
             abort(404, 'Componente no encontrado.');
