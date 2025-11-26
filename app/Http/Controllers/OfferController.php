@@ -71,7 +71,8 @@ class OfferController extends Controller
                 'organizer_cost' => $validated['organizer_cost'] ?? null,
                 'instructor_requirements' => $validated['instructor_requirements'] ?? null,
                 'proposal_status' => 'offer_open',
-                'attendee_price' => 0,
+                'price' => 0,
+                'payment_required' => false,
             ]);
 
             // Validar conflictos de horario
@@ -215,7 +216,7 @@ class OfferController extends Controller
             })
             ->with(['schedules', 'applications' => function ($q) {
                 $q->where('status', 'pending')
-                  ->with('professionalProfile.user', 'professionalProfile.academicFormation');
+                  ->with('professionalProfile.user', 'professionalProfile.academicTrainings');
             }])
             ->get();
 

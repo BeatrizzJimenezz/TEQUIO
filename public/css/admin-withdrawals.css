@@ -1,0 +1,195 @@
+/* admin-withdrawals.css */
+
+:root {
+    --brand-deep: #0C2340;
+    --brand-medium: #1B3A5B;
+    --brand-light: #4499BB;
+    --brand-accent: #8CC63F;
+    --bg-surface: #F8F9FA;
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+}
+
+body {
+    background-color: var(--bg-surface);
+}
+
+/* --- Hero Header --- */
+.hero-header {
+    background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand-medium) 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(12, 35, 64, 0.15);
+}
+
+.hero-pattern {
+    position: absolute;
+    top: 0; right: 0;
+    opacity: 0.1;
+    font-size: 12rem;
+    transform: translate(20%, -20%) rotate(-15deg);
+    pointer-events: none;
+    color: white;
+}
+
+/* --- Tarjetas de Estadísticas Personalizadas --- */
+.stat-card {
+    border: none;
+    border-radius: 1rem;
+    background: white;
+    padding: 1.5rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    border-left: 5px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* Variantes de Color por Marca */
+.stat-pending { border-left-color: #f59e0b; } /* Ambar para pendiente (semántico) */
+.stat-completed { border-left-color: var(--brand-accent); } /* Verde marca */
+.stat-rejected { border-left-color: #ef4444; } /* Rojo semántico */
+.stat-total { border-left-color: var(--brand-light); } /* Azul marca */
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.bg-icon-pending { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.bg-icon-completed { background-color: rgba(140, 198, 63, 0.1); color: var(--brand-accent); }
+.bg-icon-rejected { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.bg-icon-total { background-color: rgba(68, 153, 187, 0.1); color: var(--brand-light); }
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--brand-deep);
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+/* --- Filtros --- */
+.filter-card {
+    background: white;
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 1.5rem;
+}
+
+.btn-filter {
+    border-radius: 50rem;
+    padding: 0.4rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid #e5e7eb;
+    color: var(--text-secondary);
+    background: white;
+    transition: all 0.2s;
+}
+
+.btn-filter:hover {
+    background-color: #f3f4f6;
+    color: var(--brand-deep);
+}
+
+.btn-filter.active {
+    background-color: var(--brand-deep);
+    color: white;
+    border-color: var(--brand-deep);
+}
+
+/* --- Tabla --- */
+.table-card {
+    background: white;
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.table-modern thead th {
+    background-color: #f8fafc;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+}
+
+.table-modern td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+    color: var(--text-primary);
+}
+
+.table-modern tr:hover td {
+    background-color: #f9fafb;
+}
+
+/* Badges de Estado */
+.status-badge {
+    padding: 0.35em 0.85em;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-pending { background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+.badge-completed { background-color: #ecfccb; color: #365314; border: 1px solid #bef264; }
+.badge-rejected { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* Botones de Acción */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-icon-view { background: #eff6ff; color: var(--brand-light); }
+.btn-icon-view:hover { background: var(--brand-light); color: white; }
+
+.btn-icon-approve { background: #f0fdf4; color: var(--brand-accent); }
+.btn-icon-approve:hover { background: var(--brand-accent); color: white; }
+
+.btn-icon-reject { background: #fef2f2; color: #ef4444; }
+.btn-icon-reject:hover { background: #ef4444; color: white; }
+
+/* Paginación */
+.pagination-container {
+    padding: 1rem;
+    border-top: 1px solid #f3f4f6;
+}

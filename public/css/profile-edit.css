@@ -1,6 +1,7 @@
-    .btn-outline-evai {
+.btn-outline-evai {
     border-color: #4499BB;
     color: #4499BB;
+    border-radius: 50rem;
 }
 
 .btn-outline-evai:hover {
@@ -8,18 +9,17 @@
     color: #FFFFFF;
 }
 
-.btn-outline-evai { 
-    border-radius: 50rem; /* Añadir redondez extrema para el estilo pill */
+
+.border-dashed {
+    border-style: dashed !important;
 }
-    .border-dashed {
-        border-style: dashed !important;
-    }
-    .hover-scale:hover {
-        transform: scale(1.02);
-        transition: transform 0.2s;
-    }
-    /* Ajuste para inputs de solo lectura visual (estilo light) */
-    .form-control:focus {
-        border-color: #4499bb;
-        box-shadow: 0 0 0 0.25rem rgba(68, 153, 187, 0.25);
-    }
+
+.hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
+}
+
+.form-control:focus {
+    border-color: #4499bb;
+    box-shadow: 0 0 0 0.25rem rgba(68, 153, 187, 0.25);
+}

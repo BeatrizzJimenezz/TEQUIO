@@ -62,7 +62,7 @@ class ProposalController extends Controller
             'cover' => 'nullable|url|max:500',
             'level' => 'nullable|in:beginner,intermediate,advanced',
             'capacity' => 'nullable|integer|min:1',
-            'attendee_price' => 'nullable|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'participant_requirements' => 'nullable|string',
             'schedules' => 'required|array|min:1',
             'schedules.*.date' => 'required|date',
@@ -90,7 +90,8 @@ class ProposalController extends Controller
                 'cover' => $validated['cover'] ?? null,
                 'level' => $validated['level'] ?? null,
                 'capacity' => $validated['capacity'] ?? null,
-                'attendee_price' => $validated['attendee_price'] ?? 0,
+                'price' => $validated['price'] ?? 0,
+                'payment_required' => ($validated['price'] ?? 0) > 0,
                 'participant_requirements' => $validated['participant_requirements'] ?? null,
                 'proposal_status' => 'proposed',
             ]);

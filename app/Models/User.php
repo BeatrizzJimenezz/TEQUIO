@@ -63,8 +63,46 @@ class User extends Authenticatable
         if ($this->profile_photo) {
             return asset('storage/' . $this->profile_photo);
         }
-        
+
         // Retornar avatar predeterminado
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
+
+    // Relación con suscripciones
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    // Verificar si el usuario tiene una suscripción activa
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription && $this->subscription->isActive();
+    }
+
+    // Relación con balance de organizador
+    public function organizerBalance()
+    {
+        return $this->hasOne(OrganizerBalance::class);
+    }
+
+    // Relación con retiros
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class, 'user_id');
+    }
+
+    // Obtener o crear el balance del organizador
+    public function getOrCreateOrganizerBalance()
+    {
+        if (!$this->organizerBalance) {
+            return $this->organizerBalance()->create([
+                'available_balance' => 0,
+                'pending_balance' => 0,
+                'total_earned' => 0,
+                'total_withdrawn' => 0,
+            ]);
+        }
+        return $this->organizerBalance;
     }
 }

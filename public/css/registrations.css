@@ -1,0 +1,130 @@
+    :root {
+        --brand-deep: #0C2340;
+        --brand-medium: #1B3A5B;
+        --brand-light: #4499BB;
+        --brand-accent: #8CC63F;
+        --bg-surface: #F8F9FA;
+        --text-secondary: #6C757D;
+    }
+
+    body {
+        background-color: var(--bg-surface);
+    }
+
+    .btn-outline-tequio {
+        border-color: var(--brand-light);
+        color: var(--brand-light);
+        border-radius: 50rem;
+        border-width: 1.5px;
+    }
+
+    .btn-outline-tequio:hover {
+        background-color: var(--brand-light);
+        color: white;
+    }
+
+    .badge-activity {
+        background-color: var(--brand-medium);
+        color: white;
+    }
+
+    .badge-component {
+        background-color: var(--brand-light);
+        color: white;
+    }
+
+    .badge-payment-free {
+        background-color: var(--brand-accent);
+        color: white;
+    }
+
+    .hero-header {
+        background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand-medium) 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(12, 35, 64, 0.15);
+    }
+
+    .hero-pattern {
+        position: absolute;
+        top: 0;
+        right: 0;
+        opacity: 0.05;
+        font-size: 15rem;
+        transform: translate(20%, -20%) rotate(-15deg);
+        pointer-events: none;
+    }
+
+    .reg-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        transition: transform 0.25s ease;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .reg-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        border-color: rgba(68, 153, 187, 0.2);
+    }
+
+    .reg-header {
+        background-color: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 1.5rem;
+    }
+
+    .reg-body {
+        padding: 1.5rem;
+    }
+
+    .ticket-stub {
+        background-color: #f8fafc;
+        border-left: 2px dashed #cbd5e1;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 250px;
+    }
+
+    .qr-box {
+        background: white;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+    }
+
+    .badge-pill {
+        padding: 0.35em 0.85em;
+        border-radius: 50rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .status-dot {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    .dot-success {
+        background-color: var(--brand-accent);
+    }
+
+    .dot-warning {
+        background-color: #f59e0b;
+    }
