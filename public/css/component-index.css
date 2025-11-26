@@ -1,0 +1,169 @@
+/* component-index.css - Estilo Moderno */
+
+:root {
+    --brand-deep: #0C2340;
+    --brand-medium: #1B3A5B;
+    --brand-light: #4499BB;
+    --brand-accent: #F5A623; /* Un dorado más moderno para acentos */
+    --brand-accent-dark: #D98E11;
+    --bg-surface: #F4F7FA; /* Fondo un poco más claro */
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+    --border-radius-xl: 1rem;
+    --border-radius-lg: 0.75rem;
+}
+
+body {
+    background-color: var(--bg-surface);
+    font-family: 'Inter', sans-serif; /* Se asume que se usa una fuente moderna como Inter */
+}
+
+/* --- 1. Dashboard Cards (Encabezado) --- */
+.dashboard-card {
+    border-radius: var(--border-radius-xl);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card-overview {
+    background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand-medium) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-pattern {
+    position: absolute;
+    right: -20px;
+    bottom: -40px;
+    font-size: 12rem;
+    opacity: 0.05;
+    color: white;
+    pointer-events: none;
+}
+
+.btn-hero-back {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+}
+
+.btn-hero-back:hover {
+    background: white;
+    color: var(--brand-deep);
+}
+
+.stats-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stats-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* Action Cards */
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+.action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+
+/* --- 2. Component Cards (Lista) --- */
+.component-card-modern {
+    border-radius: var(--border-radius-xl);
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.component-card-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.07) !important;
+}
+
+.component-img-wrapper {
+    min-height: 200px;
+    background-color: #f0f2f5;
+}
+
+.component-img-wrapper img {
+    transition: transform 0.3s ease;
+}
+
+.component-card-modern:hover .component-img-wrapper img {
+    transform: scale(1.03);
+}
+
+.btn-action-modern {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-action-modern:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Utilidades Extras --- */
+.text-brand-deep { color: var(--brand-deep) !important; }
+.text-brand-accent { color: var(--brand-accent) !important; }
+
+.btn-brand-accent {
+    background-color: var(--brand-accent);
+    border-color: var(--brand-accent);
+    color: white;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-brand-accent:hover {
+    background-color: var(--brand-accent-dark);
+    border-color: var(--brand-accent-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
+}
+
+.bg-brand-accent-subtle { background-color: rgba(245, 166, 35, 0.15) !important; }
+.bg-success-subtle { background-color: #d1e7dd !important; }
+.bg-warning-subtle { background-color: #fff3cd !important; }
+.bg-primary-subtle { background-color: #cfe2ff !important; }
+
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

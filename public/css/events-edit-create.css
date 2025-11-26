@@ -1,0 +1,121 @@
+
+:root {
+    --brand-deep: #0C2340;
+    --brand-main: #4499BB;
+    --brand-accent: #8CC63F;
+    --evai-blue-main: #4499BB;
+    --evai-blue-deep: #0C2340;
+    --evai-green-accent: #8CC63F;
+    --evai-gray-light: #C8CCC9;
+    --evai-white: #FFFFFF;
+}
+
+.edit-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    background-color: #fff;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s;
+}
+
+.edit-card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.border-top-accent {
+    border-top: 4px solid var(--evai-green-accent) !important;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--brand-deep);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand-main);
+    box-shadow: 0 0 0 0.25rem rgba(68, 153, 187, 0.15);
+}
+
+.tag-check-input:checked + .tag-check-label {
+    background-color: var(--brand-deep);
+    color: white;
+    border-color: var(--brand-deep);
+}
+
+.tag-check-label {
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #e9ecef;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    margin-right: 0.25rem;
+    background-color: #f8f9fa;
+}
+
+.tag-check-label:hover {
+    background-color: #e2e6ea;
+    color: var(--brand-deep);
+}
+
+.sticky-sidebar {
+    position: sticky;
+    top: 1.5rem;
+    z-index: 10;
+}
+
+.btn-evai-green {
+    background-color: var(--evai-green-accent);
+    border-color: var(--evai-green-accent);
+    color: white;
+    font-weight: bold;
+    border-radius: 50rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.btn-evai-green:hover {
+    background-color: #72a933;
+    border-color: #72a933;
+    color: white;
+}
+
+.btn-outline-evai {
+    border: 1px solid var(--evai-blue-main);
+    color: var(--evai-blue-main);
+    border-radius: 50rem;
+    font-weight: bold;
+    background-color: transparent;
+}
+
+.btn-outline-evai:hover {
+    background-color: var(--evai-blue-main);
+    color: var(--evai-white);
+}
+
+.link-back {
+    color: #ffffffff; 
+    font-size: 0.75rem; 
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+.link-back:hover {
+    color: #e0e0e0;
+}

@@ -139,9 +139,9 @@
                             Cancelar
                         </a>
 
-                        <a type="submit" class="btn btn-evai-green">
-                            </i> Guardar Cambios
-                        </a>
+                        <button type="submit" class="btn btn-evai-green">
+                            <i class="bi bi-save me-1"></i> Guardar Cambios
+                        </button>
                     </div>
 
                 </div>

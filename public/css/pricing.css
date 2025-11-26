@@ -1,0 +1,163 @@
+:root {
+    --brand-deep: #0C2340;
+    --brand-medium: #1B3A5B;
+    --brand-light: #4499BB;
+    --brand-accent: #8CC63F;
+    --bg-surface: #F8F9FA;
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+}
+
+body {
+    background-color: var(--bg-surface);
+}
+
+.pricing-card {
+    border-radius: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    background: white;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(12, 35, 64, 0.15) !important;
+}
+
+.plan-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--brand-deep);
+    margin-bottom: 0;
+    line-height: 1;
+}
+
+.plan-period {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.badge-custom {
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.5em 1em;
+    border-radius: 50rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.badge-monthly {
+    background-color: rgba(68, 153, 187, 0.1);
+    color: var(--brand-light);
+}
+
+.badge-annual {
+    background-color: rgba(140, 198, 63, 0.1);
+    color: var(--brand-accent);
+}
+
+.border-popular {
+    border: 2px solid var(--brand-accent) !important;
+    position: relative;
+}
+
+.badge-popular {
+    background-color: var(--brand-accent);
+    color: white;
+    box-shadow: 0 4px 10px rgba(140, 198, 63, 0.4);
+}
+
+.feature-list li {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+}
+
+.check-icon {
+    color: var(--brand-accent);
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.btn-plan {
+    padding: 0.875rem 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 0.75rem;
+    width: 100%;
+    transition: all 0.3s;
+}
+
+.btn-primary-plan {
+    background-color: var(--brand-deep);
+    color: white;
+    border: none;
+}
+.btn-primary-plan:hover {
+    background-color: var(--brand-medium);
+    color: white;
+    box-shadow: 0 5px 15px rgba(12, 35, 64, 0.2);
+}
+
+.btn-accent-plan {
+    background-color: var(--brand-accent);
+    color: white;
+    border: none;
+}
+.btn-accent-plan:hover {
+    background-color: #7ab332;
+    color: white;
+    box-shadow: 0 5px 15px rgba(140, 198, 63, 0.3);
+}
+
+.subscribe-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.accordion-item {
+    border: none;
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 1rem;
+}
+
+.accordion-button {
+    font-weight: 600;
+    color: var(--brand-deep);
+    background-color: white;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--brand-light);
+    background-color: rgba(68, 153, 187, 0.05);
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,0.1);
+}
+
+#paypalModal .modal-content {
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+}
+
+#paypalModal .modal-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #003087 0%, #0070ba 100%); /* Azul PayPal oficial */
+    color: white;
+}
+
+.spinner-border.text-primary {
+    color: var(--brand-light) !important;
+}

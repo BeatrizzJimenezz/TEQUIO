@@ -1,49 +1,316 @@
-    .nav-tabs {
-        background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
+/* management.css */
+
+:root {
+    --brand-deep: #0C2340;
+    --brand-medium: #1B3A5B;
+    --brand-light: #4499BB;
+    --brand-accent: #8CC63F;
+    --bg-surface: #F8F9FA;
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+}
+
+body { background-color: var(--bg-surface); }
+
+.btn-outline-tequio {
+    border: 1px solid var(--brand-medium);
+    color: var(--brand-medium);
+    font-weight: 600;
+}
+.btn-outline-tequio:hover {
+    background-color: var(--brand-medium);
+    color: white;
+}
+
+.btn-tequio {
+    border: 1px solid var(--brand-medium);
+    color: white;
+    background: var(--brand-medium);
+    font-weight: 600;
+}
+.btn-tequio:hover {
+    border: 1px solid var(--brand-medium);
+    color: var(--brand-medium);
+    font-weight: 600;
+}
+
+/* --- Hero Header --- */
+.hero-header {
+    background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand-medium) 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2.5rem 2rem 4rem 2rem; /* Padding extra abajo para solapar contenido */
+    position: relative;
+    overflow: hidden;
+    margin-bottom: -2rem; /* Margen negativo para efecto superpuesto */
+    box-shadow: 0 10px 30px rgba(12, 35, 64, 0.2);
+    z-index: 1;
+}
+
+.hero-pattern {
+    position: absolute;
+    top: 0; right: 0;
+    opacity: 0.1;
+    font-size: 12rem;
+    transform: translate(20%, -20%) rotate(-15deg);
+    pointer-events: none;
+    color: white;
+}
+
+/* Botones del Header */
+.btn-hero-light {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 50rem;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(5px);
+}
+
+.btn-hero-light:hover {
+    background: white;
+    color: var(--brand-deep);
+}
+
+/* --- Contenedor Principal --- */
+.main-container {
+    position: relative;
+    z-index: 2;
+    padding-top: 0;
+}
+
+/* --- Tabs de Navegación (Estilo Moderno) --- */
+.nav-pills-custom {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 0.5rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.nav-pills-custom .nav-item {
+    flex: 1;
+    min-width: 140px;
+}
+
+.nav-pills-custom .nav-link {
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.nav-pills-custom .nav-link:hover {
+    background-color: #f8fafc;
+    color: var(--brand-deep);
+}
+
+.nav-pills-custom .nav-link.active {
+    background-color: var(--brand-deep);
+    color: white;
+    box-shadow: 0 4px 10px rgba(12, 35, 64, 0.2);
+}
+
+.nav-pills-custom .nav-link.active .badge {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: white !important;
+}
+
+/* --- Tarjetas de Admin --- */
+.card-admin {
+    background: white;
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card-header-admin {
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+/* --- Badges y Textos --- */
+.text-brand-deep { color: var(--brand-deep) !important; }
+.text-brand-main { color: var(--brand-light) !important; } /* Usamos el light para iconos */
+.text-brand-accent { color: var(--brand-accent) !important; }
+
+.badge-custom {
+    padding: 0.4em 0.8em;
+    border-radius: 50rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.bg-brand-deep { background-color: var(--brand-deep); }
+.bg-brand-accent { background-color: var(--brand-accent); }
+.bg-brand-light { background-color: var(--brand-light); }
+.bg-brand-oferta { background-color: #ffe69c; }
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-icon-edit { background: #eff6ff; color: var(--brand-light); }
+.btn-icon-edit:hover { background: var(--brand-light); color: white; }
+
+.btn-icon-delete { background: #fef2f2; color: #ef4444; }
+.btn-icon-delete:hover { background: #ef4444; color: white; }
+
+/* --- Agenda Table --- */
+.table-modern thead th {
+    background-color: #f8fafc;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+}
+
+.table-modern td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Avatar */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* --- Componentes (Tarjeta) --- */
+.component-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: white;
+    position: relative;
+}
+
+.component-card:hover {
+    border-color: var(--brand-light);
+    box-shadow: 0 10px 30px rgba(12, 35, 64, 0.08);
+    transform: translateY(-3px);
+}
+
+/* Bordes de estado */
+.border-status-open { border-left: 5px solid var(--brand-accent) !important; }
+.border-status-proposed { border-left: 5px solid #f59e0b !important; }
+.border-status-approved { border-left: 5px solid var(--brand-deep) !important; }
+
+/* Contenedor de Imagen */
+.component-img-wrapper {
+    height: 100%;
+    min-height: 220px; /* Altura mínima en escritorio para que no se vea aplastada */
+    position: relative;
+    overflow: hidden;
+}
+
+.component-img-wrapper img {
+    transition: transform 0.5s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.component-card:hover .component-img-wrapper img {
+    transform: scale(1.05);
+}
+
+/* Ajuste para móvil: Imagen tipo banner */
+@media (max-width: 767.98px) {
+    .component-img-wrapper {
+        min-height: 180px;
+        max-height: 200px;
     }
-    
-    .nav-tabs .nav-link {
-        border: none;
-        color: #6c757d;
-        padding: 1rem 1.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .nav-tabs .nav-link:hover {
-        background-color: #f8f9fa;
-        color: #0C2340;
-    }
-    
-    .nav-tabs .nav-link.active {
-        background-color: #4499BB;
-        color: white;
-        font-weight: 600;
-    }
-    
-    .nav-tabs .nav-link.active .badge {
-        background-color: white !important;
-        color: #4499BB !important;
-    }
-    
-    /* Avatar Circle */
-    .avatar-circle {
-        flex-shrink: 0;
-    }
-    
-    /* Smooth transitions */
-    .tab-pane {
-        animation: fadeIn 0.3s ease-in;
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+}
+
+/* --- Botones de Acción --- */
+.btn-action-icon {
+    width: 42px; /* Un poco más grandes para mejor toque */
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.2rem;
+    text-decoration: none;
+    background-color: white; /* Fondo base */
+}
+
+/* Estilos Específicos */
+.btn-edit {
+    background-color: #f8f9fa;
+    color: var(--brand-light);
+    border-color: #e9ecef;
+}
+.btn-edit:hover {
+    background-color: var(--brand-light);
+    color: white;
+    border-color: var(--brand-light);
+    box-shadow: 0 4px 12px rgba(68, 153, 187, 0.3);
+}
+
+.btn-schedule {
+    background-color: #f0fdf4;
+    color: var(--brand-accent);
+    border-color: #dcfce7;
+}
+.btn-schedule:hover {
+    background-color: var(--brand-accent);
+    color: white;
+    border-color: var(--brand-accent);
+    box-shadow: 0 4px 12px rgba(140, 198, 63, 0.3);
+}
+
+.btn-delete {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+.btn-delete:hover {
+    background-color: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+

@@ -31,22 +31,10 @@ body {
     padding-bottom: 10px;
 }
 
-#sidebar-wrapper::-webkit-scrollbar {
-    width: 6px;
-}
-
-#sidebar-wrapper::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.1);
-}
-
-#sidebar-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.3);
-    border-radius: 3px;
-}
-
-#sidebar-wrapper::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.5);
-}
+#sidebar-wrapper::-webkit-scrollbar { width: 6px; }
+#sidebar-wrapper::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+#sidebar-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+#sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
 
 #page-content-wrapper {
     width: 100%;
@@ -55,14 +43,14 @@ body {
 
 .sidebar-heading {
     padding: 0.875rem 1.25rem;
-    height: 50px;
+    height: 60px; 
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .sidebar-link {
-    padding: 8px 15px;
+    padding: 15px 15px;
     display: flex;
     align-items: center;
     color: #adb5bd;
@@ -70,27 +58,36 @@ body {
     white-space: nowrap;
     overflow: hidden;
     border-left: 3px solid transparent;
+    transition: all 0.2s;
 }
 
 .sidebar-link i {
-    font-size: 1rem;
+    font-size: 1.1rem;
     min-width: 50px;
     text-align: center;
 }
 
 .sidebar-link:hover, .sidebar-link.active {
-    background-color: rgba(2, 44, 88, 0.363);
+    background-color: rgba(255, 255, 255, 0.05);
     color: #fff;
     border-left-color: #4499bb;
 }
 
 .sidebar-category {
-    padding: 5px 25px 5px;
-    font-size: 0.75rem;
-    font-weight: bold;
+    padding: 15px 25px 5px;
+    font-size: 0.7rem;
     color: #6c757d;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
     white-space: nowrap;
+}
+
+.sidebar-divider {
+    display: none;
+    margin: 0.5rem 1rem;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    opacity: 1;
 }
 
 #sidebarToggle {
@@ -99,6 +96,8 @@ body {
     color: #adb5bd;
     font-size: 1.5rem;
     cursor: pointer;
+    padding: 0;
+    margin-left: auto;
 }
 
 
@@ -113,16 +112,37 @@ body {
     body.sb-sidenav-toggled .sidebar-category,
     body.sb-sidenav-toggled .brand-text,
     body.sb-sidenav-toggled .user-info-text,
-    body.sb-sidenav-toggled .sidebar-submenu { display: none; }
+    body.sb-sidenav-toggled .sidebar-submenu,
+    body.sb-sidenav-toggled .badge {
+        display: none !important; 
+    }
 
-    body.sb-sidenav-toggled #logo-tequio { display: none !important; }
+    body.sb-sidenav-toggled .sidebar-divider {
+        display: block !important;
+        margin: 10px 15px;
+    }
+
+    body.sb-sidenav-toggled #logo-tequio { 
+        display: none !important; 
+    }
     
     body.sb-sidenav-toggled .sidebar-heading {
         justify-content: center;
         padding: 0;
     }
+    body.sb-sidenav-toggled #sidebarToggle {
+        margin: 0;
+    }
 
-    body.sb-sidenav-toggled .sidebar-link i { margin-right: 0; }
+    body.sb-sidenav-toggled .sidebar-link {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    body.sb-sidenav-toggled .sidebar-link i { 
+        margin-right: 0; 
+        min-width: 80px;
+    }
 
     body.sb-sidenav-toggled .user-card {
         background-color: transparent !important;
@@ -130,15 +150,20 @@ body {
         padding: 0 !important;
         box-shadow: none !important;
     }
+    body.sb-sidenav-toggled .user-card img {
+        margin: 0 !important;
+    }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
     #sidebar-wrapper { width: 80px; }
     #page-content-wrapper { margin-left: 80px; }
 
-    .link-text, .sidebar-category, .brand-text, .user-info-text, .sidebar-submenu { display: none; }
+    .link-text, .sidebar-category, .brand-text, .user-info-text, .sidebar-submenu, .badge, #logo-tequio { 
+        display: none !important; 
+    }
+    .sidebar-divider { display: block !important; }
 
-    
     .user-card {
         background-color: transparent !important;
         justify-content: center;
@@ -150,11 +175,19 @@ body {
         width: 250px; 
         box-shadow: 5px 0 15px rgba(0,0,0,0.5);
     }
+
     body.sb-sidenav-toggled .link-text,
     body.sb-sidenav-toggled .sidebar-category,
-    body.sb-sidenav-toggled .brand-text,
     body.sb-sidenav-toggled .user-info-text,
-    body.sb-sidenav-toggled .sidebar-submenu { display: none; }
+    body.sb-sidenav-toggled .badge { 
+        display: inline-block !important; 
+    }
+    body.sb-sidenav-toggled #logo-tequio {
+        display: flex !important;
+    }
+    body.sb-sidenav-toggled .sidebar-divider {
+        display: none !important;
+    }
     
 
     body.sb-sidenav-toggled .user-card {

@@ -126,9 +126,9 @@
                                                 </span>
                                             @endif
 
-                                            @if($component->attendee_price > 0)
+                                            @if($component->price > 0)
                                                 <span class="badge" style="background-color: #8CC63F;">
-                                                    ${{ number_format($component->attendee_price, 2) }}
+                                                    ${{ number_format($component->price, 2) }}
                                                 </span>
                                             @else
                                                 <span class="badge" style="background-color: #8CC63F;">Gratis</span>
