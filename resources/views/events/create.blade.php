@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('header', 'Crear Evento')
-
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/events-edit-create.css') }}">
 
