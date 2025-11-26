@@ -14,6 +14,10 @@ use App\Http\Controllers\ComponentScheduleController;
 use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\ComponentPaymentController;
+use App\Http\Controllers\OrganizerFundsController;
+use App\Http\Controllers\Admin\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -88,12 +92,26 @@ Route::middleware(['auth', 'verified'])->prefix('admin/users')->group(function (
     Route::put('/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
     Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
     Route::post('/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
+
+    // Subscription Management Routes
+    Route::post('/{user}/subscription/activate', [UserManagementController::class, 'activateSubscription'])->name('admin.users.subscription.activate');
+    Route::delete('/{user}/subscription/cancel', [UserManagementController::class, 'cancelSubscription'])->name('admin.users.subscription.cancel');
+    Route::post('/{user}/subscription/extend', [UserManagementController::class, 'extendSubscription'])->name('admin.users.subscription.extend');
 });
 
 // ============ Admin Reports Routes ============
 Route::middleware(['auth', 'verified'])->prefix('admin/reports')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('admin.reports.index');
     Route::get('/export', [ReportController::class, 'export'])->name('admin.reports.export');
+});
+
+// ============ PayPal Subscription Routes ============
+Route::middleware(['auth', 'verified'])->prefix('subscription')->group(function () {
+    Route::get('/', [PayPalController::class, 'index'])->name('paypal.index');
+    Route::post('/subscribe', [PayPalController::class, 'subscribe'])->name('paypal.subscribe');
+    Route::get('/check-status', [PayPalController::class, 'checkStatus'])->name('paypal.check-status');
+    Route::get('/success', [PayPalController::class, 'success'])->name('paypal.success');
+    Route::get('/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
 });
 
 // ============ Event Management Routes (Admin/Organizer) ============
@@ -104,8 +122,8 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
 
     // Event CRUD
     Route::get('/', [EventController::class, 'index'])->name('events.index');
-    Route::get('/create', [EventController::class, 'create'])->name('events.create');
-    Route::post('/', [EventController::class, 'store'])->name('events.store');
+    Route::get('/create', [EventController::class, 'create'])->name('events.create')->middleware('check.subscription');
+    Route::post('/', [EventController::class, 'store'])->name('events.store')->middleware('check.subscription');
     Route::get('/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::put('/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/{event}', [EventController::class, 'destroy'])->name('events.destroy');
@@ -166,15 +184,68 @@ Route::middleware(['auth', 'verified'])->prefix('my-events')->group(function () 
 Route::middleware(['auth', 'verified'])->group(function () {
     // List of user's registrations
     Route::get('/my-registrations', [RegistrationController::class, 'index'])->name('registrations.index');
-    
+
     // Cancel registration
     Route::delete('/registrations/{id}', [RegistrationController::class, 'destroy'])->name('registrations.destroy');
-    
+
     // Register for an event/component (AJAX/Web)
     Route::post('/registrations', [RegistrationController::class, 'store'])->name('registrations.store');
-    
+
     // Check status (AJAX)
     Route::get('/registrations/check/{componentId}', [RegistrationController::class, 'checkStatus'])->name('registrations.check');
+});
+
+// ============ Component Payment Routes ============
+Route::middleware(['auth', 'verified'])->prefix('payment')->group(function () {
+    // NEW: Checkout for component (without registration)
+    Route::get('/component/{component}/checkout', [ComponentPaymentController::class, 'checkoutComponent'])->name('payment.checkout.component');
+    Route::post('/component/{component}/paypal/initiate', [ComponentPaymentController::class, 'initiatePayPalForComponent'])->name('payment.paypal.initiate.component');
+    Route::get('/component/{component}/success', [ComponentPaymentController::class, 'paypalSuccessComponent'])->name('payment.success.component');
+    Route::get('/component/{component}/cancel', [ComponentPaymentController::class, 'paypalCancelComponent'])->name('payment.cancel.component');
+
+    // LEGACY: Checkout page with existing registration
+    Route::get('/checkout/{registration}', [ComponentPaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::post('/paypal/{registration}/initiate', [ComponentPaymentController::class, 'initiatePayPalPayment'])->name('payment.paypal.initiate');
+    Route::get('/success/{registration}', [ComponentPaymentController::class, 'paypalSuccess'])->name('payment.success');
+    Route::get('/cancel/{registration}', [ComponentPaymentController::class, 'paypalCancel'])->name('payment.cancel');
+
+    // In-person payment (organizers only)
+    Route::post('/in-person/{registration}', [ComponentPaymentController::class, 'processInPersonPayment'])->name('payment.in-person');
+
+    // Payment confirmation
+    Route::get('/confirmation/{registration}', [ComponentPaymentController::class, 'confirmation'])->name('payment.confirmation');
+});
+
+// ============ Organizer Funds Management Routes ============
+Route::middleware(['auth', 'verified'])->prefix('organizer/funds')->group(function () {
+    // Dashboard
+    Route::get('/', [OrganizerFundsController::class, 'index'])->name('organizer.funds.index');
+
+    // Payments history
+    Route::get('/payments', [OrganizerFundsController::class, 'paymentsHistory'])->name('organizer.funds.payments');
+
+    // Withdrawals
+    Route::get('/withdrawals', [OrganizerFundsController::class, 'withdrawalsHistory'])->name('organizer.funds.withdrawals');
+    Route::get('/withdrawals/create', [OrganizerFundsController::class, 'createWithdrawal'])->name('organizer.funds.withdrawals.create');
+    Route::post('/withdrawals', [OrganizerFundsController::class, 'storeWithdrawal'])->name('organizer.funds.withdrawals.store');
+    Route::delete('/withdrawals/{withdrawal}', [OrganizerFundsController::class, 'cancelWithdrawal'])->name('organizer.funds.withdrawals.cancel');
+});
+
+// ============ Admin Withdrawal Management Routes ============
+Route::middleware(['auth', 'verified'])->prefix('admin/withdrawals')->group(function () {
+    // List and filter
+    Route::get('/', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+
+    // View details
+    Route::get('/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+
+    // Approval forms
+    Route::get('/{withdrawal}/approve', [WithdrawalController::class, 'showApprovalForm'])->name('admin.withdrawals.approve.form');
+    Route::post('/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+
+    // Reject form
+    Route::get('/{withdrawal}/reject', [WithdrawalController::class, 'showRejectForm'])->name('admin.withdrawals.reject.form');
+    Route::post('/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
 });
 
 // Professional Profile Routes (Included externally)

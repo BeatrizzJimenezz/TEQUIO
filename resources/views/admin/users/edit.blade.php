@@ -23,10 +23,10 @@
     </div>
 
     <div class="row g-4">
-        
+
         <div class="col-lg-8">
             <div class="admin-card main-card-offset">
-                
+
                 @if(session('success'))
                     <div class="alert alert-success border-0 shadow-sm mb-4 rounded-3">
                         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
@@ -50,13 +50,13 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="name" class="form-label-title">Nombre Completo</label>
-                                <input type="text" class="form-control" id="name" name="name" 
+                                <input type="text" class="form-control" id="name" name="name"
                                        value="{{ old('name', $user->name) }}" required>
                                 @error('name') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label-title">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" name="email" 
+                                <input type="email" class="form-control" id="email" name="email"
                                        value="{{ old('email', $user->email) }}" required>
                                 @error('email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                             </div>
@@ -86,14 +86,14 @@
                                         @php
                                             $isSelf = $user->id === auth()->id();
                                             $hasRole = $user->hasRole($role->name);
-                                            $disabled = $isSelf && !$hasRole; 
+                                            $disabled = $isSelf && !$hasRole;
                                         @endphp
 
-                                        <input type="radio" class="role-selector" name="roles[]" 
-                                               id="role_{{ $role->id }}" value="{{ $role->name }}" 
+                                        <input type="radio" class="role-selector" name="roles[]"
+                                               id="role_{{ $role->id }}" value="{{ $role->name }}"
                                                {{ $hasRole ? 'checked' : '' }}
                                                {{ $disabled ? 'disabled' : '' }}>
-                                        
+
                                         <label class="role-card" for="role_{{ $role->id }}">
                                             <i class="bi bi-check-circle-fill check-icon"></i>
 
@@ -104,11 +104,11 @@
                                                     default => 'icon-participant bi-person',
                                                 };
                                             @endphp
-                                            
+
                                             <div class="role-icon {{ explode(' ', $iconClass)[0] }}">
                                                 <i class="bi {{ explode(' ', $iconClass)[1] }}"></i>
                                             </div>
-                                            
+
                                             <h6 class="fw-bold mb-1 text-dark">{{ $role->name }}</h6>
                                             <p class="text-muted small mb-0 lh-sm opacity-75">
                                                 @switch($role->name)
@@ -122,7 +122,7 @@
                                 @endif
                             @endforeach
                         </div>
-                        
+
                         {{-- Input oculto por seguridad si es el propio usuario --}}
                         @if($user->id === auth()->id())
                             <input type="hidden" name="roles[]" value="Administrador">
@@ -141,14 +141,14 @@
 
         {{-- COLUMNA DERECHA: Acciones y Metadatos --}}
         <div class="col-lg-4">
-            
+
             {{-- Acciones de Cuenta --}}
             <div class="admin-card main-card-offset mb-4">
                         <h6 class="text-muted fw-bold small text-uppercase mb-4 border-bottom pb-2">
                             <i class="bi bi-person-fill-lock me-2"></i>Acciones de Cuenta
                         </h6>
 
-                
+
                 <div class="mb-3">
                     <button type="button" class="btn btn-outline-evai w-100"
                             data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
@@ -170,7 +170,7 @@
                     <i class="bi bi-info-circle-fill me-2"></i>Información del Sistema
                 </h6>
 
-                
+
                 <div class="d-flex align-items-center mb-4">
                     <div class="meta-icon"><i class="bi bi-calendar-event"></i></div>
                     <div>
@@ -218,7 +218,7 @@
                     Se generará una nueva contraseña temporal para <strong class="text-dark">{{ $user->name }}</strong>.<br>
                     El usuario perderá acceso inmediato con su contraseña actual.
                 </p>
-                
+
                 <div class="d-grid gap-3">
                     <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
                         @csrf
@@ -229,6 +229,125 @@
                     <button type="button" class="btn btn-light w-100 rounded-pill py-2 text-muted fw-bold" data-bs-dismiss="modal">
                         Cancelar
                     </button>
+            {{-- Tarjeta de Suscripción --}}
+            @if($user->hasRole('Organizador'))
+            <div class="card-admin mb-4">
+                <div class="card-header-admin bg-success bg-opacity-10">
+                    <h6 class="mb-0 fw-bold text-success">
+                        <i class="bi bi-star-fill me-2"></i>Gestionar Suscripción
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    @if($user->hasActiveSubscription())
+                        {{-- Suscripción Activa --}}
+                        <div class="alert alert-success border-0 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <strong>Suscripción Activa</strong>
+                                    <p class="mb-0 small">
+                                        Plan: <strong>{{ ucfirst($user->subscription->plan_id) }}</strong><br>
+                                        Vence: <strong>{{ $user->subscription->ends_at->format('d/m/Y') }}</strong>
+                                        @if($user->subscription->ends_at->isFuture())
+                                            ({{ $user->subscription->ends_at->diffForHumans() }})
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Extender Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.extend', $user) }}" method="POST" class="mb-2">
+                            @csrf
+                            <label class="form-label small fw-bold">Extender Suscripción</label>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <input type="number" name="amount" class="form-control form-control-sm" placeholder="Cantidad" min="1" max="120" value="1" required>
+                                </div>
+                                <div class="col-6">
+                                    <select name="unit" class="form-select form-select-sm" required>
+                                        <option value="months">Mes(es)</option>
+                                        <option value="years">Año(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Extender Suscripción
+                            </button>
+                        </form>
+
+                        {{-- Cancelar Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.cancel', $user) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                    onclick="return confirm('¿Cancelar la suscripción de este usuario?')">
+                                <i class="bi bi-x-circle me-1"></i>Cancelar Suscripción
+                            </button>
+                        </form>
+                    @else
+                        {{-- Sin Suscripción --}}
+                        <div class="alert alert-warning border-0 mb-3">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            <strong>Sin suscripción activa</strong>
+                        </div>
+
+                        {{-- Activar Suscripción --}}
+                        <form action="{{ route('admin.users.subscription.activate', $user) }}" method="POST">
+                            @csrf
+                            <label class="form-label small fw-bold">Activar Suscripción</label>
+                            <select name="plan" class="form-select form-select-sm mb-2" required>
+                                <option value="monthly">Mensual (1 mes)</option>
+                                <option value="annual">Anual (1 año)</option>
+                                <option value="lifetime">Vitalicia (100 años)</option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-star-fill me-1"></i>Activar Suscripción
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            {{-- Tarjeta de Metadatos --}}
+            <div class="card-admin">
+                <div class="card-body p-4">
+                    <h6 class="text-brand-deep fw-bold mb-3">Metadatos</h6>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-light p-2 me-3 text-brand-main">
+                            <i class="bi bi-calendar-plus"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Fecha de Registro</small>
+                            <span class="fw-bold text-dark">{{ $user->created_at->format('d M, Y h:i A') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-light p-2 me-3 text-brand-main">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Última Actualización</small>
+                            <span class="fw-bold text-dark">{{ $user->updated_at->format('d M, Y h:i A') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-light p-2 me-3 text-brand-main">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Estado del Email</small>
+                            @if($user->email_verified_at)
+                                <span class="badge bg-success bg-opacity-10 text-success">Verificado</span>
+                            @else
+                                <span class="badge bg-warning bg-opacity-10 text-warning">Pendiente</span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -251,7 +370,7 @@
                         Estás a punto de eliminar permanentemente a <strong class="text-dark">{{ $user->name }}</strong>.<br>
                         Esta acción no se puede deshacer.
                     </p>
-                    
+
                     <div class="d-grid gap-3">
                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST">
                             @csrf @method('DELETE')

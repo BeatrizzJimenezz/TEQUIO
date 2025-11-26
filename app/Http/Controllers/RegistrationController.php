@@ -108,13 +108,64 @@ class RegistrationController extends Controller
             }
         }
 
+
         try {
+            // Si el componente tiene precio
+            if ($component->requiresPayment() && $component->price > 0) {
+                // Verificar si el usuario eligió pago en persona
+                $paymentMethod = $request->input('payment_method');
+                
+                if ($paymentMethod === 'in_person' && $component->acceptsPaymentMethod('in_person')) {
+                    // Pago en persona - crear inscripción inmediatamente
+                    $registration = Registration::create([
+                        'user_id' => $userId,
+                        'component_id' => $componentId,
+                        'ticket_qr' => Registration::generateTicketQR(),
+                        'registered_at' => now(),
+                        'expires_at' => $component->event->end_date->addDays(1),
+                        'payment_status' => 'pending', // Pendiente de pago pero inscripción confirmada
+                        'payment_method' => 'in_person',
+                    ]);
+
+                    if ($request->expectsJson()) {
+                        return response()->json([
+                            'success' => true,
+                            'message' => '¡Inscripción confirmada! Recuerda coordinar el pago en persona con el organizador.',
+                            'data' => [
+                                'registration_id' => $registration->id,
+                                'ticket' => $registration->ticket_qr
+                            ]
+                        ], 201);
+                    }
+
+                    return redirect()->back()->with('success', '¡Inscripción confirmada! Recuerda coordinar el pago en persona con el organizador.');
+                }
+
+                // Pago en línea - redirigir al checkout
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Redirigiendo al pago...',
+                        'redirect_to_checkout' => true,
+                        'data' => [
+                            'component_id' => $component->id,
+                            'checkout_url' => route('payment.checkout.component', $component)
+                        ]
+                    ], 200);
+                }
+
+                return redirect()->route('payment.checkout.component', $component)
+                    ->with('info', 'Completa el pago para confirmar tu inscripción en ' . $component->name);
+            }
+
+            // Componente gratuito - crear inscripción inmediatamente
             $registration = Registration::create([
                 'user_id' => $userId,
                 'component_id' => $componentId,
                 'ticket_qr' => Registration::generateTicketQR(),
                 'registered_at' => now(),
                 'expires_at' => $component->event->end_date->addDays(1),
+                'payment_status' => 'free',
             ]);
 
             if ($request->expectsJson()) {

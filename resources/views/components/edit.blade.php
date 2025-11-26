@@ -315,17 +315,18 @@
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label for="attendee_price" class="form-label fw-semibold" style="color: #0C2340;">
+                                <label for="price" class="form-label fw-semibold" style="color: #0C2340;">
                                     Precio para Asistente
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control @error('attendee_price') is-invalid @enderror"
-                                           id="attendee_price" name="attendee_price"
-                                           value="{{ old('attendee_price', $component->attendee_price) }}" min="0" step="0.01">
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror"
+                                           id="price" name="price"
+                                           value="{{ old('price', $component->price) }}" min="0" step="0.01"
+                                           onchange="togglePaymentMethods()">
                                 </div>
                                 <small class="text-muted">$0.00 para actividad gratuita</small>
-                                @error('attendee_price')
+                                @error('price')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -344,6 +345,64 @@
                                 @error('organizer_cost')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+
+                        {{-- Métodos de Pago --}}
+                        @php
+                            $currentPaymentMethods = old('payment_methods', $component->payment_methods ?? []);
+                            if (is_string($currentPaymentMethods)) {
+                                $currentPaymentMethods = json_decode($currentPaymentMethods, true) ?? [];
+                            }
+                        @endphp
+                        <div id="paymentMethodsSection" class="mt-4 pt-4 border-top" style="display: {{ ($component->price > 0) ? 'block' : 'none' }};">
+                            <label class="form-label fw-semibold mb-3" style="color: #0C2340;">
+                                <i class="bi bi-credit-card me-2" style="color: #4499BB;"></i>
+                                Métodos de Pago Aceptados <span class="text-danger">*</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check p-3 border rounded" style="background-color: #f8f9fa;">
+                                        <input class="form-check-input" type="checkbox" name="payment_methods[]" value="online"
+                                               id="paymentOnline" {{ in_array('online', $currentPaymentMethods) ? 'checked' : '' }}>
+                                        <label class="form-check-label w-100" for="paymentOnline">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-paypal fs-4 me-3 text-primary"></i>
+                                                <div>
+                                                    <strong class="d-block">Pago en Línea (PayPal)</strong>
+                                                    <small class="text-muted">Los participantes pagan con tarjeta o PayPal al inscribirse</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check p-3 border rounded" style="background-color: #f8f9fa;">
+                                        <input class="form-check-input" type="checkbox" name="payment_methods[]" value="in_person"
+                                               id="paymentInPerson" {{ in_array('in_person', $currentPaymentMethods) ? 'checked' : '' }}>
+                                        <label class="form-check-label w-100" for="paymentInPerson">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-cash-coin fs-4 me-3 text-success"></i>
+                                                <div>
+                                                    <strong class="d-block">Pago en Persona</strong>
+                                                    <small class="text-muted">Los participantes pagan directamente al organizador</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            @error('payment_methods')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
+                            <div class="alert border-0 mt-3 mb-0" style="background-color: #e8f4f8; border-left: 4px solid #4499BB !important;">
+                                <div class="d-flex">
+                                    <i class="bi bi-info-circle me-2 mt-1" style="color: #4499BB;"></i>
+                                    <small>
+                                        <strong>Nota:</strong> Debes seleccionar al menos un método de pago cuando el componente tiene precio.
+                                        Puedes aceptar ambos métodos si lo deseas.
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -537,6 +596,21 @@ function toggleSpeakerSection() {
     }
 }
 
+// Mostrar/ocultar sección de métodos de pago según el precio
+function togglePaymentMethods() {
+    const price = parseFloat(document.getElementById('price').value) || 0;
+    const paymentMethodsSection = document.getElementById('paymentMethodsSection');
+
+    if (price > 0) {
+        paymentMethodsSection.style.display = 'block';
+    } else {
+        paymentMethodsSection.style.display = 'none';
+        // Desmarcar checkboxes si el precio es 0
+        document.getElementById('paymentOnline').checked = false;
+        document.getElementById('paymentInPerson').checked = false;
+    }
+}
+
 function addSchedule() {
     const container = document.getElementById('schedulesContainer');
     const minDate = '{{ $event->start_date->format("Y-m-d") }}';
@@ -601,6 +675,7 @@ function updateRemoveButtons() {
 
 document.addEventListener('DOMContentLoaded', function() {
     updateRemoveButtons();
+    togglePaymentMethods();
 });
 
 document.getElementById('componentForm')?.addEventListener('submit', function(e) {
@@ -610,11 +685,6 @@ document.getElementById('componentForm')?.addEventListener('submit', function(e)
         alert('Debes agregar al menos un horario');
         return false;
     }
-});
-
-// Inicializar la sección de ponente al cargar
-document.addEventListener('DOMContentLoaded', function() {
-    // No limpiar campos en edit, ya que pueden tener valores existentes
 });
 </script>
 @endpush

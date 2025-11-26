@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UserManagementController extends Controller
 {
@@ -129,6 +131,7 @@ class UserManagementController extends Controller
     {
         $this->checkAdmin();
 
+        $user->load('subscription'); // Cargar relación de suscripción
         $roles = Role::all();
 
         return view('admin.users.edit', compact('user', 'roles'));
@@ -240,6 +243,123 @@ class UserManagementController extends Controller
 
         } catch (\Exception $e) {
             return back()->with('error', 'Error al cambiar el estado del usuario.');
+        }
+    }
+
+    /**
+     * Activar suscripción para un usuario (Admin)
+     */
+    public function activateSubscription(Request $request, User $user)
+    {
+        $this->checkAdmin();
+
+        $validated = $request->validate([
+            'plan' => 'required|in:monthly,annual,lifetime',
+            'duration_months' => 'nullable|integer|min:1|max:120',
+        ]);
+
+        try {
+            // Calcular fecha de fin según el plan
+            $ends_at = match($validated['plan']) {
+                'monthly' => Carbon::now()->addMonth(),
+                'annual' => Carbon::now()->addYear(),
+                'lifetime' => Carbon::now()->addYears(100), // 100 años para "lifetime"
+                default => Carbon::now()->addMonths($validated['duration_months'] ?? 1),
+            };
+
+            // Crear o actualizar suscripción
+            Subscription::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'paypal_subscription_id' => 'ADMIN-' . strtoupper(uniqid()),
+                    'plan_id' => $validated['plan'],
+                    'status' => 'active',
+                    'starts_at' => Carbon::now(),
+                    'ends_at' => $ends_at,
+                ]
+            );
+
+            $planName = match($validated['plan']) {
+                'monthly' => 'Mensual',
+                'annual' => 'Anual',
+                'lifetime' => 'Vitalicio',
+            };
+
+            return back()->with('success', "Suscripción {$planName} activada para {$user->name}. Válida hasta: {$ends_at->format('d/m/Y')}");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al activar la suscripción: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cancelar suscripción de un usuario (Admin)
+     */
+    public function cancelSubscription(User $user)
+    {
+        $this->checkAdmin();
+
+        try {
+            $subscription = $user->subscription;
+
+            if (!$subscription) {
+                return back()->with('info', 'Este usuario no tiene una suscripción activa.');
+            }
+
+            $subscription->update([
+                'status' => 'cancelled',
+                'ends_at' => Carbon::now(),
+            ]);
+
+            return back()->with('success', "Suscripción de {$user->name} cancelada correctamente.");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al cancelar la suscripción: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extender suscripción de un usuario (Admin)
+     */
+    public function extendSubscription(Request $request, User $user)
+    {
+        $this->checkAdmin();
+
+        $validated = $request->validate([
+            'amount' => 'required|integer|min:1|max:120',
+            'unit' => 'required|in:months,years',
+        ]);
+
+        try {
+            $subscription = $user->subscription;
+
+            if (!$subscription) {
+                return back()->with('error', 'Este usuario no tiene una suscripción para extender.');
+            }
+
+            // Extender desde la fecha actual de vencimiento o desde ahora
+            $currentEnd = $subscription->ends_at && $subscription->ends_at->isFuture()
+                ? $subscription->ends_at
+                : Carbon::now();
+
+            $amount = (int) $validated['amount'];
+            $unit = $validated['unit'];
+
+            // Aplicar extensión según la unidad
+            $newEnd = $unit === 'years'
+                ? $currentEnd->copy()->addYears($amount)
+                : $currentEnd->copy()->addMonths($amount);
+
+            $subscription->update([
+                'ends_at' => $newEnd,
+                'status' => 'active',
+            ]);
+
+            $unitText = $unit === 'years' ? 'año(s)' : 'mes(es)';
+            return back()->with('success', "Suscripción de {$user->name} extendida por {$amount} {$unitText}. Nueva fecha de vencimiento: {$newEnd->format('d/m/Y')}");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al extender la suscripción: ' . $e->getMessage());
         }
     }
 }

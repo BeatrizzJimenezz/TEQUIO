@@ -67,6 +67,19 @@
                                             {{ ucfirst($registration->component->level) }}
                                         </span>
                                     @endif
+                                    @if($registration->payment_method === 'in_person')
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-cash-coin me-1"></i> Pago en Persona
+                                        </span>
+                                    @elseif($registration->payment_method === 'online')
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-credit-card me-1"></i> Pago en Línea
+                                        </span>
+                                    @elseif($registration->payment_status === 'free')
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-gift me-1"></i> Gratis
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <p class="text-muted mb-3">
