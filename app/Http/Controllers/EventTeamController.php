@@ -52,81 +52,88 @@ class EventTeamController extends Controller
 
     // Agregar un organizador nuevo o existente al evento
     public function store(Request $request, Event $event)
-    {
-        $this->authorize('isOrganizer', $event);
+{
+    $this->authorize('isOrganizer', $event);
 
-        $rules = ['type' => 'required|in:existing,new'];
+    $rules = ['type' => 'required|in:existing,new'];
 
-        if ($request->type === 'existing') {
-            $rules['user_id'] = 'required|exists:users,id';
-        } else {
-            $rules['name'] = 'required|string|max:255';
-            $rules['email'] = 'required|email|unique:users,email';
-            $rules['password'] = 'required|min:8';
-        }
+    if ($request->type === 'existing') {
+        $rules['user_id'] = 'required|exists:users,id';
+    } else {
+        $rules['name'] = 'required|string|max:255';
+        $rules['email'] = 'required|email|unique:users,email';
+        $rules['password'] = 'required|min:8';
+    }
 
-        $request->validate($rules, [
-            'user_id.required' => 'Debes seleccionar un usuario.',
-            'user_id.exists' => 'El usuario seleccionado no existe.',
-            'name.required' => 'El nombre es obligatorio.',
-            'email.required' => 'El correo es obligatorio.',
-            'email.email' => 'Debe ser un correo válido.',
-            'email.unique' => 'Este correo ya está registrado.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        ]);
+    $request->validate($rules, [
+        'user_id.required' => 'Debes seleccionar un usuario.',
+        'user_id.exists' => 'El usuario seleccionado no existe.',
+        'name.required' => 'El nombre es obligatorio.',
+        'email.required' => 'El correo es obligatorio.',
+        'email.email' => 'Debe ser un correo válido.',
+        'email.unique' => 'Este correo ya está registrado.',
+        'password.required' => 'La contraseña es obligatoria.',
+        'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+    ]);
 
-        DB::beginTransaction();
-        try {
-            if ($request->type === 'new') {
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'must_change_password' => true,
-                ]);
-
-                $user->assignRole('Organizador');
-                $professionalProfile = $user->professionalProfile()->create([]);
-            } else {
-                $user = User::findOrFail($request->user_id);
-
-                if (!$user->hasRole('Organizador')) {
-                    $user->assignRole('Organizador');
-                }
-
-                $professionalProfile = $user->professionalProfile ?? $user->professionalProfile()->create([]);
-            }
-
-            $alreadyOrganizer = $event->collaborators()
-                ->wherePivot('professional_profile_id', $professionalProfile->id)
-                ->wherePivot('role', 'Organizador')
-                ->exists();
-
-            if ($alreadyOrganizer) {
-                DB::rollBack();
-                return back()->with('error', 'Este usuario ya es organizador del evento.');
-            }
-
-            $event->collaborators()->attach($professionalProfile->id, [
-                'role' => 'Organizador',
-                'created_at' => now(),
-                'updated_at' => now(),
+    DB::beginTransaction();
+    try {
+        if ($request->type === 'new') {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'must_change_password' => true,
             ]);
 
-            DB::commit();
+            $user->assignRole('Organizador');
+            $professionalProfile = $user->professionalProfile()->create([]);
+        } else {
+            $user = User::findOrFail($request->user_id);
 
-            return redirect()->route('events.team.index', $event)
-                ->with('success', $request->type === 'new' 
-                    ? 'Nuevo organizador creado y agregado exitosamente.' 
-                    : 'Organizador agregado exitosamente.');
+            // IMPORTANTE: Asignar rol de Organizador si no lo tiene
+            if (!$user->hasRole('Organizador')) {
+                $user->assignRole('Organizador');
+            }
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()
-                ->with('error', 'Error al agregar organizador: ' . $e->getMessage());
+            // Obtener o crear perfil profesional
+            $professionalProfile = $user->professionalProfile;
+            if (!$professionalProfile) {
+                $professionalProfile = $user->professionalProfile()->create([]);
+            }
         }
+
+        // Verificar si ya es organizador de este evento
+        $alreadyOrganizer = $event->collaborators()
+            ->wherePivot('professional_profile_id', $professionalProfile->id)
+            ->wherePivot('role', 'Organizador')
+            ->exists();
+
+        if ($alreadyOrganizer) {
+            DB::rollBack();
+            return back()->with('error', 'Este usuario ya es organizador del evento.');
+        }
+
+        // Agregar como colaborador
+        $event->collaborators()->attach($professionalProfile->id, [
+            'role' => 'Organizador',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('events.team.index', $event)
+            ->with('success', $request->type === 'new' 
+                ? 'Nuevo organizador creado y agregado exitosamente.' 
+                : 'Organizador agregado exitosamente.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withInput()
+            ->with('error', 'Error al agregar organizador: ' . $e->getMessage());
     }
+}
 
     // Eliminar organizador del equipo
     public function destroy(Event $event, $professionalProfileId)

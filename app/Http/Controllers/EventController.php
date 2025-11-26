@@ -8,9 +8,11 @@ use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\EventUpdatedNotification;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class EventController extends Controller
 {
+    use AuthorizesRequests;
     // Verificar permisos de administrador u organizador
     private function checkPermissions()
     {
@@ -39,65 +41,79 @@ class EventController extends Controller
 
     // Listado de eventos propios con filtros y paginación
     public function index(Request $request)
-    {
-        $user = auth()->user();
-        $isArchivedView = $request->get('view') === 'archived';
-        
-        // Iniciar consulta con relaciones
-        $query = Event::with(['tags', 'components'])
-            ->whereHas('professionalProfile', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-            ->orderBy('start_date', 'desc');
+{
+    $user = auth()->user();
+    $professionalProfile = $user->professionalProfile;
+    $isArchivedView = $request->get('view') === 'archived';
 
-        // Filtros de búsqueda
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
+    // Iniciar consulta con relaciones
+    $query = Event::with(['tags', 'components'])
+        ->where(function($q) use ($user, $professionalProfile) {
+
+            // Eventos donde es organizador principal
+            $q->whereHas('professionalProfile', function($subQ) use ($user) {
+                $subQ->where('user_id', $user->id);
             });
-        }
 
-        // Filtro de modalidad
-        if ($request->filled('modality')) {
-            $query->where('modality', $request->modality);
-        }
+            // SOLO aplicar si existe perfil profesional
+            if ($professionalProfile) {
+                $q->orWhereHas('collaborators', function($subQ) use ($professionalProfile) {
+                    $subQ->where('professional_profiles.id', $professionalProfile->id)
+                         ->where('event_profiles.role', 'Organizador');
+                });
+            }
+        });
 
-        // Filtro de fecha desde
-        if ($request->filled('date_from')) {
-            $query->where('start_date', '>=', $request->date_from);
-        }
-
-        // Filtro de fecha hasta
-        if ($request->filled('date_to')) {
-            $query->where('end_date', '<=', $request->date_to);
-        }
-
-        // Filtro de etiquetas
-        if ($request->filled('tags')) {
-            $query->whereHas('tags', function($q) use ($request) {
-                $q->whereIn('tags.id', $request->tags);
-            });
-        }
-
-        // Filtrar según la vista (archivados vs activos)
-        if ($isArchivedView) {
-            $query->archived(); 
-        } else {
-            $query->active()
-                ->whereIn('status', ['active', 'planning', 'finished']); 
-        }
-
-        // Ordenar por fecha de inicio (más recientes primero)
-        $query->orderBy('start_date', 'desc');
-
-        $events = $query->paginate(12)->withQueryString();
-        
-        $tags = Tag::orderBy('name')->get();
-
-        return view('events.index', compact('events', 'tags'));
+    // Filtros de búsqueda
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%");
+        });
     }
+
+    // Filtro de modalidad
+    if ($request->filled('modality')) {
+        $query->where('modality', $request->modality);
+    }
+
+    // Filtro fecha desde
+    if ($request->filled('date_from')) {
+        $query->where('start_date', '>=', $request->date_from);
+    }
+
+    // Filtro fecha hasta
+    if ($request->filled('date_to')) {
+        $query->where('end_date', '<=', $request->date_to);
+    }
+
+    // Filtro etiquetas
+    if ($request->filled('tags')) {
+        $query->whereHas('tags', function($q) use ($request) {
+            $q->whereIn('tags.id', $request->tags);
+        });
+    }
+
+    // Filtrar archivados o activos
+    if ($isArchivedView) {
+        $query->archived();
+    } else {
+        $query->active()
+              ->whereIn('status', ['active', 'planning', 'finished']);
+    }
+
+    // Ordenar por fecha de inicio
+    $query->orderBy('start_date', 'desc');
+
+    // Paginación
+    $events = $query->paginate(12)->withQueryString();
+
+    // Obtener etiquetas
+    $tags = Tag::orderBy('name')->get();
+
+    return view('events.index', compact('events', 'tags'));
+}
 
     // Vista para crear nuevo evento
     public function create()
@@ -146,10 +162,7 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         $this->checkPermissions();
-
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para editar este evento.');
-        }
+        $this->authorize('update', $event);
 
         $tags = Tag::orderBy('name')->get();
         $selectedTags = $event->tags->pluck('id')->toArray();
@@ -161,10 +174,9 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         $this->checkPermissions();
+        $this->authorize('update', $event);
 
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para editar este evento.');
-        }
+    
 
         // Capturar valores antes de editar
         $oldValues = $event->only([
@@ -239,10 +251,7 @@ class EventController extends Controller
     public function destroy(Event $event)
     {
         $this->checkPermissions();
-
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para eliminar este evento.');
-        }
+        $this->authorize('delete', $event); // Usa la policy (solo organizador principal)
 
         try {
             $event->delete();
@@ -258,11 +267,8 @@ class EventController extends Controller
     public function archive(Event $event)
     {
         $this->checkPermissions();
-        
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para archivar este evento.');
-        }
-        
+        $this->authorize('update', $event);
+
         $event->is_archived = !$event->is_archived;
 
         if ($event->is_archived && $event->status === 'active') {
@@ -323,41 +329,50 @@ class EventController extends Controller
 
     // Lista de reportes de todos los eventos del organizador
     public function reportsIndex()
-    {
-        $this->checkPermissions();
+{
+    $this->checkPermissions();
 
-        $user = auth()->user();
+    $user = auth()->user();
+    $professionalProfile = $user->professionalProfile;
 
-        // Obtener todos los eventos del organizador con estadísticas
-        $events = Event::with(['components.registrations', 'tags'])
-            ->whereHas('professionalProfile', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-            ->orderBy('start_date', 'desc')
-            ->get()
-            ->map(function ($event) {
-                $event->stats = [
-                    'totalComponents' => $event->components->count(),
-                    'totalRegistrations' => $event->components->sum(fn($c) => $c->registrations->count()),
-                    'talks' => $event->components->where('type', 'talk')->count(),
-                    'workshops' => $event->components->where('type', 'workshop')->count(),
-                    'activities' => $event->components->where('type', 'activity')->count(),
-                ];
-                return $event;
+    // Obtener todos los eventos del organizador con estadísticas
+    $events = Event::with(['components.registrations', 'tags'])
+        ->where(function($q) use ($user, $professionalProfile) {
+
+            // Eventos donde es organizador principal
+            $q->whereHas('professionalProfile', function($subQ) use ($user) {
+                $subQ->where('user_id', $user->id);
             });
 
-        return view('events.reports-index', compact('events'));
-    }
+            // SOLO aplicar si el usuario tiene perfil profesional
+            if ($professionalProfile) {
+                $q->orWhereHas('collaborators', function($subQ) use ($professionalProfile) {
+                    $subQ->where('professional_profiles.id', $professionalProfile->id)
+                         ->where('event_profiles.role', 'Organizador');
+                });
+            }
+        })
+        ->orderBy('start_date', 'desc')
+        ->get()
+        ->map(function ($event) {
+            $event->stats = [
+                'totalComponents' => $event->components->count(),
+                'totalRegistrations' => $event->components->sum(fn($c) => $c->registrations->count()),
+                'talks' => $event->components->where('type', 'talk')->count(),
+                'workshops' => $event->components->where('type', 'workshop')->count(),
+                'activities' => $event->components->where('type', 'activity')->count(),
+            ];
+            return $event;
+        });
+
+    return view('events.reports-index', compact('events'));
+}
 
     // Reportes del evento
     public function reports(Event $event)
     {
         $this->checkPermissions();
-
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para ver los reportes de este evento.');
-        }
-
+        $this->authorize('isOrganizer', $event); 
         // Cargar relaciones necesarias
         $event->load(['components.schedules', 'components.registrations.user', 'tags']);
 
@@ -439,10 +454,8 @@ class EventController extends Controller
     public function exportReport(Request $request, Event $event)
     {
         $this->checkPermissions();
+        $this->authorize('isOrganizer', $event);
 
-        if ($event->professionalProfile->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para exportar el reporte de este evento.');
-        }
 
         $format = $request->query('format', 'pdf');
 
