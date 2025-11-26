@@ -3,44 +3,47 @@
 @section('header', 'Publicar Oferta')
 
 @push('styles')
-    <link href="{{ asset('css/management.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/create-offers.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Información del evento --}}
-    <div class="card-admin mb-4">
+    
+    {{-- 1. INFORMACIÓN DEL EVENTO (BANNER AZUL) --}}
+    <div class="card-admin card-banner-blue mb-4">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h3 class="mb-1 fw-bold text-brand-deep">
+                    <h3 class="mb-1 fw-bold">
                         <i class="bi bi-megaphone-fill me-2 text-brand-accent"></i>
                         Publicar Oferta Abierta
                     </h3>
-                    <p class="text-muted mb-0">
-                        <i class="bi bi-calendar3 me-1 text-brand-main"></i>
+                    <p class="mb-0 opacity-75">
+                        <i class="bi bi-calendar3 me-1"></i>
                         {{ $event->name }} | {{ $event->start_date->format('d/m/Y') }} - {{ $event->end_date->format('d/m/Y') }}
                     </p>
                 </div>
-                <a href="{{ route('offers.index', $event) }}" class="btn btn-white shadow-sm">
+                <a href="{{ route('offers.index', $event) }}" class="btn btn-glass px-4">
                     <i class="bi bi-arrow-left me-1"></i> Volver
                 </a>
             </div>
         </div>
     </div>
 
-    {{-- Formulario de oferta --}}
+    {{-- 2. FORMULARIO DE OFERTA --}}
     <div class="card-admin mb-4">
-        <div class="card-header-admin">
+        <!-- Header Azul del Formulario -->
+        <div class="card-header-blue">
             <h5 class="mb-0 fw-bold">
-                <i class="bi bi-pencil-square me-2 text-brand-main"></i>
+                <i class="bi bi-pencil-square me-2"></i>
                 Detalles de la Oferta
             </h5>
         </div>
+
         <div class="card-body p-4">
-            <div class="alert alert-info border-0 shadow-sm mb-4">
+            <div class="alert alert-info border-0 shadow-sm mb-4" style="background-color: rgba(68, 153, 187, 0.1); color: #0C2340;">
                 <div class="d-flex">
-                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                    <i class="bi bi-info-circle-fill me-2 mt-1" style="color: #4499BB;"></i>
                     <div>
                         Las ofertas abiertas son componentes para los cuales buscas ponentes o talleristas externos.
                         Aparecerán públicamente y los usuarios podrán postularse.
@@ -73,7 +76,7 @@
             <form action="{{ route('offers.store', $event) }}" method="POST" id="offerForm">
                 @csrf
 
-                {{-- Información básica --}}
+                {{-- SECCIÓN: Información básica --}}
                 <div class="card border-0 shadow-sm mb-4 bg-light">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-3">
@@ -148,7 +151,7 @@
                     </div>
                 </div>
 
-                {{-- Modalidad y ubicación --}}
+                {{-- SECCIÓN: Modalidad y ubicación --}}
                 <div class="card border-0 shadow-sm mb-4 bg-light">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-3">
@@ -185,7 +188,7 @@
                     </div>
                 </div>
 
-                {{-- Compensación y requisitos --}}
+                {{-- SECCIÓN: Compensación y requisitos --}}
                 <div class="card border-0 shadow-sm mb-4 bg-light">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-3">
@@ -221,13 +224,13 @@
                     </div>
                 </div>
 
-                {{-- Horarios --}}
+                {{-- SECCIÓN: Horarios --}}
                 <div class="card border-0 shadow-sm mb-4 bg-light">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-brand-deep border-bottom pb-2 mb-3">
                             <i class="bi bi-calendar-week me-2 text-brand-accent"></i>Horarios Disponibles <span class="text-danger">*</span>
                         </h6>
-                        <p class="text-muted mb-3">Define los horarios en los que se podría impartir esta actividad</p>
+                        <p class="text-muted mb-3 small">Define los horarios en los que se podría impartir esta actividad</p>
 
                         <div id="schedulesContainer">
                             {{-- Horario inicial --}}
@@ -268,13 +271,15 @@
                     </div>
                 </div>
 
-                {{-- Botones --}}
-                <div class="d-flex justify-content-between gap-3">
-                    <a href="{{ route('offers.index', $event) }}" class="btn btn-white btn-lg shadow-sm px-4">
-                        <i class="bi bi-x-lg me-2"></i>Cancelar
+                {{-- Botones (Diseño Mejorado) --}}
+                <div class="form-actions-footer">
+                    <a href="{{ route('offers.index', $event) }}" class="btn-cancel-custom">
+                        <i class="bi bi-x-lg"></i>
+                        Cancelar Operación
                     </a>
-                    <button type="submit" class="btn btn-brand-main btn-lg shadow-sm px-5 text-white">
-                        <i class="bi bi-megaphone-fill me-2"></i>Publicar Oferta
+                    <button type="submit" class="btn-publish-custom">
+                        <i class="bi bi-megaphone-fill"></i>
+                        PUBLICAR OFERTA
                     </button>
                 </div>
             </form>
