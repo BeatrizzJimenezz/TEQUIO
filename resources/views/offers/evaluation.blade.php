@@ -142,7 +142,7 @@
                 </h4>
             @endif
 
-            @forelse($proposals as $proposal)
+            @forelse($proposals ?? [] as $proposal)
                 <div class="card-admin">
                     <div class="card-header-blue">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -154,13 +154,17 @@
                         <div class="row g-4">
                             <div class="col-md-4 border-end">
                                 <div class="d-flex align-items-center mb-3">
+                                    @if($proposal->presenter)
                                     <div class="avatar-circle bg-brand-deep text-white me-3">
-                                        {{ strtoupper(substr($proposal->speaker->user->name, 0, 1)) }}
-                                    </div>
+                                        {{ strtoupper(substr($proposal->presenter->user->name, 0, 1)) }}
                                     <div>
-                                        <strong class="d-block text-brand-deep">{{ $proposal->speaker->user->name }}</strong>
-                                        <small class="text-muted">{{ $proposal->speaker->user->email }}</small>
+                                    <strong class="d-block text-brand-deep">{{ $proposal->speaker->user->name }}</strong>
+                                    <small class="text-muted">{{ $proposal->speaker->user->email }}</small>
                                     </div>
+                                    </div>
+                                    @else
+                                        <p>Sin presentador asignado</p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-8">
