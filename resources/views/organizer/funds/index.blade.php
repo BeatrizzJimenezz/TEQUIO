@@ -1,221 +1,248 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/admin-withdrawals.css') }}">
+@endpush
+
 @section('content')
-<div class="container-fluid p-4">
-    <div class="mb-4">
-        <h1 class="h2 fw-bold mb-2">Gestión de Fondos</h1>
-        <p class="text-muted">Administra tus ganancias y solicita retiros</p>
+<div class="container-fluid py-4">
+
+    <div class="hero-header d-flex justify-content-between align-items-center mb-4">
+        <div style="z-index: 2;">
+            <h2 class="fw-bold mb-1">Mis Fondos</h2>
+            <p class="mb-0 opacity-75">Administra tus ganancias y solicita retiros a tu cuenta.</p>
+        </div>
+        <i class="bi bi-wallet2 hero-pattern"></i>
     </div>
 
-    <!-- Mensajes de sesión -->
     @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center">
+            <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+            <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
     @endif
 
     @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+            <div>{{ session('error') }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
     @endif
 
-    <!-- Tarjetas de Estadísticas -->
+    @if(!$balance->paypal_email)
+        <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4 d-flex align-items-start">
+            <div class="bg-warning bg-opacity-25 rounded-circle p-2 me-3 text-warning-emphasis">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1 alert-heading">Configura tu PayPal</h6>
+                <p class="mb-0 small opacity-75">Necesitas configurar tu correo de PayPal para recibir retiros. Podrás agregarlo al solicitar tu primer retiro.</p>
+            </div>
+        </div>
+    @endif
+
     <div class="row g-4 mb-4">
-        <!-- Balance Disponible -->
+        
+        {{-- Balance Disponible (Usamos estilo 'completed' para verde/positivo) --}}
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-white bg-success h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle mb-0 opacity-75">Balance Disponible</h6>
-                        <i class="bi bi-wallet2 fs-2 opacity-75"></i>
+            <div class="stat-card stat-completed h-100 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <p class="stat-label mb-1">Balance Disponible</p>
+                        <h3 class="stat-value text-brand-accent">${{ number_format($stats['available_balance'], 2) }}</h3>
                     </div>
-                    <h2 class="card-title mb-1">${{ number_format($stats['available_balance'], 2) }}</h2>
-                    <p class="card-text small opacity-75">Listo para retirar</p>
-                    @if($stats['available_balance'] >= config('payment.minimum_withdrawal', 5.00))
-                    <a href="{{ route('organizer.funds.withdrawals.create') }}" class="btn btn-light btn-sm mt-2 w-100">
+                    <div class="stat-icon bg-icon-completed">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                </div>
+                
+                @if($stats['available_balance'] >= config('payment.minimum_withdrawal', 5.00))
+                    <a href="{{ route('organizer.funds.withdrawals.create') }}" class="btn btn-sm w-100 fw-bold text-white shadow-sm" style="background-color: var(--brand-accent); border-radius: 50rem;">
                         <i class="bi bi-cash-stack me-1"></i> Solicitar Retiro
                     </a>
-                    @else
-                    <button type="button" class="btn btn-light btn-sm mt-2 w-100" disabled title="Balance mínimo requerido: ${{ number_format(config('payment.minimum_withdrawal', 5.00), 2) }}">
-                        <i class="bi bi-cash-stack me-1"></i> Solicitar Retiro
+                @else
+                    <button disabled class="btn btn-sm w-100 fw-bold border" style="border-radius: 50rem; color: var(--text-secondary); background: #f8fafc;">
+                        Mínimo: ${{ number_format(config('payment.minimum_withdrawal', 5.00), 2) }}
                     </button>
-                    <small class="d-block mt-2 opacity-75">Mínimo: ${{ number_format(config('payment.minimum_withdrawal', 5.00), 2) }}</small>
-                    @endif
+                @endif
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="stat-card stat-pending">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="stat-label mb-1">En Retención</p>
+                        <h3 class="stat-value">${{ number_format($stats['pending_balance'], 2) }}</h3>
+                        <small class="text-muted fw-bold">Pendiente de liberar</small>
+                    </div>
+                    <div class="stat-icon bg-icon-pending">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Balance Pendiente -->
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-white bg-warning h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle mb-0 opacity-75">Balance Pendiente</h6>
-                        <i class="bi bi-clock-history fs-2 opacity-75"></i>
+            <div class="stat-card stat-total">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="stat-label mb-1">Total Ganado</p>
+                        <h3 class="stat-value">${{ number_format($stats['total_earned'], 2) }}</h3>
+                        <small class="text-brand-light fw-bold">{{ $stats['payments_count'] }} pagos recibidos</small>
                     </div>
-                    <h2 class="card-title mb-1">${{ number_format($stats['pending_balance'], 2) }}</h2>
-                    <p class="card-text small opacity-75">En período de retención</p>
+                    <div class="stat-icon bg-icon-total">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Ganado -->
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-white bg-primary h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle mb-0 opacity-75">Total Ganado</h6>
-                        <i class="bi bi-graph-up-arrow fs-2 opacity-75"></i>
+            <div class="stat-card stat-rejected">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="stat-label mb-1">Total Retirado</p>
+                        <h3 class="stat-value">${{ number_format($stats['total_withdrawn'], 2) }}</h3>
+                        <small class="text-muted fw-bold">Transferido a tu cuenta</small>
                     </div>
-                    <h2 class="card-title mb-1">${{ number_format($stats['total_earned'], 2) }}</h2>
-                    <p class="card-text small opacity-75">{{ $stats['payments_count'] }} pagos recibidos</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Retirado -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle mb-0 opacity-75">Total Retirado</h6>
-                        <i class="bi bi-cash-coin fs-2 opacity-75"></i>
+                    <div class="stat-icon bg-icon-rejected">
+                        <i class="bi bi-box-arrow-right"></i>
                     </div>
-                    <h2 class="card-title mb-1">${{ number_format($stats['total_withdrawn'], 2) }}</h2>
-                    <p class="card-text small opacity-75">${{ number_format($stats['pending_withdrawals'], 2) }} pendientes</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Información de PayPal -->
-    @if(!$balance->paypal_email)
-    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <div>
-            <strong>Configura tu correo de PayPal</strong><br>
-            <small>Necesitas configurar tu correo de PayPal para recibir retiros. Lo podrás agregar al solicitar tu primer retiro.</small>
-        </div>
+    <div class="mb-4">
+        <ul class="nav nav-pills gap-2 p-1 bg-white rounded-pill shadow-sm d-inline-flex" style="border: 1px solid #f0f0f0;">
+            <li class="nav-item">
+                <a class="nav-link active rounded-pill px-4 fw-bold" href="{{ route('organizer.funds.index') }}" 
+                   style="background-color: var(--brand-deep);">
+                    Resumen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 fw-bold text-secondary" href="{{ route('organizer.funds.payments') }}">
+                    Historial de Pagos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 fw-bold text-secondary" href="{{ route('organizer.funds.withdrawals') }}">
+                    Mis Retiros
+                </a>
+            </li>
+        </ul>
     </div>
-    @else
-    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        <div>
-            <strong>Correo de PayPal configurado:</strong> {{ $balance->paypal_email }}
-        </div>
-    </div>
-    @endif
-
-    <!-- Tabs de Navegación -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ route('organizer.funds.index') }}">
-                <i class="bi bi-house-fill me-1"></i> Resumen
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('organizer.funds.payments') }}">
-                <i class="bi bi-receipt me-1"></i> Historial de Pagos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('organizer.funds.withdrawals') }}">
-                <i class="bi bi-cash-stack me-1"></i> Mis Retiros
-            </a>
-        </li>
-    </ul>
 
     <div class="row g-4">
-        <!-- Pagos Recientes -->
-        <div class="col-12 col-lg-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                    <h5 class="card-title mb-0">Pagos Recientes</h5>
-                    <a href="{{ route('organizer.funds.payments') }}" class="btn btn-sm btn-outline-primary">
-                        Ver todos <i class="bi bi-arrow-right ms-1"></i>
+        
+        <div class="col-12 col-xl-6">
+            <div class="table-card mt-0 h-100">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-brand-deep mb-0">
+                        <i class="bi bi-receipt me-2"></i>Pagos Recientes
+                    </h5>
+                    <a href="{{ route('organizer.funds.payments') }}" class="btn btn-sm btn-filter">
+                        Ver Todos
                     </a>
                 </div>
-                <div class="card-body p-0">
-                    @forelse($payments->take(5) as $payment)
-                    <div class="p-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">{{ $payment->component->name }}</h6>
-                                <small class="text-muted">
-                                    {{ $payment->registration->user->name }} •
-                                    @if($payment->payment_method === 'online')
-                                        <span class="text-primary"><i class="bi bi-paypal"></i> PayPal</span>
-                                    @else
-                                        <span class="text-success"><i class="bi bi-cash"></i> En persona</span>
-                                    @endif
-                                </small>
-                            </div>
-                            <div class="text-end">
-                                <h6 class="text-success mb-0">+${{ number_format($payment->organizer_amount, 2) }}</h6>
-                                <small class="text-muted">{{ $payment->created_at->diffForHumans() }}</small>
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="p-5 text-center text-muted">
-                        <i class="bi bi-inbox display-1 mb-3 d-block"></i>
-                        <p class="mb-0">No hay pagos recibidos aún</p>
-                    </div>
-                    @endforelse
+                
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Evento / Usuario</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($payments->take(5) as $payment)
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-brand-deep">{{ $payment->component->name }}</div>
+                                        <div class="small text-muted">
+                                            {{ $payment->registration->user->name }} • 
+                                            @if($payment->payment_method === 'online')
+                                                <i class="bi bi-paypal text-primary ms-1"></i> PayPal
+                                            @else
+                                                <i class="bi bi-cash text-success ms-1"></i> Efectivo
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold text-success">+${{ number_format($payment->organizer_amount, 2) }}</span>
+                                        <div class="small text-muted">{{ $payment->created_at->diffForHumans() }}</div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="text-center py-4">
+                                        <p class="text-muted small mb-0">No hay pagos recientes</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Solicitudes de Retiro Recientes -->
-        <div class="col-12 col-lg-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                    <h5 class="card-title mb-0">Retiros Recientes</h5>
-                    <a href="{{ route('organizer.funds.withdrawals') }}" class="btn btn-sm btn-outline-primary">
-                        Ver todos <i class="bi bi-arrow-right ms-1"></i>
+        <div class="col-12 col-xl-6">
+            <div class="table-card mt-0 h-100">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-brand-deep mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>Retiros Recientes
+                    </h5>
+                    <a href="{{ route('organizer.funds.withdrawals') }}" class="btn btn-sm btn-filter">
+                        Ver Todos
                     </a>
                 </div>
-                <div class="card-body p-0">
-                    @forelse($withdrawals->take(5) as $withdrawal)
-                    <div class="p-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${{ number_format($withdrawal->amount, 2) }}</h6>
-                                <small class="text-muted">{{ $withdrawal->paypal_email }}</small>
-                            </div>
-                            <div class="text-end">
-                                @if($withdrawal->status === 'pending')
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-clock"></i> Pendiente
-                                    </span>
-                                @elseif($withdrawal->status === 'completed')
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Completado
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle"></i> Rechazado
-                                    </span>
-                                @endif
-                                <br>
-                                <small class="text-muted">{{ $withdrawal->requested_at->format('d/m/Y') }}</small>
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="p-5 text-center text-muted">
-                        <i class="bi bi-wallet2 display-1 mb-3 d-block"></i>
-                        <p class="mb-0">No has solicitado retiros aún</p>
-                    </div>
-                    @endforelse
+
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($withdrawals->take(5) as $withdrawal)
+                                <tr>
+                                    <td>
+                                        @if($withdrawal->status === 'pending')
+                                            <span class="status-badge badge-pending">Pendiente</span>
+                                        @elseif($withdrawal->status === 'completed')
+                                            <span class="status-badge badge-completed">Completado</span>
+                                        @else
+                                            <span class="status-badge badge-rejected">Rechazado</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium text-brand-deep">{{ $withdrawal->requested_at->format('d/m/Y') }}</div>
+                                        <small class="text-muted">{{ $withdrawal->paypal_email }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold text-brand-deep">${{ number_format($withdrawal->amount, 2) }}</span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <p class="text-muted small mb-0">No has solicitado retiros aún</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 @endsection

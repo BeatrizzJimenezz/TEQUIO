@@ -1,131 +1,166 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/organizer-funds.css') }}">
+@endpush
+
 @section('content')
-<div class="container-fluid p-4">
+<div class="container-fluid py-4">
+
+    {{-- 1. Hero Header --}}
+    <div class="hero-header d-flex justify-content-between align-items-center mb-4">
+        <div style="z-index: 2;">
+            <h2 class="fw-bold mb-1">Historial de Pagos</h2>
+            <p class="mb-0 opacity-75">Registro detallado de todos los ingresos por eventos.</p>
+        </div>
+        <i class="bi bi-receipt hero-pattern"></i>
+    </div>
+
+    {{-- 2. Navegación (Pills) --}}
     <div class="mb-4">
-        <h1 class="h2 fw-bold mb-2">Historial de Pagos</h1>
-        <p class="text-muted">Todos los pagos recibidos de tus componentes</p>
-    </div>
-
-    <!-- Tabs de Navegación -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
+        <div class="nav-pills-custom">
             <a class="nav-link" href="{{ route('organizer.funds.index') }}">Resumen</a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link active" href="{{ route('organizer.funds.payments') }}">Historial de Pagos</a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link" href="{{ route('organizer.funds.withdrawals') }}">Mis Retiros</a>
-        </li>
-    </ul>
+        </div>
+    </div>
 
-    <!-- Resumen de Estadísticas -->
+    {{-- 3. Resumen de Estadísticas --}}
     <div class="row g-4 mb-4">
+        
+        {{-- Total Recibido --}}
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle text-muted mb-0">Total Recibido</h6>
-                        <i class="bi bi-currency-dollar fs-2 text-success"></i>
+            <div class="mini-stat-card border-success">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mini-stat-label">Total Recibido</p>
+                        <h3 class="mini-stat-value">${{ number_format($totals['total_amount'], 2) }}</h3>
                     </div>
-                    <h2 class="card-title h3 mb-0">${{ number_format($totals['total_amount'], 2) }}</h2>
+                    <div class="mini-stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
+        {{-- Comisiones --}}
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle text-muted mb-0">Comisión Plataforma</h6>
-                        <i class="bi bi-calculator fs-2 text-primary"></i>
+            <div class="mini-stat-card border-primary">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mini-stat-label">Comisiones Plataforma</p>
+                        <h3 class="mini-stat-value text-secondary">${{ number_format($totals['platform_fees'], 2) }}</h3>
                     </div>
-                    <h2 class="card-title h3 mb-0">${{ number_format($totals['platform_fees'], 2) }}</h2>
+                    <div class="mini-stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
+        {{-- Pagos Online --}}
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle text-muted mb-0">Pagos en Línea</h6>
-                        <i class="bi bi-credit-card fs-2 text-info"></i>
+            <div class="mini-stat-card border-info">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mini-stat-label">Pagos en Línea</p>
+                        <h3 class="mini-stat-value">{{ $totals['online_payments'] }}</h3>
                     </div>
-                    <h2 class="card-title h3 mb-0">{{ $totals['online_payments'] }}</h2>
+                    <div class="mini-stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
+        {{-- Pagos en Persona --}}
         <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-subtitle text-muted mb-0">Pagos en Persona</h6>
-                        <i class="bi bi-cash-coin fs-2 text-warning"></i>
+            <div class="mini-stat-card border-warning">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mini-stat-label">Pagos en Persona</p>
+                        <h3 class="mini-stat-value">{{ $totals['in_person_payments'] }}</h3>
                     </div>
-                    <h2 class="card-title h3 mb-0">{{ $totals['in_person_payments'] }}</h2>
+                    <div class="mini-stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabla de Pagos -->
-    <div class="card">
+    {{-- 4. Tabla de Pagos --}}
+    <div class="table-card">
+        
+        <div class="p-4 border-bottom">
+            <h5 class="fw-bold text-brand-deep mb-0">
+                <i class="bi bi-list-ul me-2"></i>Transacciones
+            </h5>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+            <table class="table table-funds mb-0">
+                <thead>
                     <tr>
-                        <th class="text-uppercase small">Fecha</th>
-                        <th class="text-uppercase small">Participante</th>
-                        <th class="text-uppercase small">Componente / Evento</th>
-                        <th class="text-uppercase small">Método</th>
-                        <th class="text-uppercase small text-end">Total Pagado</th>
-                        <th class="text-uppercase small text-end">Tu Ganancia</th>
+                        <th>Fecha</th>
+                        <th>Participante</th>
+                        <th>Evento / Componente</th>
+                        <th>Método</th>
+                        <th class="text-end">Total Pagado</th>
+                        <th class="text-end">Tu Ganancia</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($payments as $payment)
                     <tr>
-                        <td class="align-middle">
-                            <div>{{ $payment->created_at->format('d/m/Y') }}</div>
-                            <small class="text-muted">{{ $payment->created_at->format('H:i') }}</small>
+                        <td>
+                            <div class="fw-bold text-brand-deep">{{ $payment->created_at->format('d/m/Y') }}</div>
+                            <small class="text-muted">{{ $payment->created_at->format('H:i A') }}</small>
                         </td>
-                        <td class="align-middle">
-                            <div class="fw-medium">{{ $payment->registration->user->name }}</div>
+                        <td>
+                            <div class="fw-bold text-dark">{{ $payment->registration->user->name }}</div>
                             <small class="text-muted">{{ $payment->registration->user->email }}</small>
                         </td>
-                        <td class="align-middle">
-                            <div class="fw-medium">{{ $payment->registration->component->name }}</div>
-                            <small class="text-muted">{{ $payment->registration->component->event->name }}</small>
+                        <td>
+                            <div class="fw-medium text-brand-deep">{{ $payment->registration->component->event->name }}</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 200px;">
+                                <i class="bi bi-ticket-perforated me-1"></i>
+                                {{ $payment->registration->component->name }}
+                            </small>
                         </td>
-                        <td class="align-middle">
+                        <td>
                             @if($payment->payment_method === 'online')
-                                <span class="badge bg-primary d-inline-flex align-items-center">
-                                    <i class="bi bi-paypal me-1"></i>
-                                    PayPal
+                                <span class="method-badge badge-paypal">
+                                    <i class="bi bi-paypal"></i> PayPal
                                 </span>
                             @else
-                                <span class="badge bg-success d-inline-flex align-items-center">
-                                    <i class="bi bi-cash-coin me-1"></i>
-                                    En Persona
+                                <span class="method-badge badge-cash">
+                                    <i class="bi bi-cash"></i> Efectivo
                                 </span>
                             @endif
                         </td>
-                        <td class="align-middle text-end">
+                        <td class="text-end">
                             <div class="fw-medium">${{ number_format($payment->total_paid, 2) }}</div>
-                            <small class="text-muted">Comisión: ${{ number_format($payment->platform_fee + $payment->paypal_fee, 2) }}</small>
+                            <small class="text-muted" style="font-size: 0.7rem;">
+                                Comisión: -${{ number_format($payment->platform_fee + $payment->paypal_fee, 2) }}
+                            </small>
                         </td>
-                        <td class="align-middle text-end fw-bold text-success">
-                            ${{ number_format($payment->organizer_amount, 2) }}
+                        <td class="text-end">
+                            <span class="fw-bold text-success fs-6">
+                                +${{ number_format($payment->organizer_amount, 2) }}
+                            </span>
                         </td>
                     </tr>
                     @empty
                     <tr>
                         <td colspan="6" class="text-center py-5">
-                            <i class="bi bi-file-text text-muted" style="font-size: 3rem;"></i>
-                            <p class="text-muted mt-3 mb-0">No hay pagos registrados aún</p>
+                            <div class="py-4">
+                                <div class="mb-3 text-muted opacity-25">
+                                    <i class="bi bi-inbox display-3"></i>
+                                </div>
+                                <h5 class="fw-bold text-muted">Sin pagos registrados</h5>
+                                <p class="text-muted small mb-0">Aún no has recibido pagos por tus eventos.</p>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -133,11 +168,11 @@
             </table>
         </div>
 
-        <!-- Paginación -->
+        {{-- Paginación --}}
         @if($payments->hasPages())
-        <div class="card-footer bg-white border-top">
-            {{ $payments->links() }}
-        </div>
+            <div class="pagination-container">
+                {{ $payments->links() }}
+            </div>
         @endif
     </div>
 </div>
