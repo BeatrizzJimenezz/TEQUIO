@@ -1,0 +1,111 @@
+:root {
+    --tequio-blue-main: #4499BB;
+    --tequio-blue-deep: #0C2340;
+    --tequio-green-accent: #8CC63F;
+    --tequio-gray-light: #C8CCC9;
+    --tequio-white: #FFFFFF;
+    --tequio-gray-bg: #f5f7fa;
+    --tequio-gray-border: #e2e8f0;
+    --tequio-text-muted: #64748b;
+    --tequio-warning: #f59e0b;
+}
+
+.card-banner-blue {
+    background: linear-gradient(135deg, var(--tequio-blue-deep) 0%, #08182b 100%) !important;
+    color: var(--tequio-white) !important;
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(12, 35, 64, 0.25);
+}
+
+.card-banner-blue h5 {
+    color: var(--tequio-white) !important;
+    font-weight: 800;
+}
+
+.card-banner-blue .text-muted, 
+.card-banner-blue p {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.card-banner-blue i {
+    color: var(--tequio-green-accent) !important;
+}
+
+.btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--tequio-white) !important;
+    backdrop-filter: blur(4px);
+}
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--tequio-white) !important;
+}
+
+.section-header-blue {
+    background: linear-gradient(90deg, var(--tequio-blue-main) 0%, var(--tequio-blue-deep) 100%) !important;
+    color: var(--tequio-white);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(68, 153, 187, 0.2);
+}
+
+.section-header-blue h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--tequio-white);
+}
+
+.card-admin {
+    background: var(--tequio-white);
+    border: 1px solid var(--tequio-gray-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.card-header-blue {
+    background-color: var(--tequio-blue-deep) !important; 
+    background: linear-gradient(135deg, var(--tequio-blue-deep) 0%, #1a3a5c 100%) !important;
+    padding: 1rem 1.5rem;
+    border-bottom: none;
+}
+
+.card-header-blue h5, 
+.card-header-blue .bi {
+    color: var(--tequio-white) !important;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.avatar-circle {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.text-brand-deep { color: var(--tequio-blue-deep) !important; }
+.text-brand-main { color: var(--tequio-blue-main) !important; }
+.text-brand-accent { color: var(--tequio-green-accent) !important; }
+
+.bg-brand-main { background-color: var(--tequio-blue-main) !important; }
+.bg-brand-deep { background-color: var(--tequio-blue-deep) !important; }
+
+p, div, span {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
