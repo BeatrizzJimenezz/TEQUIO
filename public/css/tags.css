@@ -1,0 +1,160 @@
+/* tags-theme.css */
+
+:root {
+    --tequio-deep: #0C2340;
+    --tequio-medium: #1B3A5B;
+    --tequio-light: #4499BB;
+    --tequio-accent: #8CC63F;
+    --bg-surface: #F8F9FA;
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+}
+
+body {
+    background-color: var(--bg-surface);
+}
+
+/* --- Hero Header --- */
+.hero-header {
+    background: linear-gradient(135deg, var(--tequio-deep) 0%, var(--tequio-medium) 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: -2rem; /* Efecto de superposición */
+    box-shadow: 0 10px 30px rgba(12, 35, 64, 0.15);
+    z-index: 1;
+}
+
+.hero-pattern {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.1;
+    font-size: 15rem;
+    transform: translate(20%, -20%) rotate(-15deg);
+    pointer-events: none;
+}
+
+/* --- Contenedor Principal (Tarjeta Flotante) --- */
+.main-content-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+    padding: 2rem;
+    padding-top: 3rem; /* Espacio para compensar el margin negativo del header */
+    z-index: 0;
+    position: relative;
+}
+
+/* --- Tabla/Lista Moderna --- */
+.modern-table {
+    border-collapse: separate;
+    border-spacing: 0 0.75rem; /* Espacio entre filas */
+    width: 100%;
+}
+
+.modern-table thead th {
+    border: none;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    padding: 0 1.5rem;
+    font-weight: 700;
+}
+
+.modern-row {
+    background-color: white;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    border: 1px solid #edf2f7;
+}
+
+/* Bordes redondeados para la fila entera */
+.modern-row td:first-child { border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; }
+.modern-row td:last-child { border-top-right-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+
+.modern-row td {
+    padding: 1.25rem 1.5rem;
+    border: none;
+    vertical-align: middle;
+}
+
+.modern-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    border-color: var(--tequio-light);
+    z-index: 2;
+    position: relative;
+}
+
+/* --- Badge Estilizado --- */
+.tag-pill {
+    background-color: #f1f5f9;
+    color: var(--tequio-deep);
+    padding: 0.5rem 1rem;
+    border-radius: 50rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.modern-row:hover .tag-pill {
+    background-color: var(--tequio-deep);
+    color: white;
+}
+
+/* --- Botones --- */
+.btn-action-icon {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+}
+
+.btn-action-icon:hover {
+    background-color: #f1f5f9;
+    transform: scale(1.1);
+}
+
+.btn-action-icon.edit { color: var(--tequio-light); }
+.btn-action-icon.delete { color: #e74c3c; }
+
+.btn-create-floating {
+    background-color: var(--tequio-accent);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50rem;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(140, 198, 63, 0.4);
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-create-floating:hover {
+    background-color: #7ab332;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(140, 198, 63, 0.6);
+    color: white;
+}
+
+/* --- Utilidades --- */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+.stat-label { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 1.5rem; font-weight: 800; }
